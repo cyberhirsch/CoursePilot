@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -40,6 +41,8 @@ interface PlannerBoardProps {
   onAddCategory: (category: Category) => void;
   onUpdateCategory: (categoryId: string, updates: Partial<Category>) => void;
   onDeleteCategory: (categoryId: string) => void;
+  onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
+  onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
 export const PlannerBoard: React.FC<PlannerBoardProps> = ({ 
@@ -73,6 +76,8 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     onAddCategory,
     onUpdateCategory,
     onDeleteCategory,
+    onAddStudiengruppe,
+    onUpdateProgram
 }) => {
 
   if (mainCategory !== 'semesterplan') {
@@ -165,6 +170,9 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
             onToggleCategoryLock={onToggleCategoryLock}
             activeBulkLocks={activeBulkLocks[activeGruppe.id]}
             finalLockedInstances={finalLockedModulesMap.get(activeGruppe.id) || new Set()}
+            onAddStudiengruppe={onAddStudiengruppe}
+            onUpdateProgram={onUpdateProgram}
+            onUpdateModulePrograms={onUpdateModulePrograms}
         />
     </div>
   );

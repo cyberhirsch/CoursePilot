@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
@@ -372,6 +373,26 @@ export default function CoursePilotClient() {
         setCategories(prev => prev.filter(c => c.id !== categoryId));
     }
   }, [categories, modules]);
+
+  const handleAddStudiengruppe = useCallback((newStudiengruppe: Studiengruppe) => {
+    if (studiengruppen.some(sg => sg.id === newStudiengruppe.id)) {
+      alert(`Eine Studiengruppe mit der ID "${newStudiengruppe.id}" existiert bereits.`);
+      return false;
+    }
+    setStudiengruppen(prev => [...prev, newStudiengruppe]);
+    setActiveStudiengruppenIds([newStudiengruppe.id]);
+    return true;
+  }, [studiengruppen]);
+
+  const handleUpdateProgram = useCallback((programId: string, updates: Partial<Program>) => {
+    setPrograms(prev => prev.map(p => 
+      p.id === programId ? { ...p, ...updates } : p
+    ));
+    // Also update any studiengruppen using this program's template if the plan changes
+    if (updates.templatePlan) {
+        setStudiengruppen(prevSg => prevSg.map(sg => sg.programId === programId ? { ...sg, plan: updates.templatePlan! } : sg))
+    }
+  }, []);
   
   const activeStudiengruppen = useMemo(() => {
     return studiengruppen.filter(sg => activeStudiengruppenIds.includes(sg.id));
@@ -430,6 +451,8 @@ export default function CoursePilotClient() {
           onAddCategory={handleAddCategory}
           onUpdateCategory={handleUpdateCategory}
           onDeleteCategory={handleDeleteCategory}
+          onAddStudiengruppe={handleAddStudiengruppe}
+          onUpdateProgram={handleUpdateProgram}
         />
       </main>
     </div>

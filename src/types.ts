@@ -1,4 +1,5 @@
 
+
 export interface Category {
   id: string;
   name: string;
@@ -33,6 +34,7 @@ export interface Program {
   defaultStudents: number;
   semesters: number;
   categoryOrder?: string[];
+  templatePlan?: ProgramPlan;
 }
 
 export interface Semester {

@@ -3,11 +3,19 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import type { Module, Program, Studiengruppe, AbsoluteSemester } from '@/types';
+import type { Module, Program, Studiengruppe, AbsoluteSemester, ProgramPlan } from '@/types';
 import { ModuleCard } from './ModuleCard';
 import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, getAbsoluteSemesterFor, ABSOLUTE_SEMESTERS, CATEGORY_ORDER } from '../constants';
 import { LockIcon } from './icons/LockIcon';
 import { UnlockIcon } from './icons/UnlockIcon';
+import { Button } from './ui/button';
+import { Copy, Edit } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from './ui/dialog';
+import { Label } from './ui/label';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { EditTemplateSheet } from './EditTemplateSheet';
+
 
 type ValidationStatus = 'valid' | 'invalid' | 'neutral';
 
@@ -29,6 +37,9 @@ interface ProgramPlannerGridProps {
     onToggleCategoryLock: (studiengruppeId: string, category: string) => void;
     activeBulkLocks?: { past: boolean; categories: Set<string> };
     finalLockedInstances: Set<string>;
+    onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
+    onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
+    onUpdateModulePrograms: (moduleId: string, programIds: string[]) => void;
 }
 
 const getHeatmapColor = (count: number): string | undefined => {
@@ -116,6 +127,79 @@ interface ParticipantInfo {
   studentCount: number;
 }
 
+const DuplicateGroupDialog: React.FC<{
+    studiengruppe: Studiengruppe;
+    onAddStudiengruppe: (sg: Studiengruppe) => boolean;
+}> = ({ studiengruppe, onAddStudiengruppe }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [newShortName, setNewShortName] = useState(studiengruppe.shortName + "-Kopie");
+    const [newStartSemesterId, setNewStartSemesterId] = useState(studiengruppe.startSemester.id);
+    const [error, setError] = useState('');
+
+    const handleSubmit = () => {
+        setError('');
+        const newId = `${studiengruppe.programId}-${newShortName}`;
+        const newStartSemester = ABSOLUTE_SEMESTERS.find(s => s.id === newStartSemesterId);
+        
+        if (!newStartSemester) {
+            setError("Ungültiges Startsemester gewählt.");
+            return;
+        }
+
+        const newGroup: Studiengruppe = {
+            ...studiengruppe,
+            id: newId,
+            name: `${studiengruppe.name.replace(studiengruppe.shortName, '')} ${newShortName}`,
+            shortName: newShortName,
+            startSemester: newStartSemester,
+            userLockedModules: [] // Start with no locks
+        };
+
+        const success = onAddStudiengruppe(newGroup);
+        if (success) {
+            setIsOpen(false);
+        } else {
+            setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                 <Button variant="outline" size="sm">
+                    <Copy className="mr-2" />
+                    Gruppe duplizieren
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Studiengruppe duplizieren</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="shortName" className="text-right">Kürzel</Label>
+                        <Input id="shortName" value={newShortName} onChange={e => setNewShortName(e.target.value)} className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="startSemester" className="text-right">Startsemester</Label>
+                        <Select value={newStartSemesterId} onValueChange={setNewStartSemesterId}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {ABSOLUTE_SEMESTERS.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {error && <p className="text-destructive text-sm col-span-4 text-center">{error}</p>}
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleSubmit}>Neue Gruppe erstellen</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     studiengruppe,
@@ -134,9 +218,13 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     onTogglePastLock,
     onToggleCategoryLock,
     activeBulkLocks,
-    finalLockedInstances
+    finalLockedInstances,
+    onAddStudiengruppe,
+    onUpdateProgram,
+    onUpdateModulePrograms
 }) => {
   const [draggedItem, setDraggedItem] = useState<{ moduleId: string, instanceId: string } | null>(null);
+  const [isTemplateSheetOpen, setIsTemplateSheetOpen] = useState(false);
 
   const orderedGroupedModules = useMemo(() => {
     const categoryMap = new Map<string, Module[]>();
@@ -356,6 +444,22 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                         {allStudiengruppen.map(g => <option key={g.id} value={g.id}>{g.name} ({g.shortName})</option>)}
                     </select>
                     <button onClick={handleNext} disabled={currentIndex >= allStudiengruppen.length - 1} className="p-2 rounded-md bg-muted hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors" aria-label="Nächste Studiengruppe"><svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path></svg></button>
+                </div>
+                 <div className="flex items-center gap-2">
+                    <DuplicateGroupDialog studiengruppe={studiengruppe} onAddStudiengruppe={onAddStudiengruppe} />
+                    <Button variant="outline" size="sm" onClick={() => setIsTemplateSheetOpen(true)}>
+                        <Edit className="mr-2" />
+                        Vorlage bearbeiten
+                    </Button>
+                     <EditTemplateSheet 
+                        isOpen={isTemplateSheetOpen}
+                        onOpenChange={setIsTemplateSheetOpen}
+                        program={program}
+                        allModules={modules}
+                        onUpdateProgram={onUpdateProgram}
+                        onUpdateModulePrograms={onUpdateModulePrograms}
+                        getModuleById={getModuleById}
+                    />
                 </div>
              </div>
              <div className="flex items-center justify-between gap-4 text-sm">
