@@ -2,7 +2,8 @@
 
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
+import Papa from 'papaparse';
 import type { Studiengruppe, Program, AbsoluteSemester, Module, ProgramPlan } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -11,8 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, ChevronRight, Copy, PlusCircle, UserPlus, GripVertical, Settings2 } from 'lucide-react';
-import { ABSOLUTE_SEMESTERS } from '@/constants';
+import { ChevronLeft, ChevronRight, Copy, PlusCircle, UserPlus, GripVertical, Settings2, Upload, Download } from 'lucide-react';
+import { ABSOLUTE_SEMESTERS, RELATIVE_SEMESTERS } from '@/constants';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
 
@@ -44,6 +45,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     
     const [isDuplicateDialogOpen, setDuplicateDialogOpen] = React.useState(false);
     const [isNewDialogOpen, setNewDialogOpen] = React.useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     
     // State for New/Duplicate Dialog
     const [newShortName, setNewShortName] = React.useState("");
@@ -157,6 +159,96 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         } else {
             setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
         }
+    };
+
+    const handleExport = () => {
+        const { plan } = studiengruppe;
+        const modulesById = new Map(allModules.map(m => [m.id, m]));
+
+        const dataForCsv = [];
+        for (const [semId, instanceIds] of Object.entries(plan.semesters)) {
+            const semesterNumber = parseInt(semId.replace('sem', ''));
+            if (isNaN(semesterNumber)) continue;
+
+            for (const instanceId of instanceIds) {
+                const baseModuleId = instanceId.split('-')[0];
+                const module = modulesById.get(baseModuleId);
+                if (module) {
+                    dataForCsv.push({
+                        moduleId: module.id,
+                        moduleName: module.name,
+                        semester: semesterNumber,
+                    });
+                }
+            }
+        }
+
+        const csv = Papa.unparse(dataForCsv);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `studienplan_${studiengruppe.id}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        Papa.parse<{moduleId: string, semester: string}>(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+                const newPlan: ProgramPlan = { semesters: {} };
+                for(let i=1; i <= studiengruppe.semesters; i++) {
+                    newPlan.semesters[`sem${i}`] = [];
+                }
+
+                const programModuleIds = new Set(program.moduleIds);
+                const poolCounters: Record<string, number> = {};
+
+                const importedModules = results.data;
+                importedModules.sort((a, b) => parseInt(a.semester) - parseInt(b.semester));
+
+                importedModules.forEach(({ moduleId, semester }) => {
+                    const semesterNumber = parseInt(semester, 10);
+                    if (!moduleId || isNaN(semesterNumber) || semesterNumber < 1 || semesterNumber > studiengruppe.semesters) {
+                        console.warn(`Skipping invalid row:`, { moduleId, semester });
+                        return;
+                    }
+                    if (!programModuleIds.has(moduleId)) {
+                         console.warn(`Skipping module "${moduleId}" as it's not in the current program.`);
+                         return;
+                    }
+                    
+                    const module = allModules.find(m => m.id === moduleId);
+                    const semKey = `sem${semesterNumber}`;
+
+                    let instanceId = moduleId;
+                    if(module?.type === 'Pool') {
+                        poolCounters[moduleId] = (poolCounters[moduleId] || 0) + 1;
+                        instanceId = `${moduleId}-${poolCounters[moduleId]}`;
+                    }
+
+                    if(!newPlan.semesters[semKey].includes(instanceId)){
+                       newPlan.semesters[semKey].push(instanceId);
+                    }
+                });
+
+                onUpdateStudiengruppe(studiengruppe.id, { plan: newPlan });
+                alert('Studienverlaufsplan wurde erfolgreich importiert!');
+            },
+            error: (error) => {
+                console.error("Error parsing CSV:", error);
+                alert(`Fehler beim Einlesen der CSV-Datei: ${error.message}`);
+            }
+        });
+
+        // Reset file input to allow re-uploading the same file
+        event.target.value = '';
     };
 
     const selectedProgramForNewDialog = allPrograms.find(p => p.id === newProgramId) || program;
@@ -296,6 +388,19 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+                
+                <div className="flex items-center gap-2">
+                    <input type="file" ref={fileInputRef} onChange={handleFileImport} accept=".csv" style={{ display: 'none' }} />
+                    <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Importieren
+                    </Button>
+                    <Button variant="outline" onClick={handleExport}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Exportieren
+                    </Button>
+                </div>
+
 
                 <Popover>
                     <PopoverTrigger asChild>
