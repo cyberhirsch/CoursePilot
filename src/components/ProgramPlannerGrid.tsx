@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
@@ -87,7 +88,7 @@ const GridCell: React.FC<GridCellProps> = ({ onDrop, onDragOver, onDragLeave, ch
         setIsOver(false);
     };
     
-    const baseClasses = 'p-1 border-t border-r border-border transition-colors duration-200 align-middle h-10';
+    const baseClasses = 'p-1 border-t border-r border-border transition-colors duration-200 align-middle';
     let stateClass = '';
     
     if (isOver) {
@@ -290,7 +291,8 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     if (!isHeatmapVisible) return new Map();
 
     const map = new Map<string, Map<string, ParticipantInfo[]>>();
-    
+    const allModulesById = new Map(allModules.map(m => [m.id, m]));
+
     allStudiengruppen.forEach(gruppe => {
         Object.entries(gruppe.plan.semesters).forEach(([relativeSemesterId, moduleInstanceIds]) => {
             const relativeIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === relativeSemesterId);
@@ -309,19 +311,19 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                 const module = getModuleById(instanceId);
                 if (!module) return;
 
-                const moduleId = module.id;
+                const courseId = module.equivalentTo || module.id;
                 
-                if (!semesterMap.has(moduleId)) {
-                    semesterMap.set(moduleId, []);
+                if (!semesterMap.has(courseId)) {
+                    semesterMap.set(courseId, []);
                 }
-                const participantList = semesterMap.get(moduleId)!;
+                const participantList = semesterMap.get(courseId)!;
                 participantList.push({ name: gruppe.shortName, studentCount: gruppe.studentCount });
             });
         });
     });
 
     return map;
-  }, [allStudiengruppen, getModuleById, isHeatmapVisible]);
+  }, [allStudiengruppen, allModules, getModuleById, isHeatmapVisible]);
 
   const semesterData = useMemo(() => {
     return RELATIVE_SEMESTERS.slice(0, program.semesters).map((semester, index) => {
@@ -480,69 +482,78 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                             )}
                                         </Draggable>
                                         
-                                        {categoryModules.map((module, moduleIndex) => (
-                                            <Draggable key={module.id} draggableId={module.id} index={moduleIndex}>
-                                                {(provided) => (
-                                                    <tr ref={provided.innerRef} {...provided.draggableProps} className="hover:bg-muted/60">
-                                                        <td {...provided.dragHandleProps} className="p-1 border-t border-border sticky left-0 bg-card z-10 flex items-center justify-between group w-64">
-                                                            <div className="flex items-center">
-                                                                <GripVertical size={14} className="cursor-grab" />
-                                                                <div className="ml-2">
-                                                                    <div className="font-semibold">{module.name}</div>
-                                                                    <div className="text-muted-foreground font-code text-[10px]">{module.id}</div>
+                                        <Droppable droppableId={category} type="MODULE">
+                                        {(provided) => (
+                                            <React.Fragment>
+                                            {categoryModules.map((module, moduleIndex) => (
+                                                <Draggable key={module.id} draggableId={module.id} index={moduleIndex}>
+                                                    {(provided) => (
+                                                        <tr ref={provided.innerRef} {...provided.draggableProps} className="hover:bg-muted/60">
+                                                            <td {...provided.dragHandleProps} className="p-1 border-t border-border sticky left-0 bg-card z-10 flex items-center justify-between group w-64">
+                                                                <div className="flex items-center">
+                                                                    <GripVertical size={14} className="cursor-grab" />
+                                                                    <div className="ml-2">
+                                                                        <div className="font-semibold">{module.name}</div>
+                                                                        <div className="text-muted-foreground font-code text-[10px]">{module.id}</div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => handleRemoveModuleFromProgram(module.id)}>
-                                                                <Trash2 size={14} className="text-destructive" />
-                                                            </Button>
-                                                        </td>
-                                                        {semesterData.map((semester, semIndex) => {
-                                                            const moduleInstances = (studiengruppe.plan.semesters[semester.id] || []).filter(instanceId => getModuleById(instanceId)?.id === module.id);
-                                                            const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, semIndex);
-                                                            const participantInfo = absoluteSemester ? participantMap.get(absoluteSemester.id)?.get(module.id) : undefined;
-                                                            const totalParticipants = participantInfo?.reduce((sum, p) => sum + p.studentCount, 0) || 0;
-                                                            const heatmapColor = isHeatmapVisible ? getHeatmapColor(totalParticipants) : undefined;
-                                                            const tooltip = participantInfo?.map(p => `${p.name} (${p.studentCount})`).join('\n');
-                                                            const baseModuleId = getModuleById(module.id)?.id;
-                                                            const isPool = getModuleById(module.id)?.type === 'Pool';
-                                                            const canDrop = baseModuleId && (!isPool || (studiengruppe.plan.semesters[semester.id] || []).every(inst => getModuleById(inst)?.id !== baseModuleId));
-                                                            return (
-                                                                <GridCell
-                                                                    key={semester.id}
-                                                                    onDrop={(e) => canDrop && curriedOnDrop(semester.id, module.id, e)}
-                                                                    onDragOver={(e) => e.preventDefault()}
-                                                                    onDragLeave={() => { }}
-                                                                    isHighlighted={false}
-                                                                    heatmapColor={heatmapColor}
-                                                                    tooltip={tooltip}
-                                                                    className={semester.isPraktikum ? 'bg-teal-900/40' : ''}
-                                                                    validationStatus={getValidationStatusForDrop(semester.id)}
-                                                                >
-                                                                    {moduleInstances.map(instanceId => {
-                                                                        const isLocked = finalLockedInstances.has(instanceId);
-                                                                        const errors = placementErrors.get(instanceId);
-                                                                        return (
-                                                                            <div key={instanceId} className="h-full w-full">
-                                                                                <ModuleCard
-                                                                                    module={module}
-                                                                                    instanceId={instanceId}
-                                                                                    isDraggable={!isLocked}
-                                                                                    onDragStart={(e) => handleDragStartLocal(e, module.id, instanceId)}
-                                                                                    onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
-                                                                                    isLocked={isLocked}
-                                                                                    hasError={!!errors}
-                                                                                    errorTooltip={errors?.join('\n')}
-                                                                                />
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </GridCell>
-                                                            );
-                                                        })}
-                                                    </tr>
-                                                )}
-                                            </Draggable>
-                                        ))}
+                                                                <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => handleRemoveModuleFromProgram(module.id)}>
+                                                                    <Trash2 size={14} className="text-destructive" />
+                                                                </Button>
+                                                            </td>
+                                                            {semesterData.map((semester, semIndex) => {
+                                                                const moduleInstances = (studiengruppe.plan.semesters[semester.id] || []).filter(instanceId => getModuleById(instanceId)?.id === module.id);
+                                                                const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, semIndex);
+                                                                const courseId = module.equivalentTo || module.id;
+                                                                const participantInfo = absoluteSemester ? participantMap.get(absoluteSemester.id)?.get(courseId) : undefined;
+                                                                const totalParticipants = participantInfo?.reduce((sum, p) => sum + p.studentCount, 0) || 0;
+                                                                const heatmapColor = isHeatmapVisible ? getHeatmapColor(totalParticipants) : undefined;
+                                                                const tooltip = participantInfo?.map(p => `${p.name} (${p.studentCount})`).join('\n');
+                                                                const baseModuleId = getModuleById(module.id)?.id;
+                                                                const isPool = getModuleById(module.id)?.type === 'Pool';
+                                                                const canDrop = baseModuleId && (!isPool || (studiengruppe.plan.semesters[semester.id] || []).every(inst => getModuleById(inst)?.id !== baseModuleId));
+                                                                return (
+                                                                    <GridCell
+                                                                        key={semester.id}
+                                                                        onDrop={(e) => canDrop && curriedOnDrop(semester.id, module.id, e)}
+                                                                        onDragOver={(e) => e.preventDefault()}
+                                                                        onDragLeave={() => { }}
+                                                                        isHighlighted={false}
+                                                                        heatmapColor={heatmapColor}
+                                                                        tooltip={tooltip}
+                                                                        className={semester.isPraktikum ? 'bg-teal-900/40' : ''}
+                                                                        validationStatus={getValidationStatusForDrop(semester.id)}
+                                                                    >
+                                                                        {moduleInstances.map(instanceId => {
+                                                                            const isLocked = finalLockedInstances.has(instanceId);
+                                                                            const errors = placementErrors.get(instanceId);
+                                                                            return (
+                                                                                <div key={instanceId} className="h-full w-full">
+                                                                                    <ModuleCard
+                                                                                        module={module}
+                                                                                        instanceId={instanceId}
+                                                                                        isDraggable={!isLocked}
+                                                                                        onDragStart={(e) => handleDragStartLocal(e, module.id, instanceId)}
+                                                                                        onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
+                                                                                        isLocked={isLocked}
+                                                                                        hasError={!!errors}
+                                                                                        errorTooltip={errors?.join('\n')}
+                                                                                    />
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </GridCell>
+                                                                );
+                                                            })}
+                                                        </tr>
+                                                    )}
+                                                </Draggable>
+                                            ))}
+                                            <tr style={{display: "none"}} ref={provided.innerRef} {...provided.droppableProps}><td colSpan={program.semesters + 1}>{provided.placeholder}</td></tr>
+                                            </React.Fragment>
+                                        )}
+                                        </Droppable>
+
                                     </React.Fragment>
                                 ))}
                                 {provided.placeholder}
@@ -587,4 +598,5 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
 };
 
     
+
 

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -438,7 +439,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({ modules, program
                                                                 <label className="block"><span className="text-muted-foreground text-sm">Lernergebnisse</span><EditableCell as="textarea" value={module.learningOutcomes || ''} onChange={(e) => onUpdateModule(module.id, 'learningOutcomes', e.target.value)} name="learningOutcomes" /></label>
                                                             </div>
                                                             <div className="space-y-4">
-                                                                <label className="block"><span className="text-muted-foreground text-sm">Prüfungsform</span><EditableCell value={module.assessment || ''} onChange={(e) => onUpdateModule(module.id, 'assessment', e.target.value)} name="assessment" /></label>
+                                                                <label className="block"><span className="text-muted-foreground text-sm">Equivalent zu</span><EditableCell value={module.equivalentTo || ''} onChange={(e) => onUpdateModule(module.id, 'equivalentTo', e.target.value)} name="equivalentTo" /></label>
                                                                 <label className="block"><span className="text-muted-foreground text-sm">Semesterempfehlung</span><EditableCell value={module.semesterRecommendation || ''} onChange={(e) => onUpdateModule(module.id, 'semesterRecommendation', e.target.value)} name="semesterRecommendation" /></label>
                                                             </div>
                                                             <div className="space-y-4">

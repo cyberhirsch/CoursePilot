@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -121,7 +122,11 @@ const ProgramSection: React.FC<ProgramSectionProps> = ({ program, studiengruppen
                                         </td>
                                         {relevantGroups.map(sg => (
                                             <td key={sg.id} className="p-2 text-center border-l border-border/50">
-                                                {sg.moduleInstancesInSem.some(instanceId => getModuleById(instanceId)?.id === module.id) && (
+                                                {sg.moduleInstancesInSem.some(instanceId => {
+                                                     const plannedModule = getModuleById(instanceId);
+                                                     if (!plannedModule) return false;
+                                                     return plannedModule.id === module.id || plannedModule.equivalentTo === module.id;
+                                                }) && (
                                                     <div className="inline-block bg-primary/80 text-primary-foreground text-xs font-bold rounded px-2 py-1">
                                                         {module.sws}
                                                     </div>
@@ -151,10 +156,15 @@ const calculateOfferedSws = (
     targetSemester: AbsoluteSemester,
     studiengruppen: Studiengruppe[],
     programs: Program[],
-    getModuleById: (id: string) => Module | undefined
+    modules: Module[]
 ): number => {
-    const uniqueModuleIdsForSws = new Set<string>();
-    let totalOfferedSws = 0;
+    const getModuleById = (id: string): Module | undefined => {
+        const directMatch = modules.find(m => m.id === id);
+        if (directMatch) return directMatch;
+        return modules.find(m => m.type === 'Pool' && id.startsWith(m.id + '-'));
+    };
+    
+    const uniqueModuleCourses = new Set<string>();
 
     studiengruppen.forEach(gruppe => {
         const relativeIndex = getRelativeSemesterIndex(gruppe.startSemester, targetSemester);
@@ -171,12 +181,19 @@ const calculateOfferedSws = (
             const module = getModuleById(instanceId);
             if (!module) return;
 
-            if (!uniqueModuleIdsForSws.has(module.id)) {
-                totalOfferedSws += module.sws;
-                uniqueModuleIdsForSws.add(module.id);
-            }
+            const courseId = module.equivalentTo || module.id;
+            uniqueModuleCourses.add(courseId);
         });
     });
+    
+    let totalOfferedSws = 0;
+    uniqueModuleCourses.forEach(courseId => {
+        const module = getModuleById(courseId);
+        if(module) {
+            totalOfferedSws += module.sws;
+        }
+    });
+
     return totalOfferedSws;
 };
 
@@ -256,18 +273,18 @@ export const SemesterOverview: React.FC<{
         const startIndex = semesters.findIndex(s => s.id === selectedSemester.id);
         if (startIndex === -1) return { current: 0, future: [] };
     
-        const current = calculateOfferedSws(selectedSemester, studiengruppen, programs, getModuleById);
+        const current = calculateOfferedSws(selectedSemester, studiengruppen, programs, modules);
     
         const future = [];
         for (let i = 1; i <= FORECAST_LENGTH; i++) {
             const futureSemester = semesters[startIndex + i];
             if (!futureSemester) break;
-            const totalSws = calculateOfferedSws(futureSemester, studiengruppen, programs, getModuleById);
+            const totalSws = calculateOfferedSws(futureSemester, studiengruppen, programs, modules);
             future.push({ semester: futureSemester, totalSws });
         }
     
         return { current, future };
-    }, [selectedSemester, semesters, studiengruppen, programs, getModuleById]);
+    }, [selectedSemester, semesters, studiengruppen, programs, modules]);
 
     return (
         <div className="h-full flex flex-col gap-4">

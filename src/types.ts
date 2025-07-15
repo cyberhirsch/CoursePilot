@@ -1,6 +1,7 @@
 
 
 
+
 export interface Category {
   id: string;
   name: string;
@@ -21,7 +22,7 @@ export interface Module {
   instanceCount?: number;
   description?: string;
   learningOutcomes?: string;
-  assessment?: string;
+  equivalentTo?: string;
   prerequisites?: string[];
   forbiddenSemesters?: number[];
   maxParticipants?: number;

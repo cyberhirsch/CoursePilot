@@ -1,3 +1,4 @@
+
 [
   {
     "id": "G1",
@@ -235,7 +236,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "equivalentTo": "F1"
   },
   {
     "id": "B2",
@@ -246,7 +248,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "equivalentTo": "F3"
   },
   {
     "id": "A1",
@@ -279,7 +282,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "equivalentTo": "M8"
   },
   {
     "id": "C1",
