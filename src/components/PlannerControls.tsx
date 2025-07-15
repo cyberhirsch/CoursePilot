@@ -30,7 +30,7 @@ interface PlannerControlsProps {
     activeBulkLocks: { past: boolean; categories: Set<string> } | undefined;
     finalLockedInstances: Set<string>;
     allModules: Module[];
-    onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
+    onAddStudiengruppe: (newStudiengruppe: Studiengruppe, saveAsTemplate: boolean) => boolean;
     onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
@@ -51,6 +51,8 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     const [newStudentCount, setNewStudentCount] = React.useState(program.defaultStudents);
     const [newStartSemesterId, setNewStartSemesterId] = React.useState(ABSOLUTE_SEMESTERS[0].id);
     const [newProgramId, setNewProgramId] = React.useState(program.id);
+    const [saveAsTemplate, setSaveAsTemplate] = React.useState(false);
+
     
     const [error, setError] = React.useState('');
     
@@ -78,6 +80,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         setNewGroupName(`${selectedProgram.name.replace("B.A. ", "")} `);
         setNewStudentCount(selectedProgram.defaultStudents);
         setNewStartSemesterId(ABSOLUTE_SEMESTERS[0].id);
+        setSaveAsTemplate(false);
         setError('');
     }
 
@@ -114,7 +117,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             userLockedModules: []
         };
         
-        const success = onAddStudiengruppe(newGroup);
+        const success = onAddStudiengruppe(newGroup, saveAsTemplate);
         if (success) {
             setNewDialogOpen(false);
             resetNewDialogState();
@@ -147,7 +150,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             userLockedModules: [] // Start with no locks
         };
 
-        const success = onAddStudiengruppe(newGroup);
+        const success = onAddStudiengruppe(newGroup, false);
         if (success) {
             setDuplicateDialogOpen(false);
             setNewShortName("");
@@ -170,9 +173,9 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                  <Button onClick={handlePrevious} variant="ghost" size="icon" disabled={currentIndex <= 0} aria-label="Vorherige Gruppe">
                     <ChevronLeft />
                 </Button>
-                <div className="flex-grow max-w-md">
+                <div className="flex-grow">
                     <Select value={studiengruppe.id} onValueChange={onSelectGroup}>
-                        <SelectTrigger className="text-base font-bold">
+                        <SelectTrigger className="text-base font-bold w-full">
                             <SelectValue placeholder="Studiengruppe wählen..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -188,7 +191,9 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                  <Button onClick={handleNext} variant="ghost" size="icon" disabled={currentIndex >= programGroups.length - 1} aria-label="Nächste Gruppe">
                     <ChevronRight />
                 </Button>
-                
+            </div>
+
+            <div className="flex items-center gap-4">
                  <Dialog open={isNewDialogOpen} onOpenChange={(isOpen) => { if (isOpen) resetNewDialogState(); setNewDialogOpen(isOpen); }}>
                     <DialogTrigger asChild>
                          <Button variant="default">
@@ -248,6 +253,11 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                                 <Input id="new-studentCount" type="number" value={newStudentCount} onChange={e => setNewStudentCount(parseInt(e.target.value) || 0)}/>
                             </div>
                             
+                            <div className="col-span-2 flex items-center space-x-2 pt-2">
+                                <Checkbox id="save-as-template" checked={saveAsTemplate} onCheckedChange={(checked) => setSaveAsTemplate(!!checked)} />
+                                <Label htmlFor="save-as-template" className="text-sm font-medium">Aktuellen Plan als Vorlage für den Studiengang speichern</Label>
+                            </div>
+                            
                             {error && <p className="text-destructive text-sm col-span-2 text-center">{error}</p>}
                         </div>
                         <DialogFooter>
@@ -291,9 +301,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                     </DialogContent>
                 </Dialog>
 
-            </div>
 
-            <div className="flex items-center gap-4">
                 <Popover open={isAddModuleOpen} onOpenChange={setAddModuleOpen}>
                     <PopoverTrigger asChild>
                         <Button variant="outline">
