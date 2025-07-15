@@ -3,51 +3,65 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { PlannerBoard } from '@/components/PlannerBoard';
-import { STUDIENGRUPPEN as initialStudiengruppen } from '@/data/MU_Design_Data';
-import { MODULES as initialModules, PROGRAMS as initialPrograms, CATEGORIES as initialCategories } from '@/data/MU_Module_Data';
 import type { Plan, Module, Program, Studiengruppe, AbsoluteSemester, ProgramPlan, MainCategory, PlannerViewMode, Category } from '@/types';
 import { ABSOLUTE_SEMESTERS, RELATIVE_SEMESTERS, getAbsoluteSemesterFor } from '@/constants';
 import { LoadingSpinner } from '@/components/icons/LoadingSpinner';
 
-const STORAGE_KEYS = {
-    modules: 'nexus_modules',
-    programs: 'nexus_programs',
-    studiengruppen: 'nexus_studiengruppen',
-    categories: 'nexus_categories',
-};
+async function fetchData() {
+    const res = await fetch('/api/data');
+    if (!res.ok) {
+        throw new Error('Failed to fetch data');
+    }
+    return res.json();
+}
+
+async function postData(data: any) {
+    await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+}
 
 export default function CoursePilotClient() {
   const [isMounted, setIsMounted] = useState(false);
 
-  const [modules, setModules] = useState<Module[]>(initialModules);
-  const [programs, setPrograms] = useState<Program[]>(initialPrograms);
-  const [studiengruppen, setStudiengruppen] = useState<Studiengruppe[]>(initialStudiengruppen);
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
-
+  const [modules, setModules] = useState<Module[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [studiengruppen, setStudiengruppen] = useState<Studiengruppe[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  
   useEffect(() => {
-    try {
-      const savedModules = localStorage.getItem(STORAGE_KEYS.modules);
-      if (savedModules) setModules(JSON.parse(savedModules));
-
-      const savedPrograms = localStorage.getItem(STORAGE_KEYS.programs);
-      if (savedPrograms) setPrograms(JSON.parse(savedPrograms));
-      
-      const savedStudiengruppen = localStorage.getItem(STORAGE_KEYS.studiengruppen);
-      if (savedStudiengruppen) setStudiengruppen(JSON.parse(savedStudiengruppen));
-      
-      const savedCategories = localStorage.getItem(STORAGE_KEYS.categories);
-      if (savedCategories) setCategories(JSON.parse(savedCategories));
-
-    } catch (e) {
-      console.error("Failed to load from localStorage", e);
-    }
-    setIsMounted(true);
+    fetchData().then(data => {
+        setModules(data.modules);
+        setPrograms(data.programs);
+        setStudiengruppen(data.studiengruppen);
+        setCategories(data.categories);
+        setIsMounted(true);
+    }).catch(e => {
+        console.error("Failed to load from backend", e);
+        // You might want to show an error message to the user here
+        setIsMounted(true); // Still mount to prevent infinite loading state
+    });
   }, []);
 
-  useEffect(() => { if(isMounted) localStorage.setItem(STORAGE_KEYS.modules, JSON.stringify(modules)); }, [modules, isMounted]);
-  useEffect(() => { if(isMounted) localStorage.setItem(STORAGE_KEYS.programs, JSON.stringify(programs)); }, [programs, isMounted]);
-  useEffect(() => { if(isMounted) localStorage.setItem(STORAGE_KEYS.studiengruppen, JSON.stringify(studiengruppen)); }, [studiengruppen, isMounted]);
-  useEffect(() => { if(isMounted) localStorage.setItem(STORAGE_KEYS.categories, JSON.stringify(categories)); }, [categories, isMounted]);
+  const fullData = useMemo(() => ({ modules, programs, studiengruppen, categories }), [modules, programs, studiengruppen, categories]);
+
+  useEffect(() => {
+    if (isMounted) {
+        // Debounce saving to avoid too many requests
+        const handler = setTimeout(() => {
+            if (fullData.modules.length > 0) { // Avoid saving empty initial state
+                postData(fullData);
+            }
+        }, 1000); // Save 1 second after the last change
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }
+  }, [fullData, isMounted]);
+
   
   const [activeStudiengruppenIds, setActiveStudiengruppenIds] = useState<string[]>([]);
   
@@ -276,7 +290,7 @@ export default function CoursePilotClient() {
         return p;
       })
     );
-  }, [modules, programs]);
+  }, [modules]);
   
   const handleDeleteModule = useCallback((moduleIdToDelete: string) => {
     setModules(prev => prev.filter(m => m.id !== moduleIdToDelete));
@@ -313,7 +327,7 @@ export default function CoursePilotClient() {
         return p;
       })
     );
-  }, [programs]);
+  }, []);
 
   const handleAddProgram = useCallback((newProgram: Program) => {
     if (programs.some(p => p.id === newProgram.id)) {
@@ -327,7 +341,7 @@ export default function CoursePilotClient() {
     setPrograms(prev => prev.map(p => 
       p.id === programId ? { ...p, ...updates } : p
     ));
-  }, [programs]);
+  }, []);
   
   const handleDeleteProgram = useCallback((programId: string) => {
     const programToDelete = programs.find(p=>p.id === programId);
@@ -392,10 +406,19 @@ export default function CoursePilotClient() {
     setActiveStudiengruppenIds([studiengruppeId]);
   };
   
-  const handleResetData = useCallback(() => {
-    if (window.confirm("Möchten Sie wirklich alle Änderungen verwerfen und die Plandaten auf den ursprünglichen Stand zurücksetzen?")) {
-        Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-        window.location.reload();
+  const handleResetData = useCallback(async () => {
+    if (window.confirm("Möchten Sie wirklich alle Änderungen verwerfen und die Plandaten auf den ursprünglichen Stand zurücksetzen? Der Serverzustand wird überschrieben.")) {
+        const res = await fetch('/api/reset', { method: 'POST' });
+        if (res.ok) {
+            const { data } = await res.json();
+            setModules(data.modules);
+            setPrograms(data.programs);
+            setStudiengruppen(data.studiengruppen);
+            setCategories(data.categories);
+            alert("Daten wurden erfolgreich zurückgesetzt.");
+        } else {
+            alert("Fehler beim Zurücksetzen der Daten.");
+        }
     }
   }, []);
 
