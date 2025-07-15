@@ -522,14 +522,14 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                                                                         isHighlighted={false}
                                                                                         heatmapColor={heatmapColor}
                                                                                         tooltip={tooltip}
-                                                                                        validationStatus={getValidationStatusForDrop(semester.id)}
                                                                                         className={semester.isPraktikum ? 'bg-teal-900/40' : ''}
+                                                                                        validationStatus={getValidationStatusForDrop(semester.id)}
                                                                                     >
                                                                                         {moduleInstances.map(instanceId => {
                                                                                             const isLocked = finalLockedInstances.has(instanceId);
                                                                                             const errors = placementErrors.get(instanceId);
                                                                                             return (
-                                                                                                <div key={instanceId} className="h-8 w-12 mx-auto">
+                                                                                                <div key={instanceId} className="h-full w-full">
                                                                                                     <ModuleCard
                                                                                                         module={module}
                                                                                                         instanceId={instanceId}
