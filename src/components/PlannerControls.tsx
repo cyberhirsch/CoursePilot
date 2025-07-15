@@ -31,7 +31,7 @@ interface PlannerControlsProps {
     activeBulkLocks: { past: boolean; categories: Set<string> } | undefined;
     finalLockedInstances: Set<string>;
     allModules: Module[];
-    onAddStudiengruppe: (newStudiengruppe: Studiengruppe, saveAsTemplate: boolean) => boolean;
+    onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
     onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
@@ -52,8 +52,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     const [newStudentCount, setNewStudentCount] = React.useState(program.defaultStudents);
     const [newStartSemesterId, setNewStartSemesterId] = React.useState(ABSOLUTE_SEMESTERS[0].id);
     const [newProgramId, setNewProgramId] = React.useState(program.id);
-    const [saveAsTemplate, setSaveAsTemplate] = React.useState(false);
-
+    
     const [error, setError] = React.useState('');
     
     const programGroups = allStudiengruppen.filter(sg => sg.programId === studiengruppe.programId);
@@ -80,7 +79,6 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         setNewGroupName(`${selectedProgram.name.replace("B.A. ", "")} `);
         setNewStudentCount(selectedProgram.defaultStudents);
         setNewStartSemesterId(ABSOLUTE_SEMESTERS[0].id);
-        setSaveAsTemplate(false);
         setError('');
     }
 
@@ -117,7 +115,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             userLockedModules: []
         };
         
-        const success = onAddStudiengruppe(newGroup, saveAsTemplate);
+        const success = onAddStudiengruppe(newGroup);
         if (success) {
             setNewDialogOpen(false);
             resetNewDialogState();
@@ -150,7 +148,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             userLockedModules: [] // Start with no locks
         };
 
-        const success = onAddStudiengruppe(newGroup, false); // Duplicates are not saved as templates
+        const success = onAddStudiengruppe(newGroup);
         if (success) {
             setDuplicateDialogOpen(false);
             setNewShortName("");
@@ -251,11 +249,6 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                              <div className="space-y-2">
                                 <Label htmlFor="new-studentCount">Teilnehmerzahl</Label>
                                 <Input id="new-studentCount" type="number" value={newStudentCount} onChange={e => setNewStudentCount(parseInt(e.target.value) || 0)}/>
-                            </div>
-                            
-                            <div className="flex items-center space-x-2 pt-5">
-                                <Checkbox id="saveAsTemplate" checked={saveAsTemplate} onCheckedChange={(checked) => setSaveAsTemplate(!!checked)} />
-                                <Label htmlFor="saveAsTemplate">Als Vorlage für den Studiengang speichern</Label>
                             </div>
                             
                             {error && <p className="text-destructive text-sm col-span-2 text-center">{error}</p>}
