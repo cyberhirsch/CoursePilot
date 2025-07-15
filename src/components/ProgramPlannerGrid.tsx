@@ -5,7 +5,6 @@ import React, { useMemo, useCallback, useState } from 'react';
 import type { Module, Program, Studiengruppe, AbsoluteSemester } from '@/types';
 import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, getAbsoluteSemesterFor, CATEGORY_ORDER } from '@/constants';
 import { ModuleCard } from '@/components/ModuleCard';
-import { ModuleSidebar } from '@/components/ModuleSidebar';
 import { PlannerControls } from '@/components/PlannerControls';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -200,101 +199,91 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     }, [studiengruppe.plan]);
 
     return (
-        <div className="flex h-full gap-4">
-            <ModuleSidebar
+        <div className="flex-grow flex flex-col gap-4 min-w-0">
+            <PlannerControls
+                studiengruppe={studiengruppe}
+                onUpdateStudiengruppe={onUpdateStudiengruppe}
+                allStudiengruppen={allStudiengruppen}
+                onSelectGroup={onSelectGroup}
+                isHeatmapVisible={isHeatmapVisible}
+                onToggleHeatmap={onToggleHeatmap}
+                totalCp={totalCp}
                 program={program}
+                selectedSemester={selectedSemester}
+                onTogglePastLock={() => onTogglePastLock(studiengruppe.id)}
+                onToggleCategoryLock={(category) => onToggleCategoryLock(studiengruppe.id, category)}
+                activeBulkLocks={activeBulkLocks}
+                finalLockedInstances={finalLockedInstances}
                 modules={modules}
-                plan={studiengruppe.plan}
-                onDragStart={onDragStart}
-                getModuleById={getModuleById}
             />
-
-            <div className="flex-grow flex flex-col gap-4 min-w-0">
-                <PlannerControls
-                    studiengruppe={studiengruppe}
-                    onUpdateStudiengruppe={onUpdateStudiengruppe}
-                    allStudiengruppen={allStudiengruppen}
-                    onSelectGroup={onSelectGroup}
-                    isHeatmapVisible={isHeatmapVisible}
-                    onToggleHeatmap={onToggleHeatmap}
-                    totalCp={totalCp}
-                    program={program}
-                    selectedSemester={selectedSemester}
-                    onTogglePastLock={() => onTogglePastLock(studiengruppe.id)}
-                    onToggleCategoryLock={(category) => onToggleCategoryLock(studiengruppe.id, category)}
-                    activeBulkLocks={activeBulkLocks}
-                    finalLockedInstances={finalLockedInstances}
-                    modules={modules}
-                />
-                
-                <ScrollArea className="flex-grow rounded-lg border border-border bg-card">
-                    <table className="w-full border-collapse">
-                        <thead>
-                            <tr className="sticky top-0 bg-card z-10 shadow-sm">
-                                <th className="p-2 text-left w-[300px] min-w-[300px] font-semibold text-foreground">Modul</th>
-                                {semesterHeaders.map(sem => (
-                                    <th key={sem.id} className="p-2 text-center font-semibold text-foreground border-l border-border" style={{backgroundColor: isHeatmapVisible ? sem.heatmapColor : undefined}}>
-                                        {sem.name}
-                                        <p className={`text-xs font-normal ${sem.cpExceeded ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
-                                            {sem.absoluteName}
-                                        </p>
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {categorizedModules.map(({ category, modules: catModules }) => (
-                                <React.Fragment key={category}>
-                                    <tr className="bg-muted/20">
-                                        <td colSpan={1 + semesterHeaders.length} className="p-2 font-bold text-foreground border-t border-border">{category}</td>
-                                    </tr>
-                                    {catModules.map(module => (
-                                        <tr key={module.id}>
-                                            <td className="p-2 border-t border-border flex items-center gap-2">
-                                                <span className="text-muted-foreground text-xs w-10 font-code">{module.id}</span>
-                                                <span className="text-sm">{module.name}</span>
-                                            </td>
-                                            {semesterHeaders.map(sem => {
-                                                const plannedInstances = (studiengruppe.plan.semesters[sem.id] || []).filter(
-                                                    (id) => module.type === 'Pool' ? id.startsWith(`${module.id}-`) : id === module.id
-                                                );
-
-                                                const droppableModuleId = module.id;
-
-                                                const participantInfo = isHeatmapVisible && sem.absoluteId
-                                                    ? participantMap.get(sem.absoluteId)?.get(module.id) || []
-                                                    : [];
-                                                const participantCount = participantInfo.reduce((sum, info) => sum + info.studentCount, 0);
-                                                const heatmapColor = isHeatmapVisible ? getHeatmapColor(participantCount) : undefined;
-                                                
-                                                const tooltipText = isHeatmapVisible && participantInfo.length > 0
-                                                    ? `Gesamt: ${participantCount} Studierende\n${participantInfo.map(info => `- ${info.name}: ${info.studentCount}`).join('\n')}`
-                                                    : undefined;
-
-                                                return (
-                                                    <DropTargetCell key={sem.id} onDrop={(e) => onDrop(studiengruppe.id, sem.id, droppableModuleId, e)} heatmapColor={heatmapColor} tooltip={tooltipText}>
-                                                        {plannedInstances.map(instanceId => (
-                                                            <ModuleCard
-                                                                key={instanceId}
-                                                                module={module}
-                                                                instanceId={instanceId}
-                                                                onDragStart={onDragStart}
-                                                                isDraggable={true}
-                                                                isLocked={finalLockedInstances.has(instanceId)}
-                                                                onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
-                                                            />
-                                                        ))}
-                                                    </DropTargetCell>
-                                                )
-                                            })}
-                                        </tr>
-                                    ))}
-                                </React.Fragment>
+            
+            <ScrollArea className="flex-grow rounded-lg border border-border bg-card">
+                <table className="w-full border-collapse">
+                    <thead>
+                        <tr className="sticky top-0 bg-card z-10 shadow-sm">
+                            <th className="p-2 text-left w-[300px] min-w-[300px] font-semibold text-foreground">Modul</th>
+                            {semesterHeaders.map(sem => (
+                                <th key={sem.id} className="p-2 text-center font-semibold text-foreground border-l border-border" style={{backgroundColor: isHeatmapVisible ? sem.heatmapColor : undefined}}>
+                                    {sem.name}
+                                    <p className={`text-xs font-normal ${sem.cpExceeded ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                                        {sem.absoluteName}
+                                    </p>
+                                </th>
                             ))}
-                        </tbody>
-                    </table>
-                </ScrollArea>
-            </div>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {categorizedModules.map(({ category, modules: catModules }) => (
+                            <React.Fragment key={category}>
+                                <tr className="bg-muted/20">
+                                    <td colSpan={1 + semesterHeaders.length} className="p-2 font-bold text-foreground border-t border-border">{category}</td>
+                                </tr>
+                                {catModules.map(module => (
+                                    <tr key={module.id}>
+                                        <td className="p-2 border-t border-border flex items-center gap-2">
+                                            <span className="text-muted-foreground text-xs w-10 font-code">{module.id}</span>
+                                            <span className="text-sm">{module.name}</span>
+                                        </td>
+                                        {semesterHeaders.map(sem => {
+                                            const plannedInstances = (studiengruppe.plan.semesters[sem.id] || []).filter(
+                                                (id) => module.type === 'Pool' ? id.startsWith(`${module.id}-`) : id === module.id
+                                            );
+
+                                            const droppableModuleId = module.id;
+
+                                            const participantInfo = isHeatmapVisible && sem.absoluteId
+                                                ? participantMap.get(sem.absoluteId)?.get(module.id) || []
+                                                : [];
+                                            const participantCount = participantInfo.reduce((sum, info) => sum + info.studentCount, 0);
+                                            const heatmapColor = isHeatmapVisible ? getHeatmapColor(participantCount) : undefined;
+                                            
+                                            const tooltipText = isHeatmapVisible && participantInfo.length > 0
+                                                ? `Gesamt: ${participantCount} Studierende\n${participantInfo.map(info => `- ${info.name}: ${info.studentCount}`).join('\n')}`
+                                                : undefined;
+
+                                            return (
+                                                <DropTargetCell key={sem.id} onDrop={(e) => onDrop(studiengruppe.id, sem.id, droppableModuleId, e)} heatmapColor={heatmapColor} tooltip={tooltipText}>
+                                                    {plannedInstances.map(instanceId => (
+                                                        <ModuleCard
+                                                            key={instanceId}
+                                                            module={module}
+                                                            instanceId={instanceId}
+                                                            onDragStart={onDragStart}
+                                                            isDraggable={true}
+                                                            isLocked={finalLockedInstances.has(instanceId)}
+                                                            onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
+                                                        />
+                                                    ))}
+                                                </DropTargetCell>
+                                            )
+                                        })}
+                                    </tr>
+                                ))}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
+            </ScrollArea>
         </div>
     );
 };
