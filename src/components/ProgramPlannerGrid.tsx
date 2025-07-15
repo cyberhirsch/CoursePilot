@@ -57,7 +57,8 @@ const DropTargetCell: React.FC<{
     onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
     children?: React.ReactNode;
     heatmapColor?: string;
-}> = ({ onDrop, children, heatmapColor }) => {
+    tooltip?: string;
+}> = ({ onDrop, children, heatmapColor, tooltip }) => {
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
@@ -71,6 +72,7 @@ const DropTargetCell: React.FC<{
             onDragOver={handleDragOver}
             onDrop={onDrop}
             style={style}
+            title={tooltip}
         >
             <div className="h-full w-full">
                 {children}
@@ -268,9 +270,13 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                                     : [];
                                                 const participantCount = participantInfo.reduce((sum, info) => sum + info.studentCount, 0);
                                                 const heatmapColor = isHeatmapVisible ? getHeatmapColor(participantCount) : undefined;
+                                                
+                                                const tooltipText = isHeatmapVisible && participantInfo.length > 0
+                                                    ? `Gesamt: ${participantCount} Studierende\n${participantInfo.map(info => `- ${info.name}: ${info.studentCount}`).join('\n')}`
+                                                    : undefined;
 
                                                 return (
-                                                    <DropTargetCell key={sem.id} onDrop={(e) => onDrop(studiengruppe.id, sem.id, droppableModuleId, e)} heatmapColor={heatmapColor}>
+                                                    <DropTargetCell key={sem.id} onDrop={(e) => onDrop(studiengruppe.id, sem.id, droppableModuleId, e)} heatmapColor={heatmapColor} tooltip={tooltipText}>
                                                         {isPlacedInThisCell && instanceId && (
                                                             <ModuleCard
                                                                 module={module}
