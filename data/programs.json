@@ -74,7 +74,7 @@
   {
     "id": "GDIM",
     "name": "B.A. Game Design and Interactive Media",
-    "semesters": 8,
+    "semesters": 7,
     "defaultStudents": 35,
     "moduleIds": [
       "G1",
