@@ -66,9 +66,10 @@ interface GridCellProps {
   heatmapColor?: string;
   tooltip?: string;
   validationStatus: ValidationStatus;
+  className?: string;
 }
 
-const GridCell: React.FC<GridCellProps> = ({ onDrop, onDragOver, onDragLeave, children, isHighlighted, heatmapColor, tooltip, validationStatus }) => {
+const GridCell: React.FC<GridCellProps> = ({ onDrop, onDragOver, onDragLeave, children, isHighlighted, heatmapColor, tooltip, validationStatus, className }) => {
     const [isOver, setIsOver] = useState(false);
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -106,7 +107,7 @@ const GridCell: React.FC<GridCellProps> = ({ onDrop, onDragOver, onDragLeave, ch
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`${baseClasses} ${stateClass}`}
+            className={`${baseClasses} ${stateClass} ${className}`}
             style={style}
             title={tooltip}
         >
@@ -522,6 +523,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                                                                         heatmapColor={heatmapColor}
                                                                                         tooltip={tooltip}
                                                                                         validationStatus={getValidationStatusForDrop(semester.id)}
+                                                                                        className={semester.isPraktikum ? 'bg-teal-900/40' : ''}
                                                                                     >
                                                                                         {moduleInstances.map(instanceId => {
                                                                                             const isLocked = finalLockedInstances.has(instanceId);
@@ -548,7 +550,6 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                                                     )}
                                                                 </Draggable>
                                                             ))}
-                                                            {/* This ref needs to be on an element inside the Droppable */}
                                                             <tr ref={provided.innerRef} style={{display: 'none'}}><td colSpan={program.semesters+1}>{provided.placeholder}</td></tr>
                                                         </React.Fragment>
                                                     )}
