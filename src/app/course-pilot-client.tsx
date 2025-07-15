@@ -446,7 +446,7 @@ export default function CoursePilotClient() {
           onUpdateStudiengruppe={handleUpdateStudiengruppe}
           modules={modules}
           programs={programs}
-          onUpdateModule={onUpdateModule}
+          onUpdateModule={handleUpdateModule}
           onAddModule={handleAddModule}
           onDeleteModule={handleDeleteModule}
           isHeatmapVisible={isHeatmapVisible}
@@ -458,8 +458,8 @@ export default function CoursePilotClient() {
           finalLockedModulesMap={finalLockedModulesMap}
           categories={categories}
           onAddCategory={handleAddCategory}
-          onUpdateCategory={onUpdateCategory}
-          onDeleteCategory={onDeleteCategory}
+          onUpdateCategory={handleUpdateCategory}
+          onDeleteCategory={handleDeleteCategory}
           onAddStudiengruppe={handleAddStudiengruppe}
           onUpdateProgram={onUpdateProgram}
         />
