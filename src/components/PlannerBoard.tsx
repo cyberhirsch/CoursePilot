@@ -42,7 +42,6 @@ interface PlannerBoardProps {
   onUpdateCategory: (categoryId: string, updates: Partial<Category>) => void;
   onDeleteCategory: (categoryId: string) => void;
   onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
-  onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
 export const PlannerBoard: React.FC<PlannerBoardProps> = ({ 
@@ -77,7 +76,6 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     onUpdateCategory,
     onDeleteCategory,
     onAddStudiengruppe,
-    onUpdateProgram
 }) => {
 
   if (mainCategory !== 'semesterplan') {
@@ -171,7 +169,6 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
             activeBulkLocks={activeBulkLocks[activeGruppe.id]}
             finalLockedInstances={finalLockedModulesMap.get(activeGruppe.id) || new Set()}
             onAddStudiengruppe={onAddStudiengruppe}
-            onUpdateProgram={onUpdateProgram}
         />
     </div>
   );

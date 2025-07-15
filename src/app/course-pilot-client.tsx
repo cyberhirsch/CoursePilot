@@ -384,16 +384,6 @@ export default function CoursePilotClient() {
     return true;
   }, [studiengruppen]);
 
-  const handleUpdateProgram = useCallback((programId: string, updates: Partial<Program>) => {
-    setPrograms(prev => prev.map(p => 
-      p.id === programId ? { ...p, ...updates } : p
-    ));
-    // Also update any studiengruppen using this program's template if the plan changes
-    if (updates.templatePlan) {
-        setStudiengruppen(prevSg => prevSg.map(sg => sg.programId === programId ? { ...sg, plan: updates.templatePlan! } : sg))
-    }
-  }, []);
-  
   const activeStudiengruppen = useMemo(() => {
     return studiengruppen.filter(sg => activeStudiengruppenIds.includes(sg.id));
   }, [studiengruppen, activeStudiengruppenIds]);
@@ -439,10 +429,10 @@ export default function CoursePilotClient() {
           onUpdateModule={handleUpdateModule}
           onAddModule={handleAddModule}
           onDeleteModule={handleDeleteModule}
-          onUpdateModulePrograms={handleUpdateModulePrograms}
+          onUpdateModulePrograms={onUpdateModulePrograms}
           isHeatmapVisible={isHeatmapVisible}
           onToggleHeatmap={handleToggleHeatmap}
-          onToggleModuleLock={handleToggleModuleLock}
+          onToggleModuleLock={onToggleModuleLock}
           onTogglePastLock={handleTogglePastLock}
           onToggleCategoryLock={handleToggleCategoryLock}
           activeBulkLocks={activeBulkLocks}
@@ -452,7 +442,6 @@ export default function CoursePilotClient() {
           onUpdateCategory={handleUpdateCategory}
           onDeleteCategory={handleDeleteCategory}
           onAddStudiengruppe={handleAddStudiengruppe}
-          onUpdateProgram={onUpdateProgram}
         />
       </main>
     </div>
