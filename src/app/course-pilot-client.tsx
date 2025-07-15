@@ -450,7 +450,7 @@ export default function CoursePilotClient() {
           categories={categories}
           onAddCategory={handleAddCategory}
           onUpdateCategory={handleUpdateCategory}
-          onDeleteCategory={onDeleteCategory}
+          onDeleteCategory={handleDeleteCategory}
         />
       </main>
     </div>
