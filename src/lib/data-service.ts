@@ -130,10 +130,14 @@ export async function getAllData(): Promise<AppData> {
         readJsonFile<Category[]>(categoriesFilePath),
     ]);
 
-    const studiengruppen: Studiengruppe[] = cohorts.map(cohort => ({
-        ...cohort,
-        plan: transformPlan(cohort.plan, modules)
-    }));
+    const studiengruppen: Studiengruppe[] = cohorts.map(cohort => {
+        const program = programsData.find(p => p.id === cohort.programId);
+        return {
+            ...cohort,
+            plan: transformPlan(cohort.plan, modules),
+            semesters: cohort.semesters || program?.semesters || 7, // Fallback chain
+        };
+    });
     
     const transformedPrograms = programsData.map(p => ({
         ...p,

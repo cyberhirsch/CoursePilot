@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
@@ -326,7 +327,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
   }, [allStudiengruppen, allModules, getModuleById, isHeatmapVisible]);
 
   const semesterData = useMemo(() => {
-    return RELATIVE_SEMESTERS.slice(0, program.semesters).map((semester, index) => {
+    return RELATIVE_SEMESTERS.slice(0, studiengruppe.semesters).map((semester, index) => {
       const moduleInstanceIds = studiengruppe.plan.semesters[semester.id] || [];
       
       const modulesInSemester = (moduleInstanceIds as string[]).map(instanceId => {
@@ -341,7 +342,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
       
       return { id: semester.id, name: semester.name, totalCP, totalSWS, totalWorkload, isPraktikum };
     });
-  }, [getModuleById, program.semesters, studiengruppe.plan]);
+  }, [getModuleById, studiengruppe.semesters, studiengruppe.plan]);
 
   const curriedOnDrop = (semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => {
       onDrop(studiengruppe.id, semesterId, targetModuleId, e);
@@ -467,7 +468,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                         <Draggable draggableId={category} index={categoryIndex}>
                                             {(provided) => (
                                                 <tr ref={provided.innerRef} {...provided.draggableProps}>
-                                                    <td colSpan={1 + program.semesters} className="p-0 border-t border-border">
+                                                    <td colSpan={1 + studiengruppe.semesters} className="p-0 border-t border-border">
                                                         <div {...provided.dragHandleProps} className="bg-muted/20 p-1.5 font-bold text-foreground text-left flex items-center justify-between">
                                                             <div className="flex items-center">
                                                                 <GripVertical size={14} className="cursor-grab" />
@@ -549,7 +550,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                                     )}
                                                 </Draggable>
                                             ))}
-                                            <tr style={{display: "none"}} ref={provided.innerRef} {...provided.droppableProps}><td colSpan={program.semesters + 1}>{provided.placeholder}</td></tr>
+                                            <tr style={{display: "none"}} ref={provided.innerRef} {...provided.droppableProps}><td colSpan={studiengruppe.semesters + 1}>{provided.placeholder}</td></tr>
                                             </React.Fragment>
                                         )}
                                         </Droppable>
@@ -598,5 +599,6 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
 };
 
     
+
 
 

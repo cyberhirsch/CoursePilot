@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -10,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, ChevronRight, Copy, PlusCircle, UserPlus, GripVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, PlusCircle, UserPlus, GripVertical, Settings2 } from 'lucide-react';
 import { ABSOLUTE_SEMESTERS } from '@/constants';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
@@ -43,7 +44,6 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     
     const [isDuplicateDialogOpen, setDuplicateDialogOpen] = React.useState(false);
     const [isNewDialogOpen, setNewDialogOpen] = React.useState(false);
-    const [isAddModuleOpen, setAddModuleOpen] = React.useState(false);
     
     // State for New/Duplicate Dialog
     const [newShortName, setNewShortName] = React.useState("");
@@ -60,8 +60,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     const currentIndex = programGroups.findIndex(g => g.id === studiengruppe.id);
     
     const uniqueCategories = [...new Set(allModules.map(m => m.category))];
-    const availableModules = allModules.filter(m => !program.moduleIds.includes(m.id));
-
+    
     const handlePrevious = () => {
         if (currentIndex > 0) {
             onSelectGroup(programGroups[currentIndex - 1].id);
@@ -74,12 +73,13 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         }
     };
 
-    const resetNewDialogState = () => {
+    const resetNewDialogState = (selectedProgramId: string) => {
+        const selectedProgram = allPrograms.find(p => p.id === selectedProgramId) || program;
+        setNewProgramId(selectedProgramId);
         setNewShortName("");
-        const selectedProgram = allPrograms.find(p => p.id === newProgramId) || program;
-        setNewGroupName(`${selectedProgram.name.replace("B.A. ", "")} `);
+        setNewGroupName(`${selectedProgram.name.replace(/B\.A\.\s*/, "")} `);
         setNewStudentCount(selectedProgram.defaultStudents);
-        setNewStartSemesterId(ABSOLUTE_SEMESTERS[0].id);
+        setNewStartSemesterId(ABSOLUTE_SEMESTERS.find(s => s.type === 'WS')?.id || ABSOLUTE_SEMESTERS[0].id);
         setSaveAsTemplate(false);
         setError('');
     }
@@ -112,6 +112,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             programId: newProgramId,
             startSemester: newStartSemester,
             studentCount: newStudentCount,
+            semesters: selectedProgram.semesters,
             type: 'klassisch',
             plan: selectedProgram.templatePlan || { semesters: {} },
             userLockedModules: []
@@ -120,7 +121,6 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         const success = onAddStudiengruppe(newGroup, saveAsTemplate);
         if (success) {
             setNewDialogOpen(false);
-            resetNewDialogState();
         } else {
             setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
         }
@@ -159,17 +159,12 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         }
     };
 
-    const handleAddModuleToProgram = (moduleId: string) => {
-        onUpdateProgram(program.id, {
-            moduleIds: [...program.moduleIds, moduleId]
-        });
-    };
-
     const selectedProgramForNewDialog = allPrograms.find(p => p.id === newProgramId) || program;
 
     return (
-        <div className="flex-shrink-0 bg-card p-3 rounded-t-lg border-b border-border flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
-            <div className="flex items-center gap-2 flex-grow">
+        <div className="flex-shrink-0 bg-card p-3 rounded-t-lg border-b border-border flex items-center justify-between flex-wrap gap-x-6 gap-y-2">
+            {/* Left side: Group Selection */}
+            <div className="flex items-center gap-2 flex-1 min-w-[300px]">
                  <Button onClick={handlePrevious} variant="ghost" size="icon" disabled={currentIndex <= 0} aria-label="Vorherige Gruppe">
                     <ChevronLeft />
                 </Button>
@@ -193,10 +188,11 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                 </Button>
             </div>
 
-            <div className="flex items-center gap-4">
-                 <Dialog open={isNewDialogOpen} onOpenChange={(isOpen) => { if (isOpen) resetNewDialogState(); setNewDialogOpen(isOpen); }}>
+            {/* Right side: Actions and Settings */}
+            <div className="flex items-center justify-end gap-x-4 gap-y-2 flex-wrap">
+                 <Dialog open={isNewDialogOpen} onOpenChange={(isOpen) => { if (isOpen) resetNewDialogState(program.id); setNewDialogOpen(isOpen); }}>
                     <DialogTrigger asChild>
-                         <Button variant="default">
+                         <Button variant="outline">
                             <UserPlus className="mr-2 h-4 w-4" />
                             Neue Gruppe
                         </Button>
@@ -208,7 +204,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                         <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-4">
                             <div className="space-y-2">
                                 <Label htmlFor="new-studiengang">Studiengang</Label>
-                                <Select value={newProgramId} onValueChange={setNewProgramId}>
+                                <Select value={newProgramId} onValueChange={(id) => resetNewDialogState(id)}>
                                     <SelectTrigger id="new-studiengang">
                                         <SelectValue />
                                     </SelectTrigger>
@@ -268,7 +264,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
 
                 <Dialog open={isDuplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
                     <DialogTrigger asChild>
-                         <Button variant="default">
+                         <Button variant="outline">
                             <Copy className="mr-2 h-4 w-4" />
                             Gruppe duplizieren
                         </Button>
@@ -301,57 +297,35 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                     </DialogContent>
                 </Dialog>
 
-
-                <Popover open={isAddModuleOpen} onOpenChange={setAddModuleOpen}>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Modul zuordnen
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-96">
-                        <h4 className="font-medium text-lg mb-2">Verfügbare Module</h4>
-                        <p className="text-sm text-muted-foreground mb-4">Fügen Sie dem Studiengang '{program.id}' Module hinzu.</p>
-                        <ScrollArea className="h-72">
-                            <div className="p-1">
-                                {availableModules.length > 0 ? availableModules.map(module => (
-                                    <div key={module.id} className="flex items-center justify-between p-2 hover:bg-muted rounded-md">
-                                        <div>
-                                            <p className="font-semibold">{module.name}</p>
-                                            <p className="text-xs text-muted-foreground">{module.id}</p>
-                                        </div>
-                                        <Button size="sm" onClick={() => handleAddModuleToProgram(module.id)}>Hinzufügen</Button>
-                                    </div>
-                                )) : <p className="text-sm text-muted-foreground text-center py-4">Alle Module sind bereits zugeordnet.</p>}
-                            </div>
-                        </ScrollArea>
-                    </PopoverContent>
-                </Popover>
-
-                <div className="flex items-center space-x-2">
-                    <Switch
-                        id="heatmap-toggle"
-                        checked={isHeatmapVisible}
-                        onCheckedChange={onToggleHeatmap}
-                    />
-                    <Label htmlFor="heatmap-toggle">Heatmap</Label>
-                </div>
-
                 <Popover>
                     <PopoverTrigger asChild>
-                        <Button variant="outline">
-                            Vergangene sperren
+                        <Button variant="ghost" size="icon">
+                            <Settings2 className="h-5 w-5"/>
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80">
                         <div className="grid gap-4">
                             <div className="space-y-2">
-                                <h4 className="font-medium leading-none">Module automatisch sperren</h4>
+                                <h4 className="font-medium leading-none">Ansichtsoptionen</h4>
                                 <p className="text-sm text-muted-foreground">
-                                    Sperren Sie Module basierend auf Regeln, um versehentliche Änderungen zu verhindern.
+                                    Passen Sie die Anzeige des Planers an.
                                 </p>
                             </div>
                             <div className="grid gap-2">
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="heatmap-toggle"
+                                        checked={isHeatmapVisible}
+                                        onCheckedChange={onToggleHeatmap}
+                                    />
+                                    <Label htmlFor="heatmap-toggle">Heatmap (Teilnehmer)</Label>
+                                </div>
+                                <div className="mt-4 space-y-2">
+                                    <h4 className="font-medium leading-none">Module automatisch sperren</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                        Sperren Sie Module, um versehentliche Änderungen zu verhindern.
+                                    </p>
+                                </div>
                                 <div className="flex items-center space-x-2">
                                     <Checkbox
                                         id="lock-past"
@@ -402,8 +376,8 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                     <Input 
                         id="semesters-count"
                         type="number" 
-                        value={program.semesters}
-                        onChange={(e) => onUpdateProgram(program.id, {semesters: parseInt(e.target.value) || 0})}
+                        value={studiengruppe.semesters}
+                        onChange={(e) => onUpdateStudiengruppe(studiengruppe.id, {semesters: parseInt(e.target.value) || 0})}
                         className="w-16"
                     />
                 </div>

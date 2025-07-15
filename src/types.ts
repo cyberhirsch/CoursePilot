@@ -2,6 +2,7 @@
 
 
 
+
 export interface Category {
   id: string;
   name: string;
@@ -83,6 +84,7 @@ export interface Studiengruppe {
   startSemester: AbsoluteSemester;
   plan: ProgramPlan; // This will be the transformed plan
   studentCount: number;
+  semesters: number; // Individual semester count for the group
   shortName: string;
   type: 'klassisch' | 'dual';
   userLockedModules?: string[];
