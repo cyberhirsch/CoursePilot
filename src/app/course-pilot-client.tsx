@@ -51,7 +51,7 @@ export default function CoursePilotClient() {
     if (isMounted) {
         const handler = setTimeout(() => {
             if (fullData.modules.length > 0) {
-                postData(fullData);
+                // postData(fullData);
             }
         }, 1000); 
 
@@ -318,19 +318,6 @@ export default function CoursePilotClient() {
       ));
   }, []);
 
-  const handleUpdateModulePrograms = useCallback((moduleId: string, programId: string, isAssigned: boolean) => {
-      setPrograms(prevPrograms => prevPrograms.map(p => {
-          if (p.id === programId) {
-              const newModuleIds = isAssigned 
-                  ? [...p.moduleIds, moduleId]
-                  : p.moduleIds.filter(id => id !== moduleId);
-              return { ...p, moduleIds: newModuleIds };
-          }
-          return p;
-      }));
-  }, []);
-
-
   const getProgramById = useCallback((id: string): Program | undefined => {
     return programs.find(p => p.id === id);
   }, [programs]);
@@ -432,7 +419,6 @@ export default function CoursePilotClient() {
           onUpdateModule={handleUpdateModule}
           onAddModule={handleAddModule}
           onDeleteModule={handleDeleteModule}
-          onUpdateModulePrograms={handleUpdateModulePrograms}
           isHeatmapVisible={isHeatmapVisible}
           onToggleHeatmap={handleToggleHeatmap}
           onToggleModuleLock={handleToggleModuleLock}

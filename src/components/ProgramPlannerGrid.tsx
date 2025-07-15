@@ -3,17 +3,14 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { DragDropContext, Droppable, Draggable, OnDragEndResponder } from '@hello-pangea/dnd';
 import type { Module, Program, Studiengruppe, AbsoluteSemester, ProgramPlan } from '@/types';
 import { ModuleCard } from './ModuleCard';
-import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, getAbsoluteSemesterFor, ABSOLUTE_SEMESTERS, CATEGORY_ORDER } from '../constants';
+import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, getAbsoluteSemesterFor, ABSOLUTE_SEMESTERS } from '../constants';
 import { LockIcon } from './icons/LockIcon';
 import { UnlockIcon } from './icons/UnlockIcon';
 import { Button } from './ui/button';
-import { Copy, PlusCircle, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from './ui/dialog';
-import { Label } from './ui/label';
-import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { GripVertical, Trash2 } from 'lucide-react';
 import { PlannerControls } from './PlannerControls';
 
 
@@ -151,33 +148,27 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
 
   const orderedGroupedModules = useMemo(() => {
     const categoryMap = new Map<string, Module[]>();
-
-    const allProgramModules = new Set(program.moduleIds);
-
-    allModules.forEach(module => {
-        if (allProgramModules.has(module.id)) {
-             if (!categoryMap.has(module.category)) {
+    
+    program.moduleIds.forEach(moduleId => {
+        const module = allModules.find(m => m.id === moduleId);
+        if (module) {
+            if (!categoryMap.has(module.category)) {
                 categoryMap.set(module.category, []);
             }
             categoryMap.get(module.category)!.push(module);
         }
     });
 
-    const categoryOrder = program.categoryOrder || CATEGORY_ORDER;
+    const categoryOrder = program.categoryOrder || [...categoryMap.keys()];
 
-    const ordered: { category: string; modules: Module[] }[] = [];
-    categoryOrder.forEach(categoryName => {
-        const modulesInCategory = categoryMap.get(categoryName);
-        if (modulesInCategory && modulesInCategory.length > 0) {
-            ordered.push({
-                category: categoryName,
-                modules: modulesInCategory.sort((a, b) => a.id.localeCompare(b.id)),
-            });
-        }
-    });
+    return categoryOrder
+        .map(categoryName => ({
+            category: categoryName,
+            modules: categoryMap.get(categoryName) || [],
+        }))
+        .filter(group => group.modules.length > 0);
 
-    return ordered;
-}, [allModules, program]);
+  }, [allModules, program]);
 
   const validateModulePlacement = useCallback((moduleId: string, instanceId: string, semesterId: string, plan: Studiengruppe['plan']): string[] => {
       const module = getModuleById(moduleId);
@@ -355,6 +346,46 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
           onUpdateStudiengruppe(studiengruppe.id, { plan: { ...studiengruppe.plan, semesters: newSemesters } });
       }
   };
+
+  const onDragEnd: OnDragEndResponder = (result) => {
+    const { source, destination, type } = result;
+
+    if (!destination) return;
+
+    if (type === 'CATEGORY') {
+        const newCategoryOrder = Array.from(program.categoryOrder || []);
+        const [removed] = newCategoryOrder.splice(source.index, 1);
+        newCategoryOrder.splice(destination.index, 0, removed);
+        onUpdateProgram(program.id, { categoryOrder: newCategoryOrder });
+    }
+
+    if (type === 'MODULE') {
+        const newModuleIds = Array.from(program.moduleIds);
+        const sourceModuleId = orderedGroupedModules[source.droppableId]?.modules[source.index]?.id;
+        
+        if (!sourceModuleId) return;
+
+        const sourceIndexInProgram = newModuleIds.findIndex(id => id === sourceModuleId);
+        
+        const destinationCategoryModules = orderedGroupedModules[destination.droppableId]?.modules;
+        
+        let destinationIndexInProgram;
+        if (destination.index === 0) {
+            // Dropped at the beginning of a category
+            const firstModuleId = destinationCategoryModules[0]?.id;
+            destinationIndexInProgram = newModuleIds.findIndex(id => id === firstModuleId);
+        } else {
+            // Dropped after another module in the category
+            const prevModuleId = destinationCategoryModules[destination.index - 1]?.id;
+            destinationIndexInProgram = newModuleIds.findIndex(id => id === prevModuleId) + 1;
+        }
+
+        const [removed] = newModuleIds.splice(sourceIndexInProgram, 1);
+        newModuleIds.splice(destinationIndexInProgram, 0, removed);
+        
+        onUpdateProgram(program.id, { moduleIds: newModuleIds });
+    }
+  };
     
   return (
     <div className="bg-card rounded-lg shadow-md h-full flex flex-col border border-border" onDragEnd={handleDragEndLocal}>
@@ -377,6 +408,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
             onUpdateProgram={onUpdateProgram}
         />
         <div className="flex-grow overflow-auto relative">
+         <DragDropContext onDragEnd={onDragEnd}>
             <table className="w-full border-collapse text-xs">
                 <thead>
                     <tr className="sticky top-0 z-10 bg-card/75 backdrop-blur-sm">
@@ -392,93 +424,116 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                         })}
                     </tr>
                 </thead>
-                <tbody className="bg-card">
-                    {orderedGroupedModules.map(({ category, modules: categoryModules }) => (
-                        <React.Fragment key={category}>
-                             <tr className="bg-muted/20">
-                                <td colSpan={1 + program.semesters} className="p-1.5 font-bold text-foreground text-left sticky left-0 bg-muted/20 flex items-center justify-between">
-                                    <span>{category}</span>
-                                    <button onClick={() => onToggleCategoryLock(studiengruppe.id, category)} className="p-1 rounded-full hover:bg-accent text-muted-foreground hover:text-accent-foreground" title={activeBulkLocks?.categories.has(category) ? "Bereich entsperren" : "Bereich sperren"}>
-                                       {activeBulkLocks?.categories.has(category) ? <LockIcon /> : <UnlockIcon />}
-                                    </button>
-                                </td>
-                            </tr>
-                            {categoryModules.map(module => (
-                                <tr key={module.id} className="h-10">
-                                    <td className="sticky left-0 p-1 font-medium bg-card border-t border-r border-border w-64 align-middle text-foreground">
-                                        <div className="flex items-center group">
-                                            <span className="text-muted-foreground font-code w-10 flex-shrink-0">{module.id}</span>
-                                            <span className="pl-2 flex-grow">{module.name}</span>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive/70 hover:text-destructive hover:bg-destructive/10"
-                                                onClick={() => handleRemoveModuleFromProgram(module.id)}
-                                                title={`Modul "${module.name}" aus Studiengang entfernen`}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                    {semesterData.map((semester, index) => {
-                                        const plannedInstances = ((studiengruppe.plan.semesters[semester.id] || []) as string[]).filter(
-                                            (id) => module.type === 'Pool' ? id.startsWith(`${module.id}-`) : id === module.id
-                                        );
-                                        
-                                        const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, index);
-                                        
-                                        const participantInfo = absoluteSemester && isHeatmapVisible
-                                            ? participantMap.get(absoluteSemester.id)?.get(module.id) || []
-                                            : [];
-                                        const participantCount = participantInfo.reduce((sum, info) => sum + info.studentCount, 0);
-                                        const heatmapColor = isHeatmapVisible ? getHeatmapColor(participantCount) : undefined;
-                                        const tooltipText = isHeatmapVisible && participantInfo.length > 0
-                                            ? `Gesamt: ${participantCount} Studierende\n${participantInfo.map(info => `- ${info.name}: ${info.studentCount}`).join('\n')}`
-                                            : undefined;
-
-                                        return (
-                                            <GridCell 
-                                                key={`${module.id}-${semester.id}`} 
-                                                onDrop={(e) => curriedOnDrop(semester.id, module.id, e)} 
-                                                onDragOver={() => {}}
-                                                onDragLeave={() => {}}
-                                                isHighlighted={semester.isPraktikum}
-                                                heatmapColor={heatmapColor}
-                                                tooltip={tooltipText}
-                                                validationStatus={getValidationStatusForDrop(semester.id)}
-                                            >
-                                                {plannedInstances.map(instanceId => {
-                                                    const instanceModule = getModuleById(instanceId);
-                                                    if (!instanceModule) return null;
-                                                    const errors = placementErrors.get(instanceId) || [];
-                                                    const cardContainerClass = plannedInstances.length > 1
-                                                        ? "w-8 h-8 flex-shrink-0"
-                                                        : "w-full h-full";
-
-                                                    return (
-                                                        <div key={instanceId} className={cardContainerClass}>
-                                                            <ModuleCard
-                                                                module={instanceModule}
-                                                                instanceId={instanceId}
-                                                                onDragStart={handleDragStartLocal}
-                                                                isDraggable={true}
-                                                                hasError={errors.length > 0}
-                                                                errorTooltip={errors.join('\n')}
-                                                                isLocked={finalLockedInstances.has(instanceId)}
-                                                                onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
-                                                            />
+                <Droppable droppableId="categories" type="CATEGORY">
+                    {(provided) => (
+                        <tbody ref={provided.innerRef} {...provided.droppableProps} className="bg-card">
+                            {orderedGroupedModules.map(({ category, modules: categoryModules }, index) => (
+                                <Draggable key={category} draggableId={category} index={index}>
+                                {(provided, snapshot) => (
+                                <React.Fragment>
+                                    <tr ref={provided.innerRef} {...provided.draggableProps} className={`${snapshot.isDragging ? 'bg-accent/30' : 'bg-muted/20'}`}>
+                                        <td colSpan={1 + program.semesters} className="p-1.5 font-bold text-foreground text-left sticky left-0 z-10 flex items-center justify-between" style={provided.draggableProps.style}>
+                                            <div className="flex items-center">
+                                                <span {...provided.dragHandleProps} className="cursor-grab p-1"><GripVertical size={14}/></span>
+                                                <span>{category}</span>
+                                            </div>
+                                            <button onClick={() => onToggleCategoryLock(studiengruppe.id, category)} className="p-1 rounded-full hover:bg-accent text-muted-foreground hover:text-accent-foreground" title={activeBulkLocks?.categories.has(category) ? "Bereich entsperren" : "Bereich sperren"}>
+                                               {activeBulkLocks?.categories.has(category) ? <LockIcon /> : <UnlockIcon />}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <Droppable droppableId={String(index)} type="MODULE">
+                                        {(provided) => (
+                                            <React.Fragment>
+                                            {categoryModules.map((module, moduleIndex) => (
+                                            <Draggable key={module.id} draggableId={module.id} index={moduleIndex}>
+                                                {(provided, snapshot) => (
+                                                <tr ref={provided.innerRef} {...provided.draggableProps} className={`${snapshot.isDragging ? 'bg-accent/20' : ''}`}>
+                                                    <td className="sticky left-0 p-1 font-medium bg-card border-t border-r border-border w-64 align-middle text-foreground" style={provided.draggableProps.style}>
+                                                        <div className="flex items-center group">
+                                                            <span {...provided.dragHandleProps} className="cursor-grab p-1 text-muted-foreground"><GripVertical size={14}/></span>
+                                                            <span className="text-muted-foreground font-code w-10 flex-shrink-0">{module.id}</span>
+                                                            <span className="pl-2 flex-grow">{module.name}</span>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+                                                                onClick={() => handleRemoveModuleFromProgram(module.id)}
+                                                                title={`Modul "${module.name}" aus Studiengang entfernen`}
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
                                                         </div>
-                                                    );
-                                                })}
-                                            </GridCell>
-                                        )
-                                    })}
-                                </tr>
+                                                    </td>
+                                                    {semesterData.map((semester, index) => {
+                                                        const plannedInstances = ((studiengruppe.plan.semesters[semester.id] || []) as string[]).filter(
+                                                            (id) => module.type === 'Pool' ? id.startsWith(`${module.id}-`) : id === module.id
+                                                        );
+                                                        
+                                                        const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, index);
+                                                        
+                                                        const participantInfo = absoluteSemester && isHeatmapVisible
+                                                            ? participantMap.get(absoluteSemester.id)?.get(module.id) || []
+                                                            : [];
+                                                        const participantCount = participantInfo.reduce((sum, info) => sum + info.studentCount, 0);
+                                                        const heatmapColor = isHeatmapVisible ? getHeatmapColor(participantCount) : undefined;
+                                                        const tooltipText = isHeatmapVisible && participantInfo.length > 0
+                                                            ? `Gesamt: ${participantCount} Studierende\n${participantInfo.map(info => `- ${info.name}: ${info.studentCount}`).join('\n')}`
+                                                            : undefined;
+
+                                                        return (
+                                                            <GridCell 
+                                                                key={`${module.id}-${semester.id}`} 
+                                                                onDrop={(e) => curriedOnDrop(semester.id, module.id, e)} 
+                                                                onDragOver={() => {}}
+                                                                onDragLeave={() => {}}
+                                                                isHighlighted={semester.isPraktikum}
+                                                                heatmapColor={heatmapColor}
+                                                                tooltip={tooltipText}
+                                                                validationStatus={getValidationStatusForDrop(semester.id)}
+                                                            >
+                                                                {plannedInstances.map(instanceId => {
+                                                                    const instanceModule = getModuleById(instanceId);
+                                                                    if (!instanceModule) return null;
+                                                                    const errors = placementErrors.get(instanceId) || [];
+                                                                    const cardContainerClass = plannedInstances.length > 1
+                                                                        ? "w-8 h-8 flex-shrink-0"
+                                                                        : "w-full h-full";
+
+                                                                    return (
+                                                                        <div key={instanceId} className={cardContainerClass}>
+                                                                            <ModuleCard
+                                                                                module={instanceModule}
+                                                                                instanceId={instanceId}
+                                                                                onDragStart={handleDragStartLocal}
+                                                                                isDraggable={true}
+                                                                                hasError={errors.length > 0}
+                                                                                errorTooltip={errors.join('\n')}
+                                                                                isLocked={finalLockedInstances.has(instanceId)}
+                                                                                onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
+                                                                            />
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </GridCell>
+                                                        )
+                                                    })}
+                                                </tr>
+                                                )}
+                                                </Draggable>
+                                            ))}
+                                            {provided.placeholder}
+                                            </React.Fragment>
+                                        )}
+                                    </Droppable>
+                                </React.Fragment>
+                                )}
+                                </Draggable>
                             ))}
-                        </React.Fragment>
-                        )
+                            {provided.placeholder}
+                        </tbody>
                     )}
-                </tbody>
+                </Droppable>
                  <tfoot className="sticky bottom-0 z-10 bg-card/95 backdrop-blur-sm font-bold">
                     <tr>
                         <td colSpan={1} className="sticky left-0 bg-card/95 p-1 text-left text-foreground border-t-2 border-r border-border">CP</td>
@@ -509,6 +564,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                     </tr>
                 </tfoot>
             </table>
+        </DragDropContext>
         </div>
     </div>
   );

@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, ChevronRight, Copy, PlusCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, PlusCircle, UserPlus, GripVertical } from 'lucide-react';
 import { ABSOLUTE_SEMESTERS } from '@/constants';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
@@ -42,9 +42,11 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
 }) => {
     
     const [isDuplicateDialogOpen, setDuplicateDialogOpen] = React.useState(false);
+    const [isNewDialogOpen, setNewDialogOpen] = React.useState(false);
     const [isAddModuleOpen, setAddModuleOpen] = React.useState(false);
-    const [newShortName, setNewShortName] = React.useState(studiengruppe.shortName + "-Kopie");
-    const [newStartSemesterId, setNewStartSemesterId] = React.useState(studiengruppe.startSemester.id);
+
+    const [newShortName, setNewShortName] = React.useState("");
+    const [newStartSemesterId, setNewStartSemesterId] = React.useState(ABSOLUTE_SEMESTERS[0].id);
     const [error, setError] = React.useState('');
     
     const programGroups = allStudiengruppen.filter(sg => sg.programId === studiengruppe.programId);
@@ -65,11 +67,52 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         }
     };
 
+    const handleNewSubmit = () => {
+        setError('');
+        const newId = `${program.id}-${newShortName}`;
+        const newStartSemester = ABSOLUTE_SEMESTERS.find(s => s.id === newStartSemesterId);
+
+        if (!newShortName) {
+            setError("Bitte ein Kürzel für die neue Gruppe angeben.");
+            return;
+        }
+        
+        if (!newStartSemester) {
+            setError("Ungültiges Startsemester gewählt.");
+            return;
+        }
+
+        const newGroup: Studiengruppe = {
+            id: newId,
+            name: `${program.name.replace("B.A. ", "")} ${newShortName}`,
+            shortName: newShortName,
+            programId: program.id,
+            startSemester: newStartSemester,
+            studentCount: program.defaultStudents,
+            type: 'klassisch',
+            plan: program.templatePlan || { semesters: {} },
+            userLockedModules: []
+        };
+        
+        const success = onAddStudiengruppe(newGroup);
+        if (success) {
+            setNewDialogOpen(false);
+            setNewShortName("");
+        } else {
+            setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
+        }
+    }
+
     const handleDuplicateSubmit = () => {
         setError('');
         const newId = `${studiengruppe.programId}-${newShortName}`;
         const newStartSemester = ABSOLUTE_SEMESTERS.find(s => s.id === newStartSemesterId);
         
+        if (!newShortName) {
+            setError("Bitte ein Kürzel für die neue Gruppe angeben.");
+            return;
+        }
+
         if (!newStartSemester) {
             setError("Ungültiges Startsemester gewählt.");
             return;
@@ -87,6 +130,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         const success = onAddStudiengruppe(newGroup);
         if (success) {
             setDuplicateDialogOpen(false);
+            setNewShortName("");
         } else {
             setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
         }
@@ -125,24 +169,24 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             </div>
 
             <div className="flex items-center gap-4">
-                 <Dialog open={isDuplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+                 <Dialog open={isNewDialogOpen} onOpenChange={setNewDialogOpen}>
                     <DialogTrigger asChild>
                          <Button variant="outline">
-                            <Copy className="mr-2 h-4 w-4" />
-                            Gruppe duplizieren
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Neue Gruppe
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Studiengruppe duplizieren</DialogTitle>
+                            <DialogTitle>Neue Studiengruppe erstellen</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="shortName" className="text-right">Kürzel</Label>
-                                <Input id="shortName" value={newShortName} onChange={e => setNewShortName(e.target.value)} className="col-span-3" />
+                                <Label htmlFor="new-shortName" className="text-right">Kürzel</Label>
+                                <Input id="new-shortName" value={newShortName} onChange={e => setNewShortName(e.target.value)} className="col-span-3" placeholder="z.B. 35k"/>
                             </div>
                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="startSemester" className="text-right">Startsemester</Label>
+                                <Label htmlFor="new-startSemester" className="text-right">Startsemester</Label>
                                 <Select value={newStartSemesterId} onValueChange={setNewStartSemesterId}>
                                     <SelectTrigger className="col-span-3">
                                         <SelectValue />
@@ -155,7 +199,42 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                             {error && <p className="text-destructive text-sm col-span-4 text-center">{error}</p>}
                         </div>
                         <DialogFooter>
-                            <Button onClick={handleDuplicateSubmit}>Neue Gruppe erstellen</Button>
+                            <Button onClick={handleNewSubmit}>Neue Gruppe erstellen</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog open={isDuplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+                    <DialogTrigger asChild>
+                         <Button variant="outline">
+                            <Copy className="mr-2 h-4 w-4" />
+                            Gruppe duplizieren
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Studiengruppe duplizieren</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="dup-shortName" className="text-right">Neues Kürzel</Label>
+                                <Input id="dup-shortName" value={newShortName} onChange={e => setNewShortName(e.target.value)} className="col-span-3" placeholder={`${studiengruppe.shortName}-Kopie`} />
+                            </div>
+                             <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="dup-startSemester" className="text-right">Startsemester</Label>
+                                <Select value={newStartSemesterId} onValueChange={setNewStartSemesterId}>
+                                    <SelectTrigger className="col-span-3">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {ABSOLUTE_SEMESTERS.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {error && <p className="text-destructive text-sm col-span-4 text-center">{error}</p>}
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={handleDuplicateSubmit}>Gruppe erstellen</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -169,9 +248,10 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                     </PopoverTrigger>
                     <PopoverContent className="w-96">
                         <h4 className="font-medium text-lg mb-2">Verfügbare Module</h4>
+                        <p className="text-sm text-muted-foreground mb-4">Fügen Sie dem Studiengang '{program.id}' Module hinzu.</p>
                         <ScrollArea className="h-72">
                             <div className="p-1">
-                                {availableModules.map(module => (
+                                {availableModules.length > 0 ? availableModules.map(module => (
                                     <div key={module.id} className="flex items-center justify-between p-2 hover:bg-muted rounded-md">
                                         <div>
                                             <p className="font-semibold">{module.name}</p>
@@ -179,7 +259,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                                         </div>
                                         <Button size="sm" onClick={() => handleAddModuleToProgram(module.id)}>Hinzufügen</Button>
                                     </div>
-                                ))}
+                                )) : <p className="text-sm text-muted-foreground text-center py-4">Alle Module sind bereits zugeordnet.</p>}
                             </div>
                         </ScrollArea>
                     </PopoverContent>
@@ -253,6 +333,16 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                             {ABSOLUTE_SEMESTERS.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
+                </div>
+                 <div className="flex items-center gap-2">
+                    <Label htmlFor="semesters-count">Semester:</Label>
+                    <Input 
+                        id="semesters-count"
+                        type="number" 
+                        value={program.semesters}
+                        onChange={(e) => onUpdateProgram(program.id, {semesters: parseInt(e.target.value) || 0})}
+                        className="w-16"
+                    />
                 </div>
                  <div className="flex items-center gap-2">
                     <Label htmlFor="student-count">Stud.:</Label>

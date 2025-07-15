@@ -29,7 +29,6 @@ interface PlannerBoardProps {
   onUpdateModule: (moduleId: string, field: keyof Module, value: any) => void;
   onAddModule: (module: Module, programIds: string[]) => void;
   onDeleteModule: (moduleId: string) => void;
-  onUpdateModulePrograms: (moduleId: string, programId: string, isAssigned: boolean) => void;
   isHeatmapVisible: boolean;
   onToggleHeatmap: () => void;
   onToggleModuleLock: (studiengruppeId: string, instanceId: string) => void;
@@ -64,7 +63,6 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     onUpdateModule,
     onAddModule,
     onDeleteModule,
-    onUpdateModulePrograms,
     isHeatmapVisible,
     onToggleHeatmap,
     onToggleModuleLock,
@@ -98,7 +96,14 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
               onUpdateModule={onUpdateModule}
               onAddModule={onAddModule}
               onDeleteModule={onDeleteModule}
-              onUpdateModulePrograms={onUpdateModulePrograms}
+              onUpdateModulePrograms={(moduleId, programId, isAssigned) => {
+                const program = programs.find(p => p.id === programId);
+                if (!program) return;
+                const newModuleIds = isAssigned
+                    ? [...program.moduleIds, moduleId]
+                    : program.moduleIds.filter(id => id !== moduleId);
+                onUpdateProgram(programId, { moduleIds: newModuleIds });
+              }}
               categories={categories}
               onAddCategory={onAddCategory}
               onUpdateCategory={onUpdateCategory}
