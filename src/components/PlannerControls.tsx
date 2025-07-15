@@ -10,31 +10,39 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 import { ABSOLUTE_SEMESTERS } from '@/constants';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 
 interface PlannerControlsProps {
     studiengruppe: Studiengruppe;
+    program: Program;
     onUpdateStudiengruppe: (id: string, updates: Partial<Studiengruppe>) => void;
     allStudiengruppen: Studiengruppe[];
     onSelectGroup: (id: string) => void;
     isHeatmapVisible: boolean;
     onToggleHeatmap: () => void;
     totalCp: number;
-    program: Program;
     selectedSemester: AbsoluteSemester;
     onTogglePastLock: () => void;
     onToggleCategoryLock: (category: string) => void;
     activeBulkLocks: { past: boolean; categories: Set<string> } | undefined;
     finalLockedInstances: Set<string>;
     modules: Module[];
+    onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
 }
 
 export const PlannerControls: React.FC<PlannerControlsProps> = ({
-    studiengruppe, onUpdateStudiengruppe, allStudiengruppen, onSelectGroup,
-    isHeatmapVisible, onToggleHeatmap, totalCp, program, selectedSemester,
-    onTogglePastLock, onToggleCategoryLock, activeBulkLocks, finalLockedInstances, modules
+    studiengruppe, program, onUpdateStudiengruppe, allStudiengruppen, onSelectGroup,
+    isHeatmapVisible, onToggleHeatmap, selectedSemester,
+    onTogglePastLock, onToggleCategoryLock, activeBulkLocks, modules,
+    onAddStudiengruppe
 }) => {
+    
+    const [isDuplicateDialogOpen, setDuplicateDialogOpen] = React.useState(false);
+    const [newShortName, setNewShortName] = React.useState(studiengruppe.shortName + "-Kopie");
+    const [newStartSemesterId, setNewStartSemesterId] = React.useState(studiengruppe.startSemester.id);
+    const [error, setError] = React.useState('');
     
     const programGroups = allStudiengruppen.filter(sg => sg.programId === studiengruppe.programId);
     const currentIndex = programGroups.findIndex(g => g.id === studiengruppe.id);
@@ -53,9 +61,35 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         }
     };
 
+    const handleDuplicateSubmit = () => {
+        setError('');
+        const newId = `${studiengruppe.programId}-${newShortName}`;
+        const newStartSemester = ABSOLUTE_SEMESTERS.find(s => s.id === newStartSemesterId);
+        
+        if (!newStartSemester) {
+            setError("Ungültiges Startsemester gewählt.");
+            return;
+        }
+
+        const newGroup: Studiengruppe = {
+            ...studiengruppe,
+            id: newId,
+            name: `${studiengruppe.name.replace(studiengruppe.shortName, '')} ${newShortName}`,
+            shortName: newShortName,
+            startSemester: newStartSemester,
+            userLockedModules: [] // Start with no locks
+        };
+
+        const success = onAddStudiengruppe(newGroup);
+        if (success) {
+            setDuplicateDialogOpen(false);
+        } else {
+            setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
+        }
+    };
 
     return (
-        <div className="flex-shrink-0 bg-card p-3 rounded-lg border border-border flex items-center justify-between flex-wrap gap-4">
+        <div className="flex-shrink-0 bg-card p-3 rounded-t-lg border-b border-border flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
                  <Button onClick={handlePrevious} variant="ghost" size="icon" disabled={currentIndex <= 0} aria-label="Vorherige Gruppe">
                     <ChevronLeft />
@@ -81,6 +115,41 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             </div>
 
             <div className="flex items-center gap-4">
+                 <Dialog open={isDuplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+                    <DialogTrigger asChild>
+                         <Button variant="outline">
+                            <Copy className="mr-2 h-4 w-4" />
+                            Gruppe duplizieren
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Studiengruppe duplizieren</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="shortName" className="text-right">Kürzel</Label>
+                                <Input id="shortName" value={newShortName} onChange={e => setNewShortName(e.target.value)} className="col-span-3" />
+                            </div>
+                             <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="startSemester" className="text-right">Startsemester</Label>
+                                <Select value={newStartSemesterId} onValueChange={setNewStartSemesterId}>
+                                    <SelectTrigger className="col-span-3">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {ABSOLUTE_SEMESTERS.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {error && <p className="text-destructive text-sm col-span-4 text-center">{error}</p>}
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={handleDuplicateSubmit}>Neue Gruppe erstellen</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
                 <div className="flex items-center space-x-2">
                     <Switch
                         id="heatmap-toggle"

@@ -172,7 +172,6 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
             finalLockedInstances={finalLockedModulesMap.get(activeGruppe.id) || new Set()}
             onAddStudiengruppe={onAddStudiengruppe}
             onUpdateProgram={onUpdateProgram}
-            onUpdateModulePrograms={onUpdateModulePrograms}
         />
     </div>
   );

@@ -9,12 +9,12 @@ import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, getAbsoluteSemesterFor, ABSO
 import { LockIcon } from './icons/LockIcon';
 import { UnlockIcon } from './icons/UnlockIcon';
 import { Button } from './ui/button';
-import { Copy, Edit } from 'lucide-react';
+import { Copy, PlusCircle, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from './ui/dialog';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { EditTemplateSheet } from './EditTemplateSheet';
+import { PlannerControls } from './PlannerControls';
 
 
 type ValidationStatus = 'valid' | 'invalid' | 'neutral';
@@ -39,7 +39,6 @@ interface ProgramPlannerGridProps {
     finalLockedInstances: Set<string>;
     onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
     onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
-    onUpdateModulePrograms: (moduleId: string, programIds: string[]) => void;
 }
 
 const getHeatmapColor = (count: number): string | undefined => {
@@ -83,7 +82,6 @@ const GridCell: React.FC<GridCellProps> = ({ onDrop, onDragOver, onDragLeave, ch
 
     const handleDragLeave = () => {
         setIsOver(false);
-        onDragLeave();
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -91,7 +89,7 @@ const GridCell: React.FC<GridCellProps> = ({ onDrop, onDragOver, onDragLeave, ch
         setIsOver(false);
     };
     
-    const baseClasses = 'p-1 border-t border-r border-border transition-colors duration-200 align-middle';
+    const baseClasses = 'p-1 border-t border-r border-border transition-colors duration-200 align-middle h-10';
     let stateClass = '';
     
     if (isOver) {
@@ -220,11 +218,9 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     activeBulkLocks,
     finalLockedInstances,
     onAddStudiengruppe,
-    onUpdateProgram,
-    onUpdateModulePrograms
+    onUpdateProgram
 }) => {
   const [draggedItem, setDraggedItem] = useState<{ moduleId: string, instanceId: string } | null>(null);
-  const [isTemplateSheetOpen, setIsTemplateSheetOpen] = useState(false);
 
   const orderedGroupedModules = useMemo(() => {
     const categoryMap = new Map<string, Module[]>();
@@ -254,7 +250,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     });
 
     return ordered;
-}, [modules, program, getModuleById]);
+}, [modules, program]);
 
   const validateModulePlacement = useCallback((moduleId: string, instanceId: string, semesterId: string, plan: Studiengruppe['plan']): string[] => {
       const module = getModuleById(moduleId);
@@ -413,85 +409,26 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
   const curriedOnDrop = (semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => {
       onDrop(studiengruppe.id, semesterId, targetModuleId, e);
   }
-
-  const currentIndex = useMemo(() => allStudiengruppen.findIndex(g => g.id === studiengruppe.id), [allStudiengruppen, studiengruppe.id]);
-
-    const handlePrevious = () => {
-        if (currentIndex > 0) {
-            onSelectGroup(allStudiengruppen[currentIndex - 1].id);
-        }
-    };
-
-    const handleNext = () => {
-        if (currentIndex < allStudiengruppen.length - 1) {
-            onSelectGroup(allStudiengruppen[currentIndex + 1].id);
-        }
-    };
-
-    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        onSelectGroup(e.target.value);
-    };
     
-    const isPastLocked = activeBulkLocks?.past || false;
-
   return (
     <div className="bg-card rounded-lg shadow-md h-full flex flex-col border border-border" onDragEnd={handleDragEndLocal}>
-        <div className="p-3 border-b-2 border-border flex flex-col gap-3">
-             <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2 flex-grow min-w-0">
-                    <button onClick={handlePrevious} disabled={currentIndex <= 0} className="p-2 rounded-md bg-muted hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors" aria-label="Vorherige Studiengruppe"><svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd"></path></svg></button>
-                    <select value={studiengruppe.id} onChange={handleSelectChange} className="flex-grow px-3 py-2 bg-input border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring text-foreground sm:text-sm min-w-0" aria-label="Studiengruppe auswählen">
-                        {allStudiengruppen.map(g => <option key={g.id} value={g.id}>{g.name} ({g.shortName})</option>)}
-                    </select>
-                    <button onClick={handleNext} disabled={currentIndex >= allStudiengruppen.length - 1} className="p-2 rounded-md bg-muted hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors" aria-label="Nächste Studiengruppe"><svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path></svg></button>
-                </div>
-                 <div className="flex items-center gap-2">
-                    <DuplicateGroupDialog studiengruppe={studiengruppe} onAddStudiengruppe={onAddStudiengruppe} />
-                    <Button variant="outline" size="sm" onClick={() => setIsTemplateSheetOpen(true)}>
-                        <Edit className="mr-2" />
-                        Vorlage bearbeiten
-                    </Button>
-                     <EditTemplateSheet 
-                        isOpen={isTemplateSheetOpen}
-                        onOpenChange={setIsTemplateSheetOpen}
-                        program={program}
-                        allModules={modules}
-                        onUpdateProgram={onUpdateProgram}
-                        onUpdateModulePrograms={onUpdateModulePrograms}
-                        getModuleById={getModuleById}
-                    />
-                </div>
-             </div>
-             <div className="flex items-center justify-between gap-4 text-sm">
-                <span className="font-medium text-muted-foreground truncate" title={program.name}>{program.name}</span>
-                <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                        <label htmlFor={`heatmap-toggle-${studiengruppe.id}`} className="text-sm font-medium text-muted-foreground cursor-pointer">Heatmap</label>
-                        <button id={`heatmap-toggle-${studiengruppe.id}`} onClick={onToggleHeatmap} className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-ring ${isHeatmapVisible ? 'bg-primary' : 'bg-input'}`} aria-pressed={isHeatmapVisible}>
-                            <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isHeatmapVisible ? 'translate-x-6' : 'translate-x-1'}`}/>
-                        </button>
-                    </div>
-                     <div className="flex items-center space-x-2">
-                        <label htmlFor={`past-lock-toggle-${studiengruppe.id}`} className="text-sm font-medium text-muted-foreground cursor-pointer">Vergangene sperren</label>
-                        <button onClick={() => onTogglePastLock(studiengruppe.id)} id={`past-lock-toggle-${studiengruppe.id}`} className="p-1.5 rounded-md bg-muted hover:bg-accent text-foreground hover:text-accent-foreground transition-colors" aria-label="Vergangene und aktuelle Semester sperren/entsperren">
-                           {isPastLocked ? <LockIcon className="w-4 h-4" /> : <UnlockIcon className="w-4 h-4" />}
-                        </button>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                        <label htmlFor={`start-sem-${studiengruppe.id}`} className="text-muted-foreground">Start:</label>
-                        <select id={`start-sem-${studiengruppe.id}`} value={studiengruppe.startSemester.id} onChange={(e) => { const newSemester = ABSOLUTE_SEMESTERS.find(s => s.id === e.target.value); if (newSemester) { onUpdateStudiengruppe(studiengruppe.id, { startSemester: newSemester }); } }} className="px-2 py-1 bg-input border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring text-foreground text-xs">
-                            {ABSOLUTE_SEMESTERS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                        </select>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                        <label htmlFor={`stud-count-${studiengruppe.id}`} className="text-muted-foreground">Stud.:</label>
-                        <input id={`stud-count-${studiengruppe.id}`} type="number" value={studiengruppe.studentCount} onChange={(e) => onUpdateStudiengruppe(studiengruppe.id, { studentCount: parseInt(e.target.value, 10) || 0 })} className="w-20 px-2 py-1 bg-input border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring text-foreground text-xs" />
-                    </div>
-                </div>
-            </div>
-        </div>
+       <PlannerControls 
+            studiengruppe={studiengruppe}
+            program={program}
+            onUpdateStudiengruppe={onUpdateStudiengruppe}
+            allStudiengruppen={allStudiengruppen}
+            onSelectGroup={onSelectGroup}
+            isHeatmapVisible={isHeatmapVisible}
+            onToggleHeatmap={onToggleHeatmap}
+            totalCp={0}
+            selectedSemester={selectedSemester}
+            onTogglePastLock={() => onTogglePastLock(studiengruppe.id)}
+            onToggleCategoryLock={(cat) => onToggleCategoryLock(studiengruppe.id, cat)}
+            activeBulkLocks={activeBulkLocks}
+            finalLockedInstances={finalLockedInstances}
+            modules={modules}
+            onAddStudiengruppe={onAddStudiengruppe}
+        />
         <div className="flex-grow overflow-auto relative">
             <table className="w-full border-collapse text-xs">
                 <thead>
@@ -520,8 +457,8 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                 </td>
                             </tr>
                             {categoryModules.map(module => (
-                                <tr key={module.id} className="hover:bg-muted/60 h-10">
-                                    <td className="sticky left-0 p-1 font-medium bg-card hover:bg-muted/60 border-t border-r border-border w-64 align-middle text-foreground">
+                                <tr key={module.id} className="h-10">
+                                    <td className="sticky left-0 p-1 font-medium bg-card border-t border-r border-border w-64 align-middle text-foreground">
                                         <div className="flex items-center">
                                             <span className="text-muted-foreground font-code w-10 flex-shrink-0">{module.id}</span>
                                             <span className="pl-2">{module.name}</span>

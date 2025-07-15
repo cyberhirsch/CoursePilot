@@ -258,7 +258,7 @@ export default function CoursePilotClient() {
         return g;
       })
     );
-  }, [getModuleById, studiengruppen, modules]);
+  }, [getModuleById, studiengruppen]);
 
   const handleUpdateStudiengruppe = useCallback((studiengruppeId: string, updates: Partial<Studiengruppe>) => {
     setStudiengruppen(prevGruppen =>
@@ -452,7 +452,7 @@ export default function CoursePilotClient() {
           onUpdateCategory={handleUpdateCategory}
           onDeleteCategory={handleDeleteCategory}
           onAddStudiengruppe={handleAddStudiengruppe}
-          onUpdateProgram={handleUpdateProgram}
+          onUpdateProgram={onUpdateProgram}
         />
       </main>
     </div>
