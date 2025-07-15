@@ -461,7 +461,7 @@ export default function CoursePilotClient() {
           onUpdateCategory={handleUpdateCategory}
           onDeleteCategory={handleDeleteCategory}
           onAddStudiengruppe={handleAddStudiengruppe}
-          onUpdateProgram={onUpdateProgram}
+          onUpdateProgram={handleUpdateProgram}
         />
       </main>
     </div>
