@@ -8,6 +8,8 @@ import { Button } from './ui/button';
 import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, CATEGORY_ORDER } from '../constants';
 import { ModuleCard } from './ModuleCard';
 import { Trash2 } from 'lucide-react';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 interface EditTemplateSheetProps {
     isOpen: boolean;
@@ -24,6 +26,8 @@ export const EditTemplateSheet: React.FC<EditTemplateSheetProps> = ({
 }) => {
     const [editingProgram, setEditingProgram] = useState<Program>(program);
     const [draggedItem, setDraggedItem] = useState<{ type: 'module' | 'category', id: string, instanceId?: string } | null>(null);
+    const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
+    const [dragOverModuleId, setDragOverModuleId] = useState<string | null>(null);
 
     useEffect(() => {
         setEditingProgram(JSON.parse(JSON.stringify(program)));
@@ -33,6 +37,8 @@ export const EditTemplateSheet: React.FC<EditTemplateSheetProps> = ({
         onUpdateProgram(editingProgram.id, {
             moduleIds: editingProgram.moduleIds,
             templatePlan: editingProgram.templatePlan,
+            semesters: editingProgram.semesters,
+            categoryOrder: editingProgram.categoryOrder,
         });
         onOpenChange(false);
     };
@@ -77,27 +83,13 @@ export const EditTemplateSheet: React.FC<EditTemplateSheetProps> = ({
         
         setEditingProgram(p => ({ ...p, templatePlan: newPlan }));
     };
-
-    const handleAddModuleToProgram = (moduleId: string) => {
-        const newModuleIds = [...editingProgram.moduleIds, moduleId];
-        setEditingProgram(p => ({...p, moduleIds: newModuleIds}));
-    };
     
-    const handleRemoveModuleFromProgram = (moduleId: string) => {
-        const newModuleIds = editingProgram.moduleIds.filter(id => id !== moduleId);
-        const newPlan = JSON.parse(JSON.stringify(editingProgram.templatePlan || { semesters: {} }));
-        Object.keys(newPlan.semesters).forEach(semId => {
-            newPlan.semesters[semId] = newPlan.semesters[semId].filter((id: string) => !id.startsWith(moduleId));
-        });
-        setEditingProgram(p => ({...p, moduleIds: newModuleIds, templatePlan: newPlan }));
-    }
-
     const unassignedModules = useMemo(() => {
         const assignedIds = new Set(editingProgram.moduleIds);
         return allModules
-          .filter(m => program.moduleIds.includes(m.id) && !assignedIds.has(m.id))
+          .filter(m => !assignedIds.has(m.id)) // All modules not in the program
           .sort((a,b)=> a.id.localeCompare(b.id));
-    }, [allModules, program.moduleIds, editingProgram.moduleIds]);
+    }, [allModules, editingProgram.moduleIds]);
     
     const modulesInPlan = useMemo(() => {
         const assignedIds = new Set(editingProgram.moduleIds);
@@ -123,20 +115,116 @@ export const EditTemplateSheet: React.FC<EditTemplateSheetProps> = ({
 
         return Array.from(modulesNotYetInGrid).map(id => getModuleById(id)).filter((m): m is Module => !!m);
 
-    }, [editingProgram.moduleIds, modulesInPlan, getModuleById])
+    }, [editingProgram.moduleIds, modulesInPlan, getModuleById]);
+
+    const orderedGroupedModules = useMemo(() => {
+        const moduleMap = new Map(allModules.map(m => [m.id, m]));
+        
+        const orderedProgramModules = editingProgram.moduleIds
+            .map(id => moduleMap.get(id))
+            .filter((m): m is Module => !!m);
+
+        const categoryMap = new Map<string, Module[]>();
+        orderedProgramModules.forEach(module => {
+            const category = module.category;
+            if (!categoryMap.has(category)) {
+                categoryMap.set(category, []);
+            }
+            categoryMap.get(category)!.push(module);
+        });
+
+        const categoryOrder = editingProgram.categoryOrder || CATEGORY_ORDER;
+        const orderedResult: { category: string; modules: Module[] }[] = [];
+
+        categoryOrder.forEach(catName => {
+            const modulesInCategory = categoryMap.get(catName);
+            if (modulesInCategory) {
+                orderedResult.push({ category: catName, modules: modulesInCategory });
+            }
+        });
+        
+        // Add any uncategorized but assigned modules
+        const remainingCategories = Array.from(categoryMap.keys()).filter(c => !categoryOrder.includes(c));
+        remainingCategories.forEach(catName => {
+            orderedResult.push({ category: catName, modules: categoryMap.get(catName)! });
+        })
+
+
+        return orderedResult;
+    }, [editingProgram, allModules]);
+
+    const handleDragStart = (e: React.DragEvent, type: 'module' | 'category', id: string, instanceId?: string) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', id); // Needed for Firefox
+        setDraggedItem({ type, id, instanceId });
+    };
+
+    const handleDragEnd = () => {
+        setDraggedItem(null);
+        setDragOverCategory(null);
+        setDragOverModuleId(null);
+    }
+    
+    const handleCategoryDrop = useCallback((droppedOnCategory: string) => {
+        if (!editingProgram || !draggedItem || draggedItem.type !== 'category' || draggedItem.id === droppedOnCategory) {
+            setDragOverCategory(null);
+            return;
+        }
+
+        const categoryOrder = [...(editingProgram.categoryOrder || CATEGORY_ORDER)];
+        const draggedIdx = categoryOrder.indexOf(draggedItem.id);
+        const targetIdx = categoryOrder.indexOf(droppedOnCategory);
+        
+        if (draggedIdx === -1 || targetIdx === -1) return;
+        
+        const [removed] = categoryOrder.splice(draggedIdx, 1);
+        categoryOrder.splice(targetIdx, 0, removed);
+        
+        setEditingProgram(p => p ? { ...p, categoryOrder } : null);
+        setDragOverCategory(null);
+    }, [editingProgram, draggedItem]);
+
+    const handleModuleRowDrop = useCallback((droppedOnModuleId: string) => {
+        if (!editingProgram || !draggedItem || draggedItem.type !== 'module' || draggedItem.id === droppedOnModuleId) {
+            setDragOverModuleId(null);
+            return;
+        }
+        
+        const moduleIds = [...editingProgram.moduleIds];
+        const draggedIdx = moduleIds.indexOf(draggedItem.id);
+        const targetIdx = moduleIds.indexOf(droppedOnModuleId);
+        
+        if (draggedIdx === -1 || targetIdx === -1) return;
+
+        const [removed] = moduleIds.splice(draggedIdx, 1);
+        moduleIds.splice(targetIdx, 0, removed);
+        
+        setEditingProgram(p => p ? { ...p, moduleIds } : null);
+        setDragOverModuleId(null);
+    }, [editingProgram, draggedItem]);
 
 
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
-            <SheetContent className="min-w-[90vw] sm:min-w-[90vw] md:min-w-[80vw] lg:min-w-[70vw] flex flex-col">
+            <SheetContent className="min-w-[90vw] sm:min-w-[90vw] md:min-w-[80vw] lg:min-w-[70vw] flex flex-col" onPointerDownOutside={e => e.preventDefault()}>
                 <SheetHeader>
                     <SheetTitle>Vorlage bearbeiten: {program.name}</SheetTitle>
-                    <SheetDescription>
-                        Passen Sie die Modulzuordnungen und den Standard-Verlaufsplan für diesen Studiengang an. Änderungen hier wirken sich als Vorlage auf neu erstellte Studiengruppen aus.
+                    <SheetDescription className="flex items-center gap-6">
+                        Passen Sie die Modulzuordnungen und den Standard-Verlaufsplan für diesen Studiengang an.
+                        <div>
+                            <Label htmlFor="semesters-input">Anzahl Semester</Label>
+                            <Input 
+                                id="semesters-input"
+                                type="number"
+                                value={editingProgram.semesters}
+                                onChange={e => setEditingProgram(p => ({...p, semesters: parseInt(e.target.value) || p.semesters }))}
+                                className="w-20 mt-1"
+                            />
+                        </div>
                     </SheetDescription>
                 </SheetHeader>
                 
-                <div className="flex-grow grid grid-cols-4 gap-4 overflow-hidden">
+                <div className="flex-grow grid grid-cols-4 gap-4 overflow-hidden" onDragEnd={handleDragEnd}>
                     {/* Sidebar */}
                     <div 
                         className="col-span-1 bg-muted/50 rounded-lg p-2 flex flex-col gap-2 overflow-y-auto"
@@ -150,8 +238,7 @@ export const EditTemplateSheet: React.FC<EditTemplateSheetProps> = ({
                                     module={module} 
                                     instanceId={module.id}
                                     isDraggable={true}
-                                    onDragStart={(e, id, instId) => setDraggedItem({type: 'module', id, instanceId: instId})}
-                                    onDragEnd={() => setDraggedItem(null)}
+                                    onDragStart={(e, id, instId) => handleDragStart(e, 'module', id, instId)}
                                 />
                              </div>
                         ))}
@@ -164,53 +251,71 @@ export const EditTemplateSheet: React.FC<EditTemplateSheetProps> = ({
                                 <thead>
                                     <tr className="sticky top-0 z-10 bg-card/75 backdrop-blur-sm">
                                         <th className="sticky left-0 bg-card/75 p-1 text-left font-semibold text-foreground w-64 border-b border-r border-border">Modul</th>
-                                        {RELATIVE_SEMESTERS.slice(0, program.semesters).map(sem => (
+                                        {RELATIVE_SEMESTERS.slice(0, editingProgram.semesters).map(sem => (
                                             <th key={sem.id} className="p-1 text-center font-semibold text-foreground border-b border-r border-border min-w-[70px]">{sem.name}</th>
                                         ))}
                                     </tr>
                                 </thead>
                                  <tbody className="bg-card">
-                                    {editingProgram.moduleIds.map(moduleId => {
-                                        const module = getModuleById(moduleId);
-                                        if(!module) return null;
-                                        
-                                        const plannedInstances = modulesInPlan.get(moduleId) || [];
-                                        if(plannedInstances.length === 0) return null; // Hide if not in plan
-
-                                        return (
-                                            <tr key={moduleId} className="h-12">
-                                                <td className="sticky left-0 p-1 font-medium bg-card border-t border-r border-border w-64">
-                                                     <div className="flex items-center">
-                                                        <span className="text-muted-foreground font-code w-10 flex-shrink-0">{module.id}</span>
-                                                        <span className="pl-2">{module.name}</span>
-                                                    </div>
-                                                </td>
-                                                {RELATIVE_SEMESTERS.slice(0, program.semesters).map(sem => (
-                                                    <td key={sem.id} 
-                                                        className="p-1 border-t border-r border-border align-top"
-                                                        onDragOver={e => e.preventDefault()}
-                                                        onDrop={() => handleModuleDrop({ type: 'semester', semesterId: sem.id })}
-                                                    >
-                                                         <div className="flex flex-col items-center justify-start gap-1 w-full h-full min-h-[40px]">
-                                                         {plannedInstances
-                                                            .filter(instId => (editingProgram.templatePlan?.semesters[sem.id] || []).includes(instId))
-                                                            .map(instanceId => (
-                                                                <div key={instanceId} className="w-full h-10">
-                                                                     <ModuleCard 
-                                                                        module={module} 
-                                                                        instanceId={instanceId}
-                                                                        isDraggable={true}
-                                                                        onDragStart={(e, id, instId) => setDraggedItem({type: 'module', id, instanceId: instId})}
-                                                                        onDragEnd={() => setDraggedItem(null)}
-                                                                    />
-                                                                </div>
-                                                         ))}
-                                                         </div>
-                                                    </td>
-                                                ))}
+                                    {orderedGroupedModules.map(({ category, modules: categoryModules }) => (
+                                         <React.Fragment key={category}>
+                                            <tr 
+                                                draggable 
+                                                onDragStart={(e) => handleDragStart(e, 'category', category)}
+                                                onDragOver={(e) => { e.preventDefault(); if (draggedItem?.type === 'category' && draggedItem.id !== category) { setDragOverCategory(category); }}}
+                                                onDragLeave={() => setDragOverCategory(null)}
+                                                onDrop={() => handleCategoryDrop(category)}
+                                                className={`bg-muted/20 cursor-move transition-all duration-150 ${dragOverCategory === category ? 'border-t-2 border-primary' : ''}`}
+                                            >
+                                                <td colSpan={1 + editingProgram.semesters} className="p-1.5 font-bold text-foreground text-left sticky left-0 bg-muted/20">{category}</td>
                                             </tr>
-                                        )
-                                    })}
+                                            {categoryModules.map(module => {
+                                                const plannedInstances = modulesInPlan.get(module.id) || [];
+                                                return (
+                                                    <tr 
+                                                        key={module.id} 
+                                                        className={`h-12 transition-all duration-150 ${dragOverModuleId === module.id ? 'border-t-2 border-primary' : 'border-t-transparent'}`}
+                                                        onDragOver={(e) => { e.preventDefault(); if (draggedItem?.type === 'module' && !draggedItem.instanceId && draggedItem.id !== module.id) { setDragOverModuleId(module.id); }}}
+                                                        onDragLeave={() => setDragOverModuleId(null)}
+                                                        onDrop={() => handleModuleRowDrop(module.id)}
+                                                    >
+                                                        <td 
+                                                            draggable 
+                                                            onDragStart={(e) => handleDragStart(e, 'module', module.id)}
+                                                            className="sticky left-0 p-1 font-medium bg-card border-t border-r border-border w-64 cursor-grab"
+                                                        >
+                                                            <div className="flex items-center">
+                                                                <span className="text-muted-foreground font-code w-10 flex-shrink-0">{module.id}</span>
+                                                                <span className="pl-2">{module.name}</span>
+                                                            </div>
+                                                        </td>
+                                                        {RELATIVE_SEMESTERS.slice(0, editingProgram.semesters).map(sem => (
+                                                            <td key={sem.id} 
+                                                                className="p-1 border-t border-r border-border align-top"
+                                                                onDragOver={e => e.preventDefault()}
+                                                                onDrop={() => handleModuleDrop({ type: 'semester', semesterId: sem.id })}
+                                                            >
+                                                                <div className="flex flex-col items-center justify-start gap-1 w-full h-full min-h-[40px]">
+                                                                {plannedInstances
+                                                                    .filter(instId => (editingProgram.templatePlan?.semesters[sem.id] || []).includes(instId))
+                                                                    .map(instanceId => (
+                                                                        <div key={instanceId} className="w-full h-10">
+                                                                            <ModuleCard 
+                                                                                module={module} 
+                                                                                instanceId={instanceId}
+                                                                                isDraggable={true}
+                                                                                onDragStart={(e, id, instId) => handleDragStart(e, 'module', id, instId)}
+                                                                            />
+                                                                        </div>
+                                                                ))}
+                                                                </div>
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                )
+                                            })}
+                                        </React.Fragment>
+                                    ))}
                                 </tbody>
                              </table>
                         </div>
