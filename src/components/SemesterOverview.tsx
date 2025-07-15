@@ -27,8 +27,11 @@ export const SemesterOverview: React.FC<SemesterOverviewProps> = ({
     
     const groupsInSemester = React.useMemo(() => {
         return studiengruppen.map(sg => {
+            const program = programs.find(p => p.id === sg.programId);
+            if (!program) return null;
+
             const relativeIndex = getRelativeSemesterIndex(sg.startSemester, selectedSemester);
-            if (relativeIndex < 0 || relativeIndex >= sg.program.semesters) {
+            if (relativeIndex < 0 || relativeIndex >= program.semesters) {
                 return null;
             }
 
@@ -48,7 +51,7 @@ export const SemesterOverview: React.FC<SemesterOverviewProps> = ({
                 totalCP
             };
         }).filter(Boolean) as (Studiengruppe & { relativeIndex: number; modules: Module[]; totalSWS: number; totalCP: number })[];
-    }, [studiengruppen, selectedSemester, getModuleById]);
+    }, [studiengruppen, selectedSemester, getModuleById, programs]);
 
     const totalStudents = groupsInSemester.reduce((sum, g) => sum + g.studentCount, 0);
     const totalSWS = groupsInSemester.reduce((sum, g) => sum + g.totalSWS, 0);
