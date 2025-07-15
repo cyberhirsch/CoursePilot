@@ -269,13 +269,19 @@ export default function CoursePilotClient() {
       prevGruppen.map(g => {
         if (g.id === studiengruppeId) {
           const newPlan = { ...g.plan };
-          const newSemesters: { [key: string]: string[] } = { ...newPlan.semesters };
+          // Deep copy of semesters to avoid mutation issues
+          const newSemesters: { [key: string]: string[] } = JSON.parse(JSON.stringify(newPlan.semesters));
           
+          // Atomically remove the instance from wherever it might be
           Object.keys(newSemesters).forEach(key => {
             newSemesters[key] = newSemesters[key].filter(id => id !== draggedInstanceId);
           });
 
-          newSemesters[semesterId] = [...(newSemesters[semesterId] || []), draggedInstanceId];
+          // Add the instance to the new target semester
+          if (!newSemesters[semesterId]) {
+            newSemesters[semesterId] = [];
+          }
+          newSemesters[semesterId].push(draggedInstanceId);
 
           return { ...g, plan: { ...g.plan, semesters: newSemesters } };
         }
