@@ -51,7 +51,7 @@ export default function CoursePilotClient() {
     if (isMounted) {
         const handler = setTimeout(() => {
             if (fullData.modules.length > 0) {
-                // postData(fullData);
+                postData(fullData);
             }
         }, 1000); 
 
@@ -364,7 +364,7 @@ export default function CoursePilotClient() {
     }
   }, [categories, modules]);
 
-  const handleAddStudiengruppe = useCallback((newStudiengruppe: Studiengruppe) => {
+  const handleAddStudiengruppe = useCallback((newStudiengruppe: Studiengruppe, saveAsTemplate: boolean) => {
     if (studiengruppen.some(sg => sg.id === newStudiengruppe.id)) {
       alert(`Eine Studiengruppe mit der ID "${newStudiengruppe.id}" existiert bereits.`);
       return false;
@@ -372,8 +372,13 @@ export default function CoursePilotClient() {
     
     setStudiengruppen(prev => [...prev, newStudiengruppe]);
     setActiveStudiengruppenIds([newStudiengruppe.id]);
+
+    if (saveAsTemplate) {
+        handleUpdateProgram(newStudiengruppe.programId, { templatePlan: newStudiengruppe.plan });
+    }
+
     return true;
-  }, [studiengruppen]);
+  }, [studiengruppen, handleUpdateProgram]);
 
   const activeStudiengruppen = useMemo(() => {
     return studiengruppen.filter(sg => activeStudiengruppenIds.includes(sg.id));
