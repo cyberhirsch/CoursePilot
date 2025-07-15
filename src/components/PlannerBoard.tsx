@@ -127,6 +127,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
               setSelectedSemester={setSelectedSemester}
               semesters={semesters}
               onSelectGroup={onSelectGroup}
+              modules={modules}
            />
   }
   
@@ -153,6 +154,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
               setSelectedSemester={setSelectedSemester}
               semesters={semesters}
               onSelectGroup={onSelectGroup}
+              modules={modules}
            />
   }
 
