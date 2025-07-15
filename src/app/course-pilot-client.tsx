@@ -24,6 +24,27 @@ async function postData(data: any) {
     });
 }
 
+// Helper to determine the real current semester based on today's date
+const getRealCurrentSemester = (): AbsoluteSemester | undefined => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth(); // 0-11
+
+    // SS: April (3) to September (8) | WS: October (9) to March (2)
+    const isSS = month >= 3 && month <= 8;
+    
+    return ABSOLUTE_SEMESTERS.find(s => {
+        if (isSS) {
+            return s.type === 'SS' && s.year === year;
+        } else {
+            // WS spans two years, e.g., WS 2023/24 starts in Oct 2023
+            const startYear = month >= 9 ? year : year - 1;
+            return s.type === 'WS' && s.year === startYear;
+        }
+    });
+};
+
+
 export default function CoursePilotClient() {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -139,7 +160,10 @@ export default function CoursePilotClient() {
 
   const finalLockedModulesMap = useMemo(() => {
     const map = new Map<string, Set<string>>();
-    const currentAbsoluteIndex = ABSOLUTE_SEMESTERS.findIndex(s => s.id === selectedSemester.id);
+    const realCurrentSemester = getRealCurrentSemester();
+    const realCurrentSemesterIndex = realCurrentSemester 
+        ? ABSOLUTE_SEMESTERS.findIndex(s => s.id === realCurrentSemester.id)
+        : -1;
 
     studiengruppen.forEach(sg => {
         const finalLocks = new Set(sg.userLockedModules || []);
@@ -151,11 +175,11 @@ export default function CoursePilotClient() {
 
             const allInstancesInPlan = Object.values(sg.plan.semesters).flat();
 
-            if (bulkSettings.past && currentAbsoluteIndex !== -1) {
+            if (bulkSettings.past && realCurrentSemesterIndex !== -1) {
                 Object.entries(sg.plan.semesters).forEach(([relativeSemId, instanceIds]) => {
                     const relativeIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === relativeSemId);
                     const absoluteSem = getAbsoluteSemesterFor(sg.startSemester, relativeIndex);
-                    if (absoluteSem && ABSOLUTE_SEMESTERS.findIndex(s => s.id === absoluteSem.id) <= currentAbsoluteIndex) {
+                    if (absoluteSem && ABSOLUTE_SEMESTERS.findIndex(s => s.id === absoluteSem.id) <= realCurrentSemesterIndex) {
                         (instanceIds as string[]).forEach(id => finalLocks.add(id));
                     }
                 });
@@ -174,7 +198,7 @@ export default function CoursePilotClient() {
         map.set(sg.id, finalLocks);
     });
     return map;
-  }, [studiengruppen, activeBulkLocks, selectedSemester, modules, getModuleById]);
+}, [studiengruppen, activeBulkLocks, modules, getModuleById]);
 
 
   const handleDrop = useCallback((studiengruppeId: string, semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => {
@@ -422,7 +446,7 @@ export default function CoursePilotClient() {
           onUpdateStudiengruppe={handleUpdateStudiengruppe}
           modules={modules}
           programs={programs}
-          onUpdateModule={handleUpdateModule}
+          onUpdateModule={onUpdateModule}
           onAddModule={handleAddModule}
           onDeleteModule={handleDeleteModule}
           isHeatmapVisible={isHeatmapVisible}
@@ -434,10 +458,10 @@ export default function CoursePilotClient() {
           finalLockedModulesMap={finalLockedModulesMap}
           categories={categories}
           onAddCategory={handleAddCategory}
-          onUpdateCategory={handleUpdateCategory}
-          onDeleteCategory={handleDeleteCategory}
+          onUpdateCategory={onUpdateCategory}
+          onDeleteCategory={onDeleteCategory}
           onAddStudiengruppe={handleAddStudiengruppe}
-          onUpdateProgram={handleUpdateProgram}
+          onUpdateProgram={onUpdateProgram}
         />
       </main>
     </div>

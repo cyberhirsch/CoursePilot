@@ -362,7 +362,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                                         htmlFor="lock-past"
                                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                     >
-                                        Sperre alle Semester bis {selectedSemester.name}
+                                        Sperre alle vergangenen und aktuellen Semester
                                     </label>
                                 </div>
                                  <div className="pl-6 mt-2 space-y-2">
