@@ -29,7 +29,6 @@ interface PlannerBoardProps {
   onUpdateModule: (moduleId: string, field: keyof Module, value: any) => void;
   onAddModule: (module: Module, programIds: string[]) => void;
   onDeleteModule: (moduleId: string) => void;
-  onUpdateModulePrograms: (moduleId: string, programIds: string[]) => void;
   isHeatmapVisible: boolean;
   onToggleHeatmap: () => void;
   onToggleModuleLock: (studiengruppeId: string, instanceId: string) => void;
@@ -42,6 +41,7 @@ interface PlannerBoardProps {
   onUpdateCategory: (categoryId: string, updates: Partial<Category>) => void;
   onDeleteCategory: (categoryId: string) => void;
   onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
+  onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
 export const PlannerBoard: React.FC<PlannerBoardProps> = ({ 
@@ -63,7 +63,6 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     onUpdateModule,
     onAddModule,
     onDeleteModule,
-    onUpdateModulePrograms,
     isHeatmapVisible,
     onToggleHeatmap,
     onToggleModuleLock,
@@ -76,6 +75,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     onUpdateCategory,
     onDeleteCategory,
     onAddStudiengruppe,
+    onUpdateProgram,
 }) => {
 
   if (mainCategory !== 'semesterplan') {
@@ -96,7 +96,19 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
               onUpdateModule={onUpdateModule}
               onAddModule={onAddModule}
               onDeleteModule={onDeleteModule}
-              onUpdateModulePrograms={onUpdateModulePrograms}
+              onUpdateModulePrograms={(moduleId, programIds) => {
+                  const program = programs.find(p => p.moduleIds.includes(moduleId));
+                  if(program) {
+                      const newPrograms = programs.map(p => {
+                          if (p.id === program.id) {
+                              return { ...p, moduleIds: programIds };
+                          }
+                          return p;
+                      });
+                      // This is a placeholder for a function that updates the programs state
+                      console.log("Updated programs:", newPrograms);
+                  }
+              }}
               categories={categories}
               onAddCategory={onAddCategory}
               onUpdateCategory={onUpdateCategory}
@@ -169,6 +181,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
             activeBulkLocks={activeBulkLocks[activeGruppe.id]}
             finalLockedInstances={finalLockedModulesMap.get(activeGruppe.id) || new Set()}
             onAddStudiengruppe={onAddStudiengruppe}
+            onUpdateProgram={onUpdateProgram}
         />
     </div>
   );

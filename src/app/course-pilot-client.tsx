@@ -312,21 +312,12 @@ export default function CoursePilotClient() {
 
   }, []);
 
-  const handleUpdateModulePrograms = useCallback((moduleId: string, programIds: string[]) => {
-    setPrograms(prevPrograms => 
-      prevPrograms.map(p => {
-        const hasModule = p.moduleIds.includes(moduleId);
-        const shouldHaveModule = programIds.includes(p.id);
+  const handleUpdateProgram = (programId: string, updates: Partial<Program>) => {
+    setPrograms(prevPrograms => prevPrograms.map(p =>
+      p.id === programId ? { ...p, ...updates } : p
+    ));
+  };
 
-        if (hasModule && !shouldHaveModule) {
-          return { ...p, moduleIds: p.moduleIds.filter(id => id !== moduleId) };
-        } else if (!hasModule && shouldHaveModule) {
-          return { ...p, moduleIds: [...p.moduleIds, moduleId] };
-        }
-        return p;
-      })
-    );
-  }, []);
 
   const getProgramById = useCallback((id: string): Program | undefined => {
     return programs.find(p => p.id === id);
@@ -429,10 +420,9 @@ export default function CoursePilotClient() {
           onUpdateModule={handleUpdateModule}
           onAddModule={handleAddModule}
           onDeleteModule={handleDeleteModule}
-          onUpdateModulePrograms={onUpdateModulePrograms}
           isHeatmapVisible={isHeatmapVisible}
           onToggleHeatmap={handleToggleHeatmap}
-          onToggleModuleLock={onToggleModuleLock}
+          onToggleModuleLock={handleToggleModuleLock}
           onTogglePastLock={handleTogglePastLock}
           onToggleCategoryLock={handleToggleCategoryLock}
           activeBulkLocks={activeBulkLocks}
@@ -442,6 +432,7 @@ export default function CoursePilotClient() {
           onUpdateCategory={handleUpdateCategory}
           onDeleteCategory={handleDeleteCategory}
           onAddStudiengruppe={handleAddStudiengruppe}
+          onUpdateProgram={handleUpdateProgram}
         />
       </main>
     </div>
