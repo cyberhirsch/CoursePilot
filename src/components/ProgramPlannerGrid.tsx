@@ -18,6 +18,7 @@ type ValidationStatus = 'valid' | 'invalid' | 'neutral';
 interface ProgramPlannerGridProps {
     studiengruppe: Studiengruppe;
     program: Program;
+    allPrograms: Program[];
     allModules: Module[];
     allStudiengruppen: Studiengruppe[];
     onDrop: (studiengruppeId: string, semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => void;
@@ -33,7 +34,7 @@ interface ProgramPlannerGridProps {
     onToggleCategoryLock: (studiengruppeId: string, category: string) => void;
     activeBulkLocks?: { past: boolean; categories: Set<string> };
     finalLockedInstances: Set<string>;
-    onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
+    onAddStudiengruppe: (newStudiengruppe: Studiengruppe, saveAsTemplate: boolean) => boolean;
     onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
@@ -125,6 +126,7 @@ interface ParticipantInfo {
 export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     studiengruppe,
     program,
+    allPrograms,
     allModules,
     allStudiengruppen,
     onDrop,
@@ -353,7 +355,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
   };
 
   const onDragEnd: OnDragEndResponder = (result) => {
-    const { source, destination, type } = result;
+    const { source, destination, type, draggableId } = result;
 
     if (!destination) return;
     
@@ -366,15 +368,11 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
         return;
     }
 
-    // Reordering modules within or between categories
+    // Reordering modules
     if (type === 'MODULE') {
-        const sourceCategoryName = result.source.droppableId;
-        const destCategoryName = result.destination.droppableId;
         const newModuleIds = Array.from(program.moduleIds);
-
-        const [movedModuleId] = newModuleIds.splice(source.index, 1);
-        newModuleIds.splice(destination.index, 0, movedModuleId);
-        
+        const [movedModule] = newModuleIds.splice(newModuleIds.indexOf(draggableId), 1);
+        newModuleIds.splice(destination.index, 0, movedModule);
         onUpdateProgram(program.id, { moduleIds: newModuleIds });
     }
   };
@@ -384,6 +382,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
        <PlannerControls 
             studiengruppe={studiengruppe}
             program={program}
+            allPrograms={allPrograms}
             onUpdateStudiengruppe={onUpdateStudiengruppe}
             allStudiengruppen={allStudiengruppen}
             onSelectGroup={onSelectGroup}
@@ -402,24 +401,24 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
         <div className="flex-grow overflow-auto relative">
          {isClient ? (
             <DragDropContext onDragEnd={onDragEnd}>
-              <table className="w-full border-collapse text-xs">
-                  <thead>
-                      <tr className="sticky top-0 z-10 bg-card/75 backdrop-blur-sm">
-                          <th className="sticky left-0 bg-card/75 p-1 text-left font-semibold text-foreground w-64 border-b border-r border-border">Modul</th>
-                          {semesterData.map((semester, index) => {
-                              const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, index);
-                              return (
-                                  <th key={semester.id} className={`p-1 text-center font-semibold text-foreground border-b border-r border-border min-w-[70px] ${semester.isPraktikum ? 'bg-teal-900/40' : ''}`}>
-                                      <div>{semester.name}</div>
-                                      <div className="font-normal text-muted-foreground">{absoluteSemester?.name}</div>
-                                  </th>
-                              )
-                          })}
-                      </tr>
-                  </thead>
-                  <Droppable droppableId="program-modules" type="MODULE">
-                    {(provided) => (
-                        <tbody ref={provided.innerRef} {...provided.droppableProps}>
+                <table className="w-full border-collapse text-xs">
+                    <thead>
+                        <tr className="sticky top-0 z-10 bg-card/75 backdrop-blur-sm">
+                            <th className="sticky left-0 bg-card/75 p-1 text-left font-semibold text-foreground w-64 border-b border-r border-border">Modul</th>
+                            {semesterData.map((semester, index) => {
+                                const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, index);
+                                return (
+                                    <th key={semester.id} className={`p-1 text-center font-semibold text-foreground border-b border-r border-border min-w-[70px] ${semester.isPraktikum ? 'bg-teal-900/40' : ''}`}>
+                                        <div>{semester.name}</div>
+                                        <div className="font-normal text-muted-foreground">{absoluteSemester?.name}</div>
+                                    </th>
+                                )
+                            })}
+                        </tr>
+                    </thead>
+                    <Droppable droppableId="module-list" type="MODULE">
+                      {(provided) => (
+                          <tbody ref={provided.innerRef} {...provided.droppableProps}>
                             {orderedGroupedModules.map(({ category, modules: categoryModules }) => (
                                 <React.Fragment key={category}>
                                     <tr className='bg-muted/20'>
@@ -432,10 +431,8 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                             </button>
                                         </td>
                                     </tr>
-                                    {categoryModules.map((module, moduleIndex) => {
-                                      const globalIndex = program.moduleIds.indexOf(module.id);
-                                      return (
-                                        <Draggable key={module.id} draggableId={module.id} index={globalIndex}>
+                                    {categoryModules.map((module, moduleIndex) => (
+                                        <Draggable key={module.id} draggableId={module.id} index={program.moduleIds.indexOf(module.id)}>
                                             {(provided, snapshot) => (
                                                 <tr ref={provided.innerRef} {...provided.draggableProps} className={`${snapshot.isDragging ? 'bg-accent/20' : ''}`}>
                                                     <td className="sticky left-0 p-1 font-medium bg-card border-t border-r border-border w-64 align-middle text-foreground" style={{ ...provided.draggableProps.style }}>
@@ -510,13 +507,13 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                                 </tr>
                                             )}
                                         </Draggable>
-                                    )})}
+                                    ))}
                                 </React.Fragment>
                             ))}
-                          {provided.placeholder}
-                        </tbody>
-                    )}
-                  </Droppable>
+                            {provided.placeholder}
+                          </tbody>
+                      )}
+                    </Droppable>
                    <tfoot className="sticky bottom-0 z-10 bg-card/95 backdrop-blur-sm font-bold">
                       <tr>
                           <td colSpan={1} className="sticky left-0 bg-card/95 p-1 text-left text-foreground border-t-2 border-r border-border">CP</td>

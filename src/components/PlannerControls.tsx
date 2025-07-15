@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import type { Studiengruppe, Program, AbsoluteSemester, Module } from '@/types';
+import type { Studiengruppe, Program, AbsoluteSemester, Module, ProgramPlan } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -18,6 +18,7 @@ import { ScrollArea } from './ui/scroll-area';
 interface PlannerControlsProps {
     studiengruppe: Studiengruppe;
     program: Program;
+    allPrograms: Program[];
     onUpdateStudiengruppe: (id: string, updates: Partial<Studiengruppe>) => void;
     allStudiengruppen: Studiengruppe[];
     onSelectGroup: (id: string) => void;
@@ -30,12 +31,12 @@ interface PlannerControlsProps {
     activeBulkLocks: { past: boolean; categories: Set<string> } | undefined;
     finalLockedInstances: Set<string>;
     allModules: Module[];
-    onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
+    onAddStudiengruppe: (newStudiengruppe: Studiengruppe, saveAsTemplate: boolean) => boolean;
     onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
 export const PlannerControls: React.FC<PlannerControlsProps> = ({
-    studiengruppe, program, onUpdateStudiengruppe, allStudiengruppen, onSelectGroup,
+    studiengruppe, program, allPrograms, onUpdateStudiengruppe, allStudiengruppen, onSelectGroup,
     isHeatmapVisible, onToggleHeatmap, selectedSemester,
     onTogglePastLock, onToggleCategoryLock, activeBulkLocks, allModules,
     onAddStudiengruppe, onUpdateProgram
@@ -44,9 +45,15 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     const [isDuplicateDialogOpen, setDuplicateDialogOpen] = React.useState(false);
     const [isNewDialogOpen, setNewDialogOpen] = React.useState(false);
     const [isAddModuleOpen, setAddModuleOpen] = React.useState(false);
-
+    
+    // State for New/Duplicate Dialog
     const [newShortName, setNewShortName] = React.useState("");
+    const [newGroupName, setNewGroupName] = React.useState("");
+    const [newStudentCount, setNewStudentCount] = React.useState(program.defaultStudents);
     const [newStartSemesterId, setNewStartSemesterId] = React.useState(ABSOLUTE_SEMESTERS[0].id);
+    const [newProgramId, setNewProgramId] = React.useState(program.id);
+    const [saveAsTemplate, setSaveAsTemplate] = React.useState(false);
+
     const [error, setError] = React.useState('');
     
     const programGroups = allStudiengruppen.filter(sg => sg.programId === studiengruppe.programId);
@@ -67,13 +74,29 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         }
     };
 
+    const resetNewDialogState = () => {
+        setNewShortName("");
+        const selectedProgram = allPrograms.find(p => p.id === newProgramId) || program;
+        setNewGroupName(`${selectedProgram.name.replace("B.A. ", "")} `);
+        setNewStudentCount(selectedProgram.defaultStudents);
+        setNewStartSemesterId(ABSOLUTE_SEMESTERS[0].id);
+        setSaveAsTemplate(false);
+        setError('');
+    }
+
     const handleNewSubmit = () => {
         setError('');
-        const newId = `${program.id}-${newShortName}`;
+        const selectedProgram = allPrograms.find(p => p.id === newProgramId);
+        if (!selectedProgram) {
+            setError("Bitte einen gültigen Studiengang auswählen.");
+            return;
+        }
+
+        const newId = `${newProgramId}-${newShortName}`;
         const newStartSemester = ABSOLUTE_SEMESTERS.find(s => s.id === newStartSemesterId);
 
-        if (!newShortName) {
-            setError("Bitte ein Kürzel für die neue Gruppe angeben.");
+        if (!newShortName || !newGroupName) {
+            setError("Bitte Kürzel und Name für die neue Gruppe angeben.");
             return;
         }
         
@@ -84,20 +107,20 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
 
         const newGroup: Studiengruppe = {
             id: newId,
-            name: `${program.name.replace("B.A. ", "")} ${newShortName}`,
+            name: newGroupName,
             shortName: newShortName,
-            programId: program.id,
+            programId: newProgramId,
             startSemester: newStartSemester,
-            studentCount: program.defaultStudents,
+            studentCount: newStudentCount,
             type: 'klassisch',
-            plan: program.templatePlan || { semesters: {} },
+            plan: selectedProgram.templatePlan || { semesters: {} },
             userLockedModules: []
         };
         
-        const success = onAddStudiengruppe(newGroup);
+        const success = onAddStudiengruppe(newGroup, saveAsTemplate);
         if (success) {
             setNewDialogOpen(false);
-            setNewShortName("");
+            resetNewDialogState();
         } else {
             setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
         }
@@ -127,7 +150,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             userLockedModules: [] // Start with no locks
         };
 
-        const success = onAddStudiengruppe(newGroup);
+        const success = onAddStudiengruppe(newGroup, false); // Duplicates are not saved as templates
         if (success) {
             setDuplicateDialogOpen(false);
             setNewShortName("");
@@ -141,6 +164,8 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             moduleIds: [...program.moduleIds, moduleId]
         });
     };
+
+    const selectedProgramForNewDialog = allPrograms.find(p => p.id === newProgramId) || program;
 
     return (
         <div className="flex-shrink-0 bg-card p-3 rounded-t-lg border-b border-border flex items-center justify-between flex-wrap gap-4">
@@ -171,24 +196,45 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             <div className="flex items-center gap-4">
                  <Dialog open={isNewDialogOpen} onOpenChange={setNewDialogOpen}>
                     <DialogTrigger asChild>
-                         <Button variant="outline">
+                         <Button variant="outline" onClick={resetNewDialogState}>
                             <UserPlus className="mr-2 h-4 w-4" />
                             Neue Gruppe
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-[600px]">
                         <DialogHeader>
-                            <DialogTitle>Neue Studiengruppe erstellen</DialogTitle>
+                            <DialogTitle>Neue Studiengruppe anlegen</DialogTitle>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="new-shortName" className="text-right">Kürzel</Label>
-                                <Input id="new-shortName" value={newShortName} onChange={e => setNewShortName(e.target.value)} className="col-span-3" placeholder="z.B. 35k"/>
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="new-studiengang">Studiengang</Label>
+                                <Select value={newProgramId} onValueChange={setNewProgramId}>
+                                    <SelectTrigger id="new-studiengang">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {allPrograms.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="new-startSemester" className="text-right">Startsemester</Label>
+                             <div className="space-y-2">
+                                <Label htmlFor="new-fachbereich">Fachbereich</Label>
+                                <Input id="new-fachbereich" value={selectedProgramForNewDialog.fachbereich || 'N/A'} disabled className="bg-muted/50" />
+                            </div>
+
+                             <div className="space-y-2">
+                                <Label htmlFor="new-groupName">Name der Gruppe</Label>
+                                <Input id="new-groupName" value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="z.B. Game Design 35k"/>
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="new-shortName">Kürzel</Label>
+                                <Input id="new-shortName" value={newShortName} onChange={e => setNewShortName(e.target.value)} placeholder="z.B. 35k"/>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="new-startSemester">Startsemester</Label>
                                 <Select value={newStartSemesterId} onValueChange={setNewStartSemesterId}>
-                                    <SelectTrigger className="col-span-3">
+                                    <SelectTrigger id="new-startSemester">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -196,7 +242,23 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                                     </SelectContent>
                                 </Select>
                             </div>
-                            {error && <p className="text-destructive text-sm col-span-4 text-center">{error}</p>}
+
+                             <div className="space-y-2">
+                                <Label htmlFor="new-semesters">Anzahl Semester</Label>
+                                <Input id="new-semesters" value={selectedProgramForNewDialog.semesters} disabled className="bg-muted/50" />
+                            </div>
+
+                             <div className="space-y-2">
+                                <Label htmlFor="new-studentCount">Teilnehmerzahl</Label>
+                                <Input id="new-studentCount" type="number" value={newStudentCount} onChange={e => setNewStudentCount(parseInt(e.target.value) || 0)}/>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2 pt-5">
+                                <Checkbox id="saveAsTemplate" checked={saveAsTemplate} onCheckedChange={(checked) => setSaveAsTemplate(!!checked)} />
+                                <Label htmlFor="saveAsTemplate">Als Vorlage für den Studiengang speichern</Label>
+                            </div>
+                            
+                            {error && <p className="text-destructive text-sm col-span-2 text-center">{error}</p>}
                         </div>
                         <DialogFooter>
                             <Button onClick={handleNewSubmit}>Neue Gruppe erstellen</Button>

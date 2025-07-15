@@ -1,5 +1,6 @@
 
 
+
 export interface Category {
   id: string;
   name: string;
@@ -35,6 +36,7 @@ export interface Program {
   semesters: number;
   categoryOrder?: string[];
   templatePlan?: ProgramPlan;
+  fachbereich?: 'Design' | 'Psychologie' | 'Wirtschaft';
 }
 
 export interface Semester {

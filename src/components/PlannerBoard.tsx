@@ -40,7 +40,7 @@ interface PlannerBoardProps {
   onAddCategory: (category: Category) => void;
   onUpdateCategory: (categoryId: string, updates: Partial<Category>) => void;
   onDeleteCategory: (categoryId: string) => void;
-  onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
+  onAddStudiengruppe: (newStudiengruppe: Studiengruppe, saveAsTemplate: boolean) => boolean;
   onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
@@ -160,6 +160,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
             key={activeGruppe.id}
             studiengruppe={activeGruppe}
             program={program}
+            allPrograms={programs}
             allModules={modules}
             onDrop={onDrop}
             getModuleById={getModuleById}
