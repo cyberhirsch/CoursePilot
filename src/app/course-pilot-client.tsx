@@ -429,7 +429,7 @@ export default function CoursePilotClient() {
           onUpdateStudiengruppe={handleUpdateStudiengruppe}
           modules={modules}
           programs={programs}
-          onUpdateModule={onUpdateModule}
+          onUpdateModule={handleUpdateModule}
           onAddModule={handleAddModule}
           onDeleteModule={handleDeleteModule}
           onUpdateModulePrograms={handleUpdateModulePrograms}
