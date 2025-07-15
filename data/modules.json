@@ -471,20 +471,9 @@
     ]
   },
   {
-    "id": "BA-P",
-    "name": "BA-Prüfung",
-    "sws": 0,
-    "cp": 10,
-    "type": "Pflicht",
-    "category": "Weitere Module und Studienabschnitte",
-    "programIds": [
-      "GDVK"
-    ]
-  },
-  {
     "id": "BA-A",
     "name": "Bachelorarbeit",
-    "sws": 0,
+    "sws": 2,
     "cp": 10,
     "type": "Pflicht",
     "category": "Weitere Module und Studienabschnitte",

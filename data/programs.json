@@ -1,3 +1,4 @@
+
 [
   {
     "id": "GDVK",
@@ -64,9 +65,9 @@
         "M6": 4,
         "G5": 5,
         "M8": 5,
+        "Prkt": 5,
         "BA-A": 6,
         "F1": 6,
-        "Prkt": 6,
         "Rep": 6
       }
     }
@@ -74,7 +75,7 @@
   {
     "id": "GDIM",
     "name": "B.A. Game Design and Interactive Media",
-    "semesters": 8,
+    "semesters": 7,
     "defaultStudents": 35,
     "moduleIds": [
       "G1",
