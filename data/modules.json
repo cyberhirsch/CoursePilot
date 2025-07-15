@@ -1,47 +1,496 @@
-
 [
-  { "id": "G1", "name": "Wissenschaftliches Propädeutikum", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangübergreifende Kompetenzen", "programIds": ["GDVK", "GDIM"] },
-  { "id": "G2", "name": "Personale und soziale Kompetenzen", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangübergreifende Kompetenzen", "programIds": ["GDVK", "GDIM"] },
-  { "id": "G3", "name": "Medien- und Kommunikationswissenschaft", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangübergreifende Kompetenzen", "programIds": ["GDVK", "GDIM"] },
-  { "id": "G4", "name": "Wirtschaftswissenschaften", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangübergreifende Kompetenzen", "programIds": ["GDVK", "GDIM"] },
-  { "id": "G5", "name": "Interkulturalität", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangübergreifende Kompetenzen", "programIds": ["GDVK", "GDIM"] },
-  { "id": "G6", "name": "Empirische Methodenlehre", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangübergreifende Kompetenzen", "programIds": ["GDVK", "GDIM"] },
-  { "id": "WP1-8", "name": "Wahlpflicht Pool", "sws": 3, "cp": 5, "type": "Pool", "category": "Studiengangübergreifende Kompetenzen", "programIds": ["GDVK", "GDIM"] },
-  { "id": "F1", "name": "Kunst-/Designgeschichte und -theorie", "sws": 2, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "F2", "name": "Gestaltungsprozess und Kreativität", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "F3", "name": "Farbe, Form, Komposition", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "F4", "name": "Grafik und Bild", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "F5", "name": "Projektwerkstatt (5 Module)", "sws": 4, "cp": 5, "type": "Pool", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "M1", "name": "Fotografie", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "M2", "name": "Layout", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "M3", "name": "Prepress/Press", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "M4", "name": "Grafik in Raum und Umgebung", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "M5", "name": "Grundlagen Interface- und Interaktionsdesign", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "M6", "name": "Interaktive Medien", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "M7", "name": "Film- und Postproduktion", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "M8", "name": "Motion Design", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDVK"] },
-  { "id": "B1", "name": "Kunst-/Designgeschichte und -theorie", "sws": 2, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "B2", "name": "Gestaltungs- und Designgrundlagen", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "A1", "name": "Concept Art", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "A2", "name": "2D Character Animation", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "A3", "name": "Motion Design", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "C1", "name": "Modelling & Texturing", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "C2", "name": "Lighting & Shading", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "C3", "name": "Rigging & 3D Character Animation", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "C4", "name": "Simulation & FX", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "S1", "name": "Grundlagen Spieleentwicklung", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "S2", "name": "Game Engines & Projektmanagement", "sws": 5, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "S3", "name": "Level Design", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "S4", "name": "Spielmechanik", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "S5", "name": "Sound Design", "sws": 2, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "I1", "name": "Interactive and Visual Storytelling", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "I2", "name": "Programmierung & Visual Scripting", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "I3", "name": "Grundlagen Interface- und Interaktionsdesign", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "I4", "name": "Interaktive Medien", "sws": 4, "cp": 5, "type": "Pflicht", "category": "Studiengangspezifische Kompetenzen", "programIds": ["GDIM"] },
-  { "id": "Lab", "name": "Game & Interactive Lab", "sws": 3, "cp": 5, "type": "Pool", "category": "Weitere Module und Studienabschnitte", "programIds": ["GDIM"] },
-  { "id": "Sp", "name": "Selbstpräsentation", "sws": 2, "cp": 5, "type": "Pflicht", "category": "Weitere Module und Studienabschnitte", "programIds": ["GDVK"] },
-  { "id": "Rep", "name": "Repetitorium", "sws": 3, "cp": 5, "type": "Pflicht", "category": "Weitere Module und Studienabschnitte", "programIds": ["GDVK", "GDIM"] },
-  { "id": "Prkt", "name": "Praxisphase", "sws": 0, "cp": 30, "type": "Pflicht", "category": "Weitere Module und Studienabschnitte", "programIds": ["GDVK", "GDIM"] },
-  { "id": "BA-P", "name": "BA-Prüfung", "sws": 0, "cp": 10, "type": "Pflicht", "category": "Weitere Module und Studienabschnitte", "programIds": ["GDVK"] },
-  { "id": "BA-A", "name": "Bachelorarbeit", "sws": 0, "cp": 10, "type": "Pflicht", "category": "Weitere Module und Studienabschnitte", "programIds": ["GDVK", "GDIM"] }
+  {
+    "id": "G1",
+    "name": "Wissenschaftliches Propädeutikum",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangübergreifende Kompetenzen",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "G2",
+    "name": "Personale und soziale Kompetenzen",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangübergreifende Kompetenzen",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "G3",
+    "name": "Medien- und Kommunikationswissenschaft",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangübergreifende Kompetenzen",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "G4",
+    "name": "Wirtschaftswissenschaften",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangübergreifende Kompetenzen",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "G5",
+    "name": "Interkulturalität",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangübergreifende Kompetenzen",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "G6",
+    "name": "Empirische Methodenlehre",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangübergreifende Kompetenzen",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "WP1-8",
+    "name": "Wahlpflicht Pool",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pool",
+    "category": "Studiengangübergreifende Kompetenzen",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "F1",
+    "name": "Kunst-/Designgeschichte und -theorie",
+    "sws": 2,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "F2",
+    "name": "Gestaltungsprozess und Kreativität",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "F3",
+    "name": "Farbe, Form, Komposition",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "F4",
+    "name": "Grafik und Bild",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "F5",
+    "name": "Projektwerkstatt (5 Module)",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pool",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "M1",
+    "name": "Fotografie",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "M2",
+    "name": "Layout",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "M3",
+    "name": "Prepress/Press",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "M4",
+    "name": "Grafik in Raum und Umgebung",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "M5",
+    "name": "Grundlagen Interface- und Interaktionsdesign",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "M6",
+    "name": "Interaktive Medien",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "M7",
+    "name": "Film- und Postproduktion",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "M8",
+    "name": "Motion Design",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "B1",
+    "name": "Kunst-/Designgeschichte und -theorie",
+    "sws": 2,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "B2",
+    "name": "Gestaltungs- und Designgrundlagen",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "A1",
+    "name": "Concept Art",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "A2",
+    "name": "2D Character Animation",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "A3",
+    "name": "Motion Design",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "C1",
+    "name": "Modelling & Texturing",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "C2",
+    "name": "Lighting & Shading",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "C3",
+    "name": "Rigging & 3D Character Animation",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "C4",
+    "name": "Simulation & FX",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "S1",
+    "name": "Grundlagen Spieleentwicklung",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "S2",
+    "name": "Game Engines & Projektmanagement",
+    "sws": 5,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "S3",
+    "name": "Level Design",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "S4",
+    "name": "Spielmechanik",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "S5",
+    "name": "Sound Design",
+    "sws": 2,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "I1",
+    "name": "Interactive and Visual Storytelling",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "I2",
+    "name": "Programmierung & Visual Scripting",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "I3",
+    "name": "Grundlagen Interface- und Interaktionsdesign",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "I4",
+    "name": "Interaktive Medien",
+    "sws": 4,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Studiengangspezifische Kompetenzen",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "Lab",
+    "name": "Game & Interactive Lab",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pool",
+    "category": "Weitere Module und Studienabschnitte",
+    "programIds": [
+      "GDIM"
+    ]
+  },
+  {
+    "id": "Sp",
+    "name": "Selbstpräsentation",
+    "sws": 2,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Weitere Module und Studienabschnitte",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "Rep",
+    "name": "Repetitorium",
+    "sws": 3,
+    "cp": 5,
+    "type": "Pflicht",
+    "category": "Weitere Module und Studienabschnitte",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "Prkt",
+    "name": "Praxisphase",
+    "sws": 0,
+    "cp": 30,
+    "type": "Pflicht",
+    "category": "Weitere Module und Studienabschnitte",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  },
+  {
+    "id": "BA-P",
+    "name": "BA-Prüfung",
+    "sws": 0,
+    "cp": 10,
+    "type": "Pflicht",
+    "category": "Weitere Module und Studienabschnitte",
+    "programIds": [
+      "GDVK"
+    ]
+  },
+  {
+    "id": "BA-A",
+    "name": "Bachelorarbeit",
+    "sws": 0,
+    "cp": 10,
+    "type": "Pflicht",
+    "category": "Weitere Module und Studienabschnitte",
+    "programIds": [
+      "GDVK",
+      "GDIM"
+    ]
+  }
 ]
