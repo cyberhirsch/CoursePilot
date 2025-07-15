@@ -209,18 +209,20 @@ export const EditTemplateSheet: React.FC<EditTemplateSheetProps> = ({
             <SheetContent className="min-w-[90vw] sm:min-w-[90vw] md:min-w-[80vw] lg:min-w-[70vw] flex flex-col" onPointerDownOutside={e => e.preventDefault()}>
                 <SheetHeader>
                     <SheetTitle>Vorlage bearbeiten: {program.name}</SheetTitle>
-                    <SheetDescription className="flex items-center gap-6">
-                        Passen Sie die Modulzuordnungen und den Standard-Verlaufsplan für diesen Studiengang an.
-                        <div>
-                            <Label htmlFor="semesters-input">Anzahl Semester</Label>
-                            <Input 
-                                id="semesters-input"
-                                type="number"
-                                value={editingProgram.semesters}
-                                onChange={e => setEditingProgram(p => ({...p, semesters: parseInt(e.target.value) || p.semesters }))}
-                                className="w-20 mt-1"
-                            />
-                        </div>
+                    <SheetDescription asChild>
+                      <div className="flex items-center gap-6">
+                          Passen Sie die Modulzuordnungen und den Standard-Verlaufsplan für diesen Studiengang an.
+                          <div>
+                              <Label htmlFor="semesters-input">Anzahl Semester</Label>
+                              <Input 
+                                  id="semesters-input"
+                                  type="number"
+                                  value={editingProgram.semesters}
+                                  onChange={e => setEditingProgram(p => ({...p, semesters: parseInt(e.target.value) || p.semesters }))}
+                                  className="w-20 mt-1"
+                              />
+                          </div>
+                      </div>
                     </SheetDescription>
                 </SheetHeader>
                 
