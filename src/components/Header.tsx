@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import type { MainCategory, PlannerViewMode } from '@/types';
-import { ResetIcon } from '@/components/icons/ResetIcon';
+import { Button } from './ui/button';
+import { LogIn } from 'lucide-react';
 
 interface HeaderProps {
     mainCategory: MainCategory;
     setMainCategory: (category: MainCategory) => void;
     viewMode: PlannerViewMode;
     setViewMode: (mode: PlannerViewMode) => void;
-    onResetData: () => void;
 }
 
 const NavLink: React.FC<{
@@ -37,7 +37,7 @@ const NavLink: React.FC<{
   </a>
 );
 
-export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, viewMode, setViewMode, onResetData }) => {
+export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, viewMode, setViewMode }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -142,14 +142,10 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
 
         <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">Standort: Köln</span>
-            <button
-                onClick={onResetData}
-                className="p-2 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                title="Alle Daten zurücksetzen und neu laden"
-                aria-label="Alle Daten zurücksetzen"
-            >
-                <ResetIcon className="w-5 h-5" />
-            </button>
+            <Button variant="outline">
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
+            </Button>
         </div>
       </div>
     </header>

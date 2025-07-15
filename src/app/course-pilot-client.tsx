@@ -40,8 +40,7 @@ export default function CoursePilotClient() {
         setIsMounted(true);
     }).catch(e => {
         console.error("Failed to load from backend", e);
-        // You might want to show an error message to the user here
-        setIsMounted(true); // Still mount to prevent infinite loading state
+        setIsMounted(true); 
     });
   }, []);
 
@@ -49,12 +48,11 @@ export default function CoursePilotClient() {
 
   useEffect(() => {
     if (isMounted) {
-        // Debounce saving to avoid too many requests
         const handler = setTimeout(() => {
-            if (fullData.modules.length > 0) { // Avoid saving empty initial state
+            if (fullData.modules.length > 0) {
                 postData(fullData);
             }
-        }, 1000); // Save 1 second after the last change
+        }, 1000); 
 
         return () => {
             clearTimeout(handler);
@@ -67,7 +65,7 @@ export default function CoursePilotClient() {
   
   const [mainCategory, setMainCategory] = useState<MainCategory>('semesterplan');
   const [viewMode, setViewModeInternal] = useState<PlannerViewMode>('semester');
-  const [selectedSemester, setSelectedSemester] = useState<AbsoluteSemester>(ABSOLUTE_SEMESTERS.find(s => s.id === 'ws2025') || ABSOLUTE_SEMESTERS[1]); // Default to WS 2025/26
+  const [selectedSemester, setSelectedSemester] = useState<AbsoluteSemester>(ABSOLUTE_SEMESTERS.find(s => s.id === 'ws2025') || ABSOLUTE_SEMESTERS[1]);
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(false);
 
   const [activeBulkLocks, setActiveBulkLocks] = useState<{ [groupId: string]: { past: boolean; categories: Set<string> } }>({});
@@ -406,22 +404,6 @@ export default function CoursePilotClient() {
     setActiveStudiengruppenIds([studiengruppeId]);
   };
   
-  const handleResetData = useCallback(async () => {
-    if (window.confirm("Möchten Sie wirklich alle Änderungen verwerfen und die Plandaten auf den ursprünglichen Stand zurücksetzen? Der Serverzustand wird überschrieben.")) {
-        const res = await fetch('/api/reset', { method: 'POST' });
-        if (res.ok) {
-            const { data } = await res.json();
-            setModules(data.modules);
-            setPrograms(data.programs);
-            setStudiengruppen(data.studiengruppen);
-            setCategories(data.categories);
-            alert("Daten wurden erfolgreich zurückgesetzt.");
-        } else {
-            alert("Fehler beim Zurücksetzen der Daten.");
-        }
-    }
-  }, []);
-
   if (!isMounted) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -437,7 +419,6 @@ export default function CoursePilotClient() {
         setMainCategory={setMainCategory}
         viewMode={viewMode}
         setViewMode={setViewMode}
-        onResetData={handleResetData}
       />
       <main className="flex-grow p-4">
         <PlannerBoard
