@@ -1,5 +1,16 @@
 [
   {
+    "id": "BPxP",
+    "name": "Betriebliche Praxisprojekte",
+    "sws": 2,
+    "cp": 10,
+    "type": "Pflicht",
+    "category": "Weitere Module und Studienabschnitte",
+    "prerequisites": [],
+    "forbiddenSemesters": [],
+    "maxParticipants": 100
+  },
+  {
     "id": "G1",
     "name": "Wissenschaftliches Propädeutikum",
     "sws": 3,

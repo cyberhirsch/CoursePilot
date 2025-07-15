@@ -155,7 +155,9 @@ export default function CoursePilotClient() {
     if (directMatch) {
       return directMatch;
     }
-    return modules.find(m => m.type === 'Pool' && id.startsWith(m.id + '-'));
+    // Handle pool module instances like 'WP1-8-1'
+    const poolBaseId = id.substring(0, id.lastIndexOf('-'));
+    return modules.find(m => m.id === poolBaseId && m.type === 'Pool');
   }, [modules]);
 
   const finalLockedModulesMap = useMemo(() => {
@@ -178,6 +180,7 @@ export default function CoursePilotClient() {
             if (bulkSettings.past && realCurrentSemesterIndex !== -1) {
                 Object.entries(sg.plan.semesters).forEach(([relativeSemId, instanceIds]) => {
                     const relativeIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === relativeSemId);
+                    if (relativeIndex === -1) return;
                     const absoluteSem = getAbsoluteSemesterFor(sg.startSemester, relativeIndex);
                     if (absoluteSem && ABSOLUTE_SEMESTERS.findIndex(s => s.id === absoluteSem.id) <= realCurrentSemesterIndex) {
                         (instanceIds as string[]).forEach(id => finalLocks.add(id));
@@ -211,9 +214,8 @@ export default function CoursePilotClient() {
         return;
     }
 
-    // Critical Check: Only allow drop if the dragged module matches the target row's module.
     if (draggedModuleId !== targetModuleId) {
-        return; // Do nothing if dropped on the wrong module row
+        return;
     }
 
     const draggedModule = getModuleById(draggedInstanceId);
@@ -275,15 +277,12 @@ export default function CoursePilotClient() {
       prevGruppen.map(g => {
         if (g.id === studiengruppeId) {
           const newPlan = { ...g.plan };
-          // Deep copy of semesters to avoid mutation issues
           const newSemesters: { [key: string]: string[] } = JSON.parse(JSON.stringify(newPlan.semesters));
           
-          // Atomically remove the instance from wherever it might be
           Object.keys(newSemesters).forEach(key => {
             newSemesters[key] = newSemesters[key].filter(id => id !== draggedInstanceId);
           });
 
-          // Add the instance to the new target semester
           if (!newSemesters[semesterId]) {
             newSemesters[semesterId] = [];
           }
@@ -479,3 +478,5 @@ export default function CoursePilotClient() {
     </div>
   );
 };
+
+    

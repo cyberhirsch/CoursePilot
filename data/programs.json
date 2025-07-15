@@ -28,7 +28,8 @@
       "Rep",
       "Prkt",
       "BA-A",
-      "WP1-8"
+      "WP1-8",
+      "BPxP"
     ],
     "categoryOrder": [
       "Studiengangübergreifende Kompetenzen",
@@ -79,8 +80,6 @@
     "moduleIds": [
       "G1",
       "G2",
-      "G3",
-      "G4",
       "G5",
       "G6",
       "WP1-8",
@@ -102,9 +101,7 @@
       "I2",
       "I3",
       "I4",
-      "Lab",
       "Rep",
-      "Prkt",
       "BA-A"
     ],
     "categoryOrder": [
