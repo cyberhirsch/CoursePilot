@@ -204,63 +204,63 @@ export default function CoursePilotClient() {
   const handleDrop = useCallback((studiengruppeId: string, semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const draggedInstanceId = e.dataTransfer.getData("instanceId");
-    const draggedModuleId = e.dataTransfer.getData("moduleId");
-
-    const draggedModule = getModuleById(draggedInstanceId);
-    const isPoolDrop = !!draggedModule && draggedModule.type === 'Pool' && draggedModule.id === targetModuleId;
     
-    if (!draggedInstanceId || !(draggedInstanceId === targetModuleId || isPoolDrop)) {
+    if (!draggedInstanceId) {
+      console.error("No instanceId found in dataTransfer.");
       return;
     }
-    
+
+    const draggedModule = getModuleById(draggedInstanceId);
+    if (!draggedModule) {
+      console.error(`Could not find module for instanceId: ${draggedInstanceId}`);
+      return;
+    }
+
     const gruppe = studiengruppen.find(g => g.id === studiengruppeId);
     if (!gruppe) return;
 
-    const dropModule = getModuleById(draggedModuleId);
-    if (dropModule) {
-      const relativeSemesterIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === semesterId) + 1;
-      
-      if (dropModule.forbiddenSemesters?.includes(relativeSemesterIndex)) {
-          alert(`Regelverletzung: Modul "${dropModule.name}" darf nicht im ${relativeSemesterIndex}. Fachsemester platziert werden.`);
-          return;
-      }
-
-      if (dropModule.prerequisites && dropModule.prerequisites.length > 0) {
-          const planSemesters = gruppe.plan.semesters;
-          const targetSemesterOrder = RELATIVE_SEMESTERS.findIndex(s => s.id === semesterId);
-
-          for (const prereqId of dropModule.prerequisites) {
-              let prereqFound = false;
-              let prereqSemesterOrder = -1;
-              
-              for (const [semId, moduleIds] of Object.entries(planSemesters)) {
-                if ((moduleIds as string[]).filter(id => id !== draggedInstanceId).includes(prereqId)) {
-                  prereqFound = true;
-                  prereqSemesterOrder = RELATIVE_SEMESTERS.findIndex(s => s.id === semId);
-                  break;
-                }
-              }
-
-              if (!prereqFound || prereqSemesterOrder >= targetSemesterOrder) {
-                  const prereqModule = getModuleById(prereqId);
-                  alert(`Abhängigkeit verletzt: "${dropModule.name}" erfordert, dass "${prereqModule?.name || prereqId}" vorher abgeschlossen wird.`);
-                  return;
-              }
-          }
-      }
+    const relativeSemesterIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === semesterId) + 1;
+    
+    if (draggedModule.forbiddenSemesters?.includes(relativeSemesterIndex)) {
+        alert(`Regelverletzung: Modul "${draggedModule.name}" darf nicht im ${relativeSemesterIndex}. Fachsemester platziert werden.`);
+        return;
     }
 
-    if (draggedModule?.type === 'Pool') {
+    if (draggedModule.prerequisites && draggedModule.prerequisites.length > 0) {
+        const planSemesters = gruppe.plan.semesters;
+        const targetSemesterOrder = RELATIVE_SEMESTERS.findIndex(s => s.id === semesterId);
+
+        for (const prereqId of draggedModule.prerequisites) {
+            let prereqFound = false;
+            let prereqSemesterOrder = -1;
+            
+            for (const [semId, moduleIds] of Object.entries(planSemesters)) {
+              if ((moduleIds as string[]).filter(id => id !== draggedInstanceId).some(id => getModuleById(id)?.id === prereqId)) {
+                prereqFound = true;
+                prereqSemesterOrder = RELATIVE_SEMESTERS.findIndex(s => s.id === semId);
+                break;
+              }
+            }
+
+            if (!prereqFound || prereqSemesterOrder >= targetSemesterOrder) {
+                const prereqModule = getModuleById(prereqId);
+                alert(`Abhängigkeit verletzt: "${draggedModule.name}" erfordert, dass "${prereqModule?.name || prereqId}" vorher abgeschlossen wird.`);
+                return;
+            }
+        }
+    }
+
+    if (draggedModule.type === 'Pool') {
       const targetSemesterModuleIds = gruppe.plan.semesters[semesterId] || [];
       const hasDuplicatePoolModule = targetSemesterModuleIds.some(existingInstanceId => {
         if (existingInstanceId === draggedInstanceId) return false;
         
         const existingBaseModule = getModuleById(existingInstanceId);
-        return existingBaseModule?.id === draggedModuleId;
+        return existingBaseModule?.id === draggedModule.id;
       });
 
       if (hasDuplicatePoolModule) {
-        console.warn(`Cannot add ${draggedInstanceId}. A module from the pool ${draggedModuleId} is already in this semester.`);
+        console.warn(`Cannot add ${draggedInstanceId}. A module from the pool ${draggedModule.id} is already in this semester.`);
         return;
       }
     }
