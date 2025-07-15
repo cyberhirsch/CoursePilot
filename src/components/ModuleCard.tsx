@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -35,10 +36,10 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module, instanceId, onDr
   const baseClasses = `w-full h-full flex items-center justify-center rounded transition-colors relative ${canBeDragged ? 'cursor-grab active:cursor-grabbing' : ''} ${isLocked ? 'cursor-not-allowed' : ''}`;
   
   const colorClasses = hasError 
-    ? 'bg-destructive/20 text-destructive border border-destructive/60' 
+    ? 'bg-destructive/20 text-destructive-foreground border border-destructive/60' 
     : isLocked
     ? 'bg-muted/30 text-muted-foreground border border-border/50'
-    : 'bg-primary/20 text-primary border border-primary/40';
+    : 'bg-primary/20 text-primary-foreground border border-primary/40';
 
   return (
       <div

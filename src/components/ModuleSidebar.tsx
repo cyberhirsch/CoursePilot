@@ -56,19 +56,21 @@ export const ModuleSidebar: React.FC<ModuleSidebarProps> = ({ program, modules, 
         }, {} as CategorizedModules);
 
         const orderedGroup = {} as CategorizedModules;
-        CATEGORY_ORDER.forEach(catName => {
+        const categoryOrder = program.categoryOrder || CATEGORY_ORDER;
+
+        categoryOrder.forEach(catName => {
             if (grouped[catName]) {
                 orderedGroup[catName] = grouped[catName];
             }
         });
         Object.keys(grouped).forEach(catName => {
-             if (!CATEGORY_ORDER.includes(catName)) {
+             if (!categoryOrder.includes(catName)) {
                  orderedGroup[catName] = grouped[catName];
              }
         });
 
         return orderedGroup;
-    }, [availableModules]);
+    }, [availableModules, program.categoryOrder]);
 
     const poolInstances = useMemo(() => {
         const instances: { [poolId: string]: string[] } = {};
@@ -77,12 +79,14 @@ export const ModuleSidebar: React.FC<ModuleSidebarProps> = ({ program, modules, 
         poolModules.forEach(pool => {
             if (program.moduleIds.includes(pool.id)) {
                 instances[pool.id] = [];
-                for (let i = 1; i <= (pool.instanceCount || 1); i++) {
-                    const instanceId = `${pool.id}-${i}`;
-                    if (!plannedInstanceIds.has(instanceId)) {
-                        instances[pool.id].push(instanceId);
-                    }
-                }
+                // Create a list of all possible instances
+                const maxInstances = pool.instanceCount || 8; // Default to 8 if not specified
+                const allPossibleInstances = Array.from({ length: maxInstances }, (_, i) => `${pool.id}-${i + 1}`);
+
+                // Filter out the ones that are already planned
+                const unplannedInstances = allPossibleInstances.filter(instId => !plannedInstanceIds.has(instId));
+                
+                instances[pool.id] = unplannedInstances;
             }
         });
         return instances;

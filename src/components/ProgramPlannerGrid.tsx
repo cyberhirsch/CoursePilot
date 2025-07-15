@@ -120,7 +120,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
         
         categoryOrder.forEach(catName => {
             if (grouped[catName]) {
-                orderedGroup.push({ category: catName, modules: grouped[catName].sort((a,b) => a.name.localeCompare(b.name))});
+                orderedGroup.push({ category: catName, modules: grouped[catName].sort((a,b) => a.id.localeCompare(b.id))});
             }
         });
         
@@ -251,19 +251,15 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                     {catModules.map(module => (
                                         <tr key={module.id}>
                                             <td className="p-2 border-t border-border flex items-center gap-2">
-                                                <span className="text-muted-foreground text-xs w-10">{module.shortName}</span>
+                                                <span className="text-muted-foreground text-xs w-10 font-code">{module.id}</span>
                                                 <span className="text-sm">{module.name}</span>
                                             </td>
                                             {semesterHeaders.map(sem => {
-                                                const instanceId = module.type === 'Pool' 
-                                                  ? Object.entries(studiengruppe.plan.semesters)
-                                                      .find(([semId, instances]) => semId === sem.id && instances.some(instId => instId.startsWith(module.id + '-')))?.[1]
-                                                      .find(instId => instId.startsWith(module.id + '-'))
-                                                  : module.id;
+                                                const plannedInstances = (studiengruppe.plan.semesters[sem.id] || []).filter(
+                                                    (id) => module.type === 'Pool' ? id.startsWith(`${module.id}-`) : id === module.id
+                                                );
 
-                                                const placedSemesterId = instanceId ? placedModulesMap.get(instanceId) : undefined;
-                                                const isPlacedInThisCell = placedSemesterId === sem.id;
-                                                const droppableModuleId = module.type === 'Pool' ? module.id : instanceId || module.id;
+                                                const droppableModuleId = module.id;
 
                                                 const participantInfo = isHeatmapVisible && sem.absoluteId
                                                     ? participantMap.get(sem.absoluteId)?.get(module.id) || []
@@ -277,8 +273,9 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
 
                                                 return (
                                                     <DropTargetCell key={sem.id} onDrop={(e) => onDrop(studiengruppe.id, sem.id, droppableModuleId, e)} heatmapColor={heatmapColor} tooltip={tooltipText}>
-                                                        {isPlacedInThisCell && instanceId && (
+                                                        {plannedInstances.map(instanceId => (
                                                             <ModuleCard
+                                                                key={instanceId}
                                                                 module={module}
                                                                 instanceId={instanceId}
                                                                 onDragStart={onDragStart}
@@ -286,7 +283,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                                                 isLocked={finalLockedInstances.has(instanceId)}
                                                                 onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
                                                             />
-                                                        )}
+                                                        ))}
                                                     </DropTargetCell>
                                                 )
                                             })}

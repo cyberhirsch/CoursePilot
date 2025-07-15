@@ -9,6 +9,9 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ABSOLUTE_SEMESTERS } from '@/constants';
 
 interface PlannerControlsProps {
     studiengruppe: Studiengruppe;
@@ -34,12 +37,29 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
 }) => {
     
     const programGroups = allStudiengruppen.filter(sg => sg.programId === studiengruppe.programId);
+    const currentIndex = programGroups.findIndex(g => g.id === studiengruppe.id);
     
     const uniqueCategories = [...new Set(modules.map(m => m.category))];
 
+    const handlePrevious = () => {
+        if (currentIndex > 0) {
+            onSelectGroup(programGroups[currentIndex - 1].id);
+        }
+    };
+
+    const handleNext = () => {
+        if (currentIndex < programGroups.length - 1) {
+            onSelectGroup(programGroups[currentIndex + 1].id);
+        }
+    };
+
+
     return (
-        <div className="flex-shrink-0 bg-card p-4 rounded-lg border border-border flex items-center justify-between">
-            <div className="flex items-center gap-6">
+        <div className="flex-shrink-0 bg-card p-3 rounded-lg border border-border flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+                 <Button onClick={handlePrevious} variant="ghost" size="icon" disabled={currentIndex <= 0} aria-label="Vorherige Gruppe">
+                    <ChevronLeft />
+                </Button>
                 <div className="w-64">
                     <Select value={studiengruppe.id} onValueChange={onSelectGroup}>
                         <SelectTrigger className="text-base font-bold">
@@ -53,26 +73,27 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                             ))}
                         </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground mt-1">{program.name}</p>
                 </div>
-                <div className="text-sm">
-                    <span className="text-muted-foreground">Start: </span>
-                    <span className="font-semibold text-foreground">{studiengruppe.startSemester.name}</span>
-                </div>
-                <div className="text-sm">
-                    <span className="text-muted-foreground">Typ: </span>
-                    <span className="font-semibold text-foreground">{studiengruppe.type}</span>
-                </div>
-                 <div className="text-sm">
-                    <span className="text-muted-foreground">Total CP: </span>
-                    <span className="font-semibold text-foreground">{totalCp}</span>
-                </div>
+                 <Button onClick={handleNext} variant="ghost" size="icon" disabled={currentIndex >= programGroups.length - 1} aria-label="Nächste Gruppe">
+                    <ChevronRight />
+                </Button>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
+                <div className="flex items-center space-x-2">
+                    <Switch
+                        id="heatmap-toggle"
+                        checked={isHeatmapVisible}
+                        onCheckedChange={onToggleHeatmap}
+                    />
+                    <Label htmlFor="heatmap-toggle">Heatmap</Label>
+                </div>
+
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button variant="outline">
-                            Module sperren ({finalLockedInstances.size})
+                            Vergangene sperren
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80">
@@ -115,13 +136,29 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                     </PopoverContent>
                 </Popover>
 
-                <div className="flex items-center space-x-2">
-                    <Switch
-                        id="heatmap-toggle"
-                        checked={isHeatmapVisible}
-                        onCheckedChange={onToggleHeatmap}
+                <div className="flex items-center gap-2">
+                    <Label htmlFor="start-semester">Start:</Label>
+                     <Select value={studiengruppe.startSemester.id} onValueChange={(id) => {
+                         const newSem = ABSOLUTE_SEMESTERS.find(s => s.id === id);
+                         if(newSem) onUpdateStudiengruppe(studiengruppe.id, { startSemester: newSem });
+                     }}>
+                        <SelectTrigger className="w-36">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {ABSOLUTE_SEMESTERS.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <div className="flex items-center gap-2">
+                    <Label htmlFor="student-count">Stud.:</Label>
+                    <Input 
+                        id="student-count"
+                        type="number" 
+                        value={studiengruppe.studentCount}
+                        onChange={(e) => onUpdateStudiengruppe(studiengruppe.id, {studentCount: parseInt(e.target.value) || 0})}
+                        className="w-20"
                     />
-                    <Label htmlFor="heatmap-toggle">CP Heatmap</Label>
                 </div>
             </div>
         </div>
