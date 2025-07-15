@@ -24,7 +24,6 @@ interface PlannerControlsProps {
     onSelectGroup: (id: string) => void;
     isHeatmapVisible: boolean;
     onToggleHeatmap: () => void;
-    totalCp: number;
     selectedSemester: AbsoluteSemester;
     onTogglePastLock: () => void;
     onToggleCategoryLock: (category: string) => void;
@@ -166,12 +165,12 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     const selectedProgramForNewDialog = allPrograms.find(p => p.id === newProgramId) || program;
 
     return (
-        <div className="flex-shrink-0 bg-card p-3 rounded-t-lg border-b border-border flex items-center justify-between flex-wrap gap-4">
+        <div className="flex-shrink-0 bg-card p-3 rounded-t-lg border-b border-border flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
             <div className="flex items-center gap-2">
                  <Button onClick={handlePrevious} variant="ghost" size="icon" disabled={currentIndex <= 0} aria-label="Vorherige Gruppe">
                     <ChevronLeft />
                 </Button>
-                <div className="w-64">
+                <div className="w-80">
                     <Select value={studiengruppe.id} onValueChange={onSelectGroup}>
                         <SelectTrigger className="text-base font-bold">
                             <SelectValue placeholder="Studiengruppe wählen..." />
@@ -184,17 +183,15 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                             ))}
                         </SelectContent>
                     </Select>
-                    <p className="text-xs text-muted-foreground mt-1">{program.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1 truncate">{program.name}</p>
                 </div>
                  <Button onClick={handleNext} variant="ghost" size="icon" disabled={currentIndex >= programGroups.length - 1} aria-label="Nächste Gruppe">
                     <ChevronRight />
                 </Button>
-            </div>
-
-            <div className="flex items-center gap-4">
+                
                  <Dialog open={isNewDialogOpen} onOpenChange={setNewDialogOpen}>
                     <DialogTrigger asChild>
-                         <Button variant="outline" onClick={resetNewDialogState}>
+                         <Button variant="default" onClick={resetNewDialogState}>
                             <UserPlus className="mr-2 h-4 w-4" />
                             Neue Gruppe
                         </Button>
@@ -261,7 +258,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
 
                 <Dialog open={isDuplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
                     <DialogTrigger asChild>
-                         <Button variant="outline">
+                         <Button variant="default">
                             <Copy className="mr-2 h-4 w-4" />
                             Gruppe duplizieren
                         </Button>
@@ -294,6 +291,9 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                     </DialogContent>
                 </Dialog>
 
+            </div>
+
+            <div className="flex items-center gap-4 flex-grow justify-end">
                 <Popover open={isAddModuleOpen} onOpenChange={setAddModuleOpen}>
                     <PopoverTrigger asChild>
                         <Button variant="outline">
