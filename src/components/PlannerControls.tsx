@@ -101,7 +101,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
             setError("Ungültiges Startsemester gewählt.");
             return;
         }
-
+        
         const newGroup: Studiengruppe = {
             id: newId,
             name: newGroupName,
@@ -166,11 +166,11 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
 
     return (
         <div className="flex-shrink-0 bg-card p-3 rounded-t-lg border-b border-border flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-grow">
                  <Button onClick={handlePrevious} variant="ghost" size="icon" disabled={currentIndex <= 0} aria-label="Vorherige Gruppe">
                     <ChevronLeft />
                 </Button>
-                <div className="w-80">
+                <div className="flex-grow max-w-md">
                     <Select value={studiengruppe.id} onValueChange={onSelectGroup}>
                         <SelectTrigger className="text-base font-bold">
                             <SelectValue placeholder="Studiengruppe wählen..." />
@@ -189,9 +189,9 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                     <ChevronRight />
                 </Button>
                 
-                 <Dialog open={isNewDialogOpen} onOpenChange={setNewDialogOpen}>
+                 <Dialog open={isNewDialogOpen} onOpenChange={(isOpen) => { if (isOpen) resetNewDialogState(); setNewDialogOpen(isOpen); }}>
                     <DialogTrigger asChild>
-                         <Button variant="default" onClick={resetNewDialogState}>
+                         <Button variant="default">
                             <UserPlus className="mr-2 h-4 w-4" />
                             Neue Gruppe
                         </Button>
@@ -293,7 +293,7 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
 
             </div>
 
-            <div className="flex items-center gap-4 flex-grow justify-end">
+            <div className="flex items-center gap-4">
                 <Popover open={isAddModuleOpen} onOpenChange={setAddModuleOpen}>
                     <PopoverTrigger asChild>
                         <Button variant="outline">
