@@ -7,7 +7,6 @@ import { SemesterOverview } from '@/components/SemesterOverview';
 import { ModuleOverview } from '@/components/ModuleOverview';
 import { OptimizationPanel } from '@/components/OptimizationPanel';
 import { PlaceholderPage } from '@/components/PlaceholderPage';
-import { ProgramEditor } from '@/components/ProgramEditor';
 
 
 interface PlannerBoardProps {
@@ -30,9 +29,6 @@ interface PlannerBoardProps {
   onAddModule: (module: Module, programIds: string[]) => void;
   onDeleteModule: (moduleId: string) => void;
   onUpdateModulePrograms: (moduleId: string, programIds: string[]) => void;
-  onAddProgram: (program: Program) => void;
-  onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
-  onDeleteProgram: (programId: string) => void;
   isHeatmapVisible: boolean;
   onToggleHeatmap: () => void;
   onToggleModuleLock: (studiengruppeId: string, instanceId: string) => void;
@@ -66,9 +62,6 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     onAddModule,
     onDeleteModule,
     onUpdateModulePrograms,
-    onAddProgram,
-    onUpdateProgram,
-    onDeleteProgram,
     isHeatmapVisible,
     onToggleHeatmap,
     onToggleModuleLock,
@@ -105,16 +98,6 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
               onAddCategory={onAddCategory}
               onUpdateCategory={onUpdateCategory}
               onDeleteCategory={onDeleteCategory}
-            />;
-  }
-
-  if (viewMode === 'templates') {
-    return <ProgramEditor
-              programs={programs}
-              modules={modules}
-              onAddProgram={onAddProgram}
-              onUpdateProgram={onUpdateProgram}
-              onDeleteProgram={onDeleteProgram}
             />;
   }
   

@@ -33,7 +33,6 @@ export interface Program {
   defaultStudents: number;
   semesters: number;
   categoryOrder?: string[];
-  templatePlan?: ProgramPlan;
 }
 
 export interface Semester {
@@ -85,4 +84,4 @@ export interface Studiengruppe {
 }
 
 export type MainCategory = 'semesterplan' | 'stundenplan' | 'pruefungswesen' | 'nutzerverwaltung' | 'einstellungen';
-export type PlannerViewMode = 'semester' | 'group' | 'modules' | 'templates' | 'optimization';
+export type PlannerViewMode = 'semester' | 'group' | 'modules' | 'optimization';

@@ -6,10 +6,10 @@ import { Button } from './ui/button';
 import { LogIn } from 'lucide-react';
 
 interface HeaderProps {
-    mainCategory: MainCategory;
-    setMainCategory: (category: MainCategory) => void;
-    viewMode: PlannerViewMode;
-    setViewMode: (mode: PlannerViewMode) => void;
+  mainCategory: MainCategory;
+  setMainCategory: (category: MainCategory) => void;
+  viewMode: PlannerViewMode;
+  setViewMode: (mode: PlannerViewMode) => void;
 }
 
 const NavLink: React.FC<{
@@ -57,7 +57,6 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
     { key: 'semester', label: 'Semesterübersicht' },
     { key: 'group', label: 'Studienverlaufsplan' },
     { key: 'modules', label: 'Modulübersicht' },
-    { key: 'templates', label: 'Vorlagen' },
     { key: 'optimization', label: 'Optimierung' },
   ];
 

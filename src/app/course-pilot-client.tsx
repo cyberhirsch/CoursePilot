@@ -327,28 +327,6 @@ export default function CoursePilotClient() {
     );
   }, []);
 
-  const handleAddProgram = useCallback((newProgram: Program) => {
-    if (programs.some(p => p.id === newProgram.id)) {
-      alert(`Ein Studiengang mit der ID "${newProgram.id}" existiert bereits.`);
-      return;
-    }
-    setPrograms(prev => [...prev, newProgram]);
-  }, [programs]);
-
-  const handleUpdateProgram = useCallback((programId: string, updates: Partial<Program>) => {
-    setPrograms(prev => prev.map(p => 
-      p.id === programId ? { ...p, ...updates } : p
-    ));
-  }, []);
-  
-  const handleDeleteProgram = useCallback((programId: string) => {
-    const programToDelete = programs.find(p=>p.id === programId);
-    if (window.confirm(`Möchten Sie den Studiengang "${programToDelete?.name || programId}" wirklich löschen? Alle zugehörigen Studiengruppen und ihre Pläne werden ebenfalls entfernt.`)) {
-      setPrograms(prev => prev.filter(p => p.id !== programId));
-      setStudiengruppen(prev => prev.filter(sg => sg.programId !== programId));
-    }
-  }, [programs]);
-  
   const getProgramById = useCallback((id: string): Program | undefined => {
     return programs.find(p => p.id === id);
   }, [programs]);
@@ -441,9 +419,6 @@ export default function CoursePilotClient() {
           onAddModule={handleAddModule}
           onDeleteModule={handleDeleteModule}
           onUpdateModulePrograms={handleUpdateModulePrograms}
-          onAddProgram={handleAddProgram}
-          onUpdateProgram={handleUpdateProgram}
-          onDeleteProgram={handleDeleteProgram}
           isHeatmapVisible={isHeatmapVisible}
           onToggleHeatmap={handleToggleHeatmap}
           onToggleModuleLock={handleToggleModuleLock}
