@@ -204,10 +204,16 @@ export default function CoursePilotClient() {
   const handleDrop = useCallback((studiengruppeId: string, semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const draggedInstanceId = e.dataTransfer.getData("instanceId");
+    const draggedModuleId = e.dataTransfer.getData("moduleId");
     
-    if (!draggedInstanceId) {
-      console.error("No instanceId found in dataTransfer.");
-      return;
+    if (!draggedInstanceId || !draggedModuleId) {
+        console.error("Missing data from drag operation.");
+        return;
+    }
+
+    // Critical Check: Only allow drop if the dragged module matches the target row's module.
+    if (draggedModuleId !== targetModuleId) {
+        return; // Do nothing if dropped on the wrong module row
     }
 
     const draggedModule = getModuleById(draggedInstanceId);
