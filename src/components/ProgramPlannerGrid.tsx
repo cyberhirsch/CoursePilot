@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import type { Module, Program, Studiengruppe, AbsoluteSemester } from '@/types';
 import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, getAbsoluteSemesterFor, CATEGORY_ORDER } from '@/constants';
 import { ModuleCard } from '@/components/ModuleCard';
@@ -29,20 +29,48 @@ interface ProgramPlannerGridProps {
     finalLockedInstances: Set<string>;
 }
 
+const getHeatmapColor = (count: number): string | undefined => {
+    if (count <= 0) return undefined;
+
+    let hue;
+    if (count > 22) {
+        return 'hsla(300, 80%, 60%, 0.35)'; // Magenta
+    }
+    if (count >= 20) {
+        hue = 120; // Green
+    } else if (count >= 10) {
+        const percentage = (count - 10) / (20 - 10);
+        hue = 60 + percentage * 60; // Yellow to Green
+    } else {
+        const percentage = (count - 1) / (10 - 1);
+        hue = 0 + percentage * 60; // Red to Yellow
+    }
+    return `hsla(${hue}, 80%, 55%, 0.35)`;
+};
+
+interface ParticipantInfo {
+  name: string;
+  studentCount: number;
+}
+
 const DropTargetCell: React.FC<{
     onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
     children?: React.ReactNode;
-}> = ({ onDrop, children }) => {
+    heatmapColor?: string;
+}> = ({ onDrop, children, heatmapColor }) => {
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
     };
+
+    const style = heatmapColor ? { backgroundColor: heatmapColor } : {};
 
     return (
         <td 
             className="p-1 border-t border-r border-border h-20"
             onDragOver={handleDragOver}
             onDrop={onDrop}
+            style={style}
         >
             <div className="h-full w-full">
                 {children}
@@ -103,6 +131,43 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
         return orderedGroup;
     }, [programModules, program.categoryOrder]);
 
+    const participantMap = useMemo(() => {
+      if (!isHeatmapVisible) return new Map(); 
+
+      const map = new Map<string, Map<string, ParticipantInfo[]>>();
+      
+      allStudiengruppen.forEach(gruppe => {
+          Object.entries(gruppe.plan.semesters).forEach(([relativeSemesterId, moduleInstanceIds]) => {
+              const relativeIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === relativeSemesterId);
+              if (relativeIndex === -1) return;
+
+              const absoluteSemester = getAbsoluteSemesterFor(gruppe.startSemester, relativeIndex);
+              if (!absoluteSemester) return;
+
+              const absoluteSemesterId = absoluteSemester.id;
+              if (!map.has(absoluteSemesterId)) {
+                  map.set(absoluteSemesterId, new Map<string, ParticipantInfo[]>());
+              }
+              const semesterMap = map.get(absoluteSemesterId)!;
+
+              (moduleInstanceIds as string[]).forEach(instanceId => {
+                  const module = getModuleById(instanceId);
+                  if (!module) return;
+
+                  const moduleId = module.id;
+                  
+                  if (!semesterMap.has(moduleId)) {
+                      semesterMap.set(moduleId, []);
+                  }
+                  const participantList = semesterMap.get(moduleId)!;
+                  participantList.push({ name: gruppe.shortName, studentCount: gruppe.studentCount });
+              });
+          });
+      });
+
+      return map;
+    }, [allStudiengruppen, getModuleById, isHeatmapVisible]);
+
     const semesterHeaders = useMemo(() => {
         return RELATIVE_SEMESTERS.slice(0, program.semesters).map((sem, index) => {
             const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, index);
@@ -114,6 +179,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
             return {
                 ...sem,
                 absoluteName: absoluteSemester?.name || '...',
+                absoluteId: absoluteSemester?.id,
                 cpSum,
                 cpExceeded,
                 heatmapColor,
@@ -197,8 +263,14 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                                                 const isPlacedInThisCell = placedSemesterId === sem.id;
                                                 const droppableModuleId = module.type === 'Pool' ? module.id : instanceId || module.id;
 
+                                                const participantInfo = isHeatmapVisible && sem.absoluteId
+                                                    ? participantMap.get(sem.absoluteId)?.get(module.id) || []
+                                                    : [];
+                                                const participantCount = participantInfo.reduce((sum, info) => sum + info.studentCount, 0);
+                                                const heatmapColor = isHeatmapVisible ? getHeatmapColor(participantCount) : undefined;
+
                                                 return (
-                                                    <DropTargetCell key={sem.id} onDrop={(e) => onDrop(studiengruppe.id, sem.id, droppableModuleId, e)}>
+                                                    <DropTargetCell key={sem.id} onDrop={(e) => onDrop(studiengruppe.id, sem.id, droppableModuleId, e)} heatmapColor={heatmapColor}>
                                                         {isPlacedInThisCell && instanceId && (
                                                             <ModuleCard
                                                                 module={module}
