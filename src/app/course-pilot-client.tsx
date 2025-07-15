@@ -312,11 +312,23 @@ export default function CoursePilotClient() {
 
   }, []);
 
-  const handleUpdateProgram = (programId: string, updates: Partial<Program>) => {
-    setPrograms(prevPrograms => prevPrograms.map(p =>
-      p.id === programId ? { ...p, ...updates } : p
-    ));
-  };
+  const handleUpdateProgram = useCallback((programId: string, updates: Partial<Program>) => {
+      setPrograms(prevPrograms => prevPrograms.map(p =>
+          p.id === programId ? { ...p, ...updates } : p
+      ));
+  }, []);
+
+  const handleUpdateModulePrograms = useCallback((moduleId: string, programId: string, isAssigned: boolean) => {
+      setPrograms(prevPrograms => prevPrograms.map(p => {
+          if (p.id === programId) {
+              const newModuleIds = isAssigned 
+                  ? [...p.moduleIds, moduleId]
+                  : p.moduleIds.filter(id => id !== moduleId);
+              return { ...p, moduleIds: newModuleIds };
+          }
+          return p;
+      }));
+  }, []);
 
 
   const getProgramById = useCallback((id: string): Program | undefined => {
@@ -417,9 +429,10 @@ export default function CoursePilotClient() {
           onUpdateStudiengruppe={handleUpdateStudiengruppe}
           modules={modules}
           programs={programs}
-          onUpdateModule={handleUpdateModule}
+          onUpdateModule={onUpdateModule}
           onAddModule={handleAddModule}
           onDeleteModule={handleDeleteModule}
+          onUpdateModulePrograms={handleUpdateModulePrograms}
           isHeatmapVisible={isHeatmapVisible}
           onToggleHeatmap={handleToggleHeatmap}
           onToggleModuleLock={handleToggleModuleLock}

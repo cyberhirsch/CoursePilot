@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -65,10 +66,9 @@ const ProgramSelector: React.FC<{ programs: Program[], selectedProgramIds: strin
 
 
 const initialNewModuleState: Module = {
-    id: '', name: '', ects: 0, sws: 0, cp: 0, workload: 0,
-    type: 'Pflicht', category: '', fachbereich: 'Design',
-    description: '', learningOutcomes: '', assessment: '',
-    prerequisites: [], forbiddenSemesters: [], maxParticipants: 0,
+    id: '', name: '', sws: 0, cp: 0,
+    type: 'Pflicht', category: '',
+    prerequisites: [], forbiddenSemesters: [],
 };
 
 const CategoryManager: React.FC<{
@@ -161,7 +161,7 @@ interface ModuleOverviewProps {
     onUpdateModule: (moduleId: string, field: keyof Module, value: any) => void;
     onAddModule: (module: Module, programIds: string[]) => void;
     onDeleteModule: (moduleId: string) => void;
-    onUpdateModulePrograms: (moduleId: string, programIds: string[]) => void;
+    onUpdateModulePrograms: (moduleId: string, programId: string, isAssigned: boolean) => void;
     categories: Category[];
     onAddCategory: (category: Category) => void;
     onUpdateCategory: (categoryId: string, updates: Partial<Category>) => void;
@@ -230,11 +230,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({ modules, program
     };
 
     const handleModuleProgramChange = (moduleId: string, programId: string, checked: boolean) => {
-        const currentProgramIds = programs.filter(p => p.moduleIds.includes(moduleId)).map(p => p.id);
-        const newProgramIds = checked
-            ? [...currentProgramIds, programId]
-            : currentProgramIds.filter(id => id !== programId);
-        onUpdateModulePrograms(moduleId, newProgramIds);
+        onUpdateModulePrograms(moduleId, programId, checked);
     };
 
     const filteredModules = useMemo(() => {
@@ -315,7 +311,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({ modules, program
                                 <div className="grid grid-cols-3 gap-3">
                                     <label className="block"><span className="text-muted-foreground text-sm">SWS</span><EditableCell value={newModule.sws} onChange={handleNewModuleChange} name="sws" type="number" className="text-center" /></label>
                                     <label className="block"><span className="text-muted-foreground text-sm">CP</span><EditableCell value={newModule.cp} onChange={handleNewModuleChange} name="cp" type="number" className="text-center" /></label>
-                                    <label className="block"><span className="text-muted-foreground text-sm">Workload</span><EditableCell value={newModule.workload} onChange={handleNewModuleChange} name="workload" type="number" className="text-center" /></label>
+                                    <label className="block"><span className="text-muted-foreground text-sm">Workload</span><EditableCell value={newModule.workload || ''} onChange={handleNewModuleChange} name="workload" type="number" className="text-center" /></label>
                                 </div>
                                 {newModule.type === 'Pool' && <label className="block"><span className="text-muted-foreground text-sm">Instanzen</span><EditableCell value={newModule.instanceCount || 0} onChange={handleNewModuleChange} name="instanceCount" type="number" className="text-center w-20" /></label>}
                             </div>
@@ -412,7 +408,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({ modules, program
                                             <td className="p-1 border-t border-border"><EditableCell value={module.type} onChange={(e) => onUpdateModule(module.id, 'type', e.target.value)} name="type" type="select" options={['Pflicht', 'Wahlpflicht', 'Pool']} /></td>
                                             <td className="p-1 border-t border-border text-center"><EditableCell value={module.sws} onChange={(e) => onUpdateModule(module.id, 'sws', parseInt(e.target.value) || 0)} name="sws" type="number" className="text-center" /></td>
                                             <td className="p-1 border-t border-border text-center"><EditableCell value={module.cp} onChange={(e) => onUpdateModule(module.id, 'cp', parseInt(e.target.value) || 0)} name="cp" type="number" className="text-center" /></td>
-                                            <td className="p-1 border-t border-border text-center"><EditableCell value={module.workload} onChange={(e) => onUpdateModule(module.id, 'workload', parseInt(e.target.value) || 0)} name="workload" type="number" className="text-center" /></td>
+                                            <td className="p-1 border-t border-border text-center"><EditableCell value={module.workload || ''} onChange={(e) => onUpdateModule(module.id, 'workload', parseInt(e.target.value) || 0)} name="workload" type="number" className="text-center" /></td>
                                             <td className="p-1 border-t border-border text-center">
                                                 {module.type === 'Pool' ? <EditableCell value={module.instanceCount || ''} onChange={(e) => onUpdateModule(module.id, 'instanceCount', parseInt(e.target.value) || undefined)} name="instanceCount" type="number" className="text-center" /> : <span className="text-muted-foreground">-</span>}
                                             </td>

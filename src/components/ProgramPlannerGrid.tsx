@@ -22,7 +22,7 @@ type ValidationStatus = 'valid' | 'invalid' | 'neutral';
 interface ProgramPlannerGridProps {
     studiengruppe: Studiengruppe;
     program: Program;
-    modules: Module[];
+    allModules: Module[];
     allStudiengruppen: Studiengruppe[];
     onDrop: (studiengruppeId: string, semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => void;
     getModuleById: (id: string) => Module | undefined;
@@ -125,84 +125,11 @@ interface ParticipantInfo {
   studentCount: number;
 }
 
-const DuplicateGroupDialog: React.FC<{
-    studiengruppe: Studiengruppe;
-    onAddStudiengruppe: (sg: Studiengruppe) => boolean;
-}> = ({ studiengruppe, onAddStudiengruppe }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [newShortName, setNewShortName] = useState(studiengruppe.shortName + "-Kopie");
-    const [newStartSemesterId, setNewStartSemesterId] = useState(studiengruppe.startSemester.id);
-    const [error, setError] = useState('');
-
-    const handleSubmit = () => {
-        setError('');
-        const newId = `${studiengruppe.programId}-${newShortName}`;
-        const newStartSemester = ABSOLUTE_SEMESTERS.find(s => s.id === newStartSemesterId);
-        
-        if (!newStartSemester) {
-            setError("Ungültiges Startsemester gewählt.");
-            return;
-        }
-
-        const newGroup: Studiengruppe = {
-            ...studiengruppe,
-            id: newId,
-            name: `${studiengruppe.name.replace(studiengruppe.shortName, '')} ${newShortName}`,
-            shortName: newShortName,
-            startSemester: newStartSemester,
-            userLockedModules: [] // Start with no locks
-        };
-
-        const success = onAddStudiengruppe(newGroup);
-        if (success) {
-            setIsOpen(false);
-        } else {
-            setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
-        }
-    };
-
-    return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                 <Button variant="outline" size="sm">
-                    <Copy className="mr-2" />
-                    Gruppe duplizieren
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Studiengruppe duplizieren</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="shortName" className="text-right">Kürzel</Label>
-                        <Input id="shortName" value={newShortName} onChange={e => setNewShortName(e.target.value)} className="col-span-3" />
-                    </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="startSemester" className="text-right">Startsemester</Label>
-                        <Select value={newStartSemesterId} onValueChange={setNewStartSemesterId}>
-                            <SelectTrigger className="col-span-3">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {ABSOLUTE_SEMESTERS.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    {error && <p className="text-destructive text-sm col-span-4 text-center">{error}</p>}
-                </div>
-                <DialogFooter>
-                    <Button onClick={handleSubmit}>Neue Gruppe erstellen</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
-}
 
 export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     studiengruppe,
     program,
-    modules,
+    allModules,
     allStudiengruppen,
     onDrop,
     getModuleById,
@@ -227,7 +154,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
 
     const allProgramModules = new Set(program.moduleIds);
 
-    modules.forEach(module => {
+    allModules.forEach(module => {
         if (allProgramModules.has(module.id)) {
              if (!categoryMap.has(module.category)) {
                 categoryMap.set(module.category, []);
@@ -250,7 +177,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     });
 
     return ordered;
-}, [modules, program]);
+}, [allModules, program]);
 
   const validateModulePlacement = useCallback((moduleId: string, instanceId: string, semesterId: string, plan: Studiengruppe['plan']): string[] => {
       const module = getModuleById(moduleId);
@@ -286,8 +213,8 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
       }
 
       // 3. Check that this module does not violate other modules' prerequisites
-      const allModuleIds = modules.map(m => m.id);
-      for (const otherModuleId of allModuleIds) {
+      const allProgramModuleIds = program.moduleIds;
+      for (const otherModuleId of allProgramModuleIds) {
           const otherModule = getModuleById(otherModuleId);
           if (otherModule?.prerequisites?.includes(moduleId)) { // If 'otherModule' requires the module we are checking
               // Find where 'otherModule' is placed
@@ -304,7 +231,7 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
       }
 
       return errors;
-  }, [getModuleById, modules]);
+  }, [getModuleById, allModules, program.moduleIds]);
 
 
   const placementErrors = useMemo(() => {
@@ -409,6 +336,25 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
   const curriedOnDrop = (semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => {
       onDrop(studiengruppe.id, semesterId, targetModuleId, e);
   }
+
+  const handleRemoveModuleFromProgram = (moduleId: string) => {
+      if (window.confirm(`Möchten Sie das Modul "${moduleId}" wirklich aus diesem Studiengang entfernen? Es wird aus dem Plan dieser Gruppe und der Modulliste des Studiengangs gelöscht.`)) {
+          // Remove from program moduleIds
+          onUpdateProgram(program.id, {
+              moduleIds: program.moduleIds.filter(id => id !== moduleId)
+          });
+
+          // Remove all instances from current studiengruppe plan
+          const newSemesters = { ...studiengruppe.plan.semesters };
+          Object.keys(newSemesters).forEach(semId => {
+              newSemesters[semId] = newSemesters[semId].filter(instanceId => {
+                  const module = getModuleById(instanceId);
+                  return module?.id !== moduleId;
+              });
+          });
+          onUpdateStudiengruppe(studiengruppe.id, { plan: { ...studiengruppe.plan, semesters: newSemesters } });
+      }
+  };
     
   return (
     <div className="bg-card rounded-lg shadow-md h-full flex flex-col border border-border" onDragEnd={handleDragEndLocal}>
@@ -426,8 +372,9 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
             onToggleCategoryLock={(cat) => onToggleCategoryLock(studiengruppe.id, cat)}
             activeBulkLocks={activeBulkLocks}
             finalLockedInstances={finalLockedInstances}
-            modules={modules}
+            allModules={allModules}
             onAddStudiengruppe={onAddStudiengruppe}
+            onUpdateProgram={onUpdateProgram}
         />
         <div className="flex-grow overflow-auto relative">
             <table className="w-full border-collapse text-xs">
@@ -459,9 +406,18 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                             {categoryModules.map(module => (
                                 <tr key={module.id} className="h-10">
                                     <td className="sticky left-0 p-1 font-medium bg-card border-t border-r border-border w-64 align-middle text-foreground">
-                                        <div className="flex items-center">
+                                        <div className="flex items-center group">
                                             <span className="text-muted-foreground font-code w-10 flex-shrink-0">{module.id}</span>
-                                            <span className="pl-2">{module.name}</span>
+                                            <span className="pl-2 flex-grow">{module.name}</span>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+                                                onClick={() => handleRemoveModuleFromProgram(module.id)}
+                                                title={`Modul "${module.name}" aus Studiengang entfernen`}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     </td>
                                     {semesterData.map((semester, index) => {

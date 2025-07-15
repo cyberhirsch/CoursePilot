@@ -10,9 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, PlusCircle } from 'lucide-react';
 import { ABSOLUTE_SEMESTERS } from '@/constants';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { ScrollArea } from './ui/scroll-area';
 
 interface PlannerControlsProps {
     studiengruppe: Studiengruppe;
@@ -28,18 +29,20 @@ interface PlannerControlsProps {
     onToggleCategoryLock: (category: string) => void;
     activeBulkLocks: { past: boolean; categories: Set<string> } | undefined;
     finalLockedInstances: Set<string>;
-    modules: Module[];
+    allModules: Module[];
     onAddStudiengruppe: (newStudiengruppe: Studiengruppe) => boolean;
+    onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
 }
 
 export const PlannerControls: React.FC<PlannerControlsProps> = ({
     studiengruppe, program, onUpdateStudiengruppe, allStudiengruppen, onSelectGroup,
     isHeatmapVisible, onToggleHeatmap, selectedSemester,
-    onTogglePastLock, onToggleCategoryLock, activeBulkLocks, modules,
-    onAddStudiengruppe
+    onTogglePastLock, onToggleCategoryLock, activeBulkLocks, allModules,
+    onAddStudiengruppe, onUpdateProgram
 }) => {
     
     const [isDuplicateDialogOpen, setDuplicateDialogOpen] = React.useState(false);
+    const [isAddModuleOpen, setAddModuleOpen] = React.useState(false);
     const [newShortName, setNewShortName] = React.useState(studiengruppe.shortName + "-Kopie");
     const [newStartSemesterId, setNewStartSemesterId] = React.useState(studiengruppe.startSemester.id);
     const [error, setError] = React.useState('');
@@ -47,7 +50,8 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     const programGroups = allStudiengruppen.filter(sg => sg.programId === studiengruppe.programId);
     const currentIndex = programGroups.findIndex(g => g.id === studiengruppe.id);
     
-    const uniqueCategories = [...new Set(modules.map(m => m.category))];
+    const uniqueCategories = [...new Set(allModules.map(m => m.category))];
+    const availableModules = allModules.filter(m => !program.moduleIds.includes(m.id));
 
     const handlePrevious = () => {
         if (currentIndex > 0) {
@@ -86,6 +90,12 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
         } else {
             setError(`Eine Gruppe mit der ID "${newId}" existiert bereits.`);
         }
+    };
+
+    const handleAddModuleToProgram = (moduleId: string) => {
+        onUpdateProgram(program.id, {
+            moduleIds: [...program.moduleIds, moduleId]
+        });
     };
 
     return (
@@ -149,6 +159,31 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
+                <Popover open={isAddModuleOpen} onOpenChange={setAddModuleOpen}>
+                    <PopoverTrigger asChild>
+                        <Button variant="outline">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Modul zuordnen
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-96">
+                        <h4 className="font-medium text-lg mb-2">Verfügbare Module</h4>
+                        <ScrollArea className="h-72">
+                            <div className="p-1">
+                                {availableModules.map(module => (
+                                    <div key={module.id} className="flex items-center justify-between p-2 hover:bg-muted rounded-md">
+                                        <div>
+                                            <p className="font-semibold">{module.name}</p>
+                                            <p className="text-xs text-muted-foreground">{module.id}</p>
+                                        </div>
+                                        <Button size="sm" onClick={() => handleAddModuleToProgram(module.id)}>Hinzufügen</Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    </PopoverContent>
+                </Popover>
 
                 <div className="flex items-center space-x-2">
                     <Switch

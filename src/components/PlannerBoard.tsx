@@ -29,6 +29,7 @@ interface PlannerBoardProps {
   onUpdateModule: (moduleId: string, field: keyof Module, value: any) => void;
   onAddModule: (module: Module, programIds: string[]) => void;
   onDeleteModule: (moduleId: string) => void;
+  onUpdateModulePrograms: (moduleId: string, programId: string, isAssigned: boolean) => void;
   isHeatmapVisible: boolean;
   onToggleHeatmap: () => void;
   onToggleModuleLock: (studiengruppeId: string, instanceId: string) => void;
@@ -63,6 +64,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     onUpdateModule,
     onAddModule,
     onDeleteModule,
+    onUpdateModulePrograms,
     isHeatmapVisible,
     onToggleHeatmap,
     onToggleModuleLock,
@@ -96,19 +98,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
               onUpdateModule={onUpdateModule}
               onAddModule={onAddModule}
               onDeleteModule={onDeleteModule}
-              onUpdateModulePrograms={(moduleId, programIds) => {
-                  const program = programs.find(p => p.moduleIds.includes(moduleId));
-                  if(program) {
-                      const newPrograms = programs.map(p => {
-                          if (p.id === program.id) {
-                              return { ...p, moduleIds: programIds };
-                          }
-                          return p;
-                      });
-                      // This is a placeholder for a function that updates the programs state
-                      console.log("Updated programs:", newPrograms);
-                  }
-              }}
+              onUpdateModulePrograms={onUpdateModulePrograms}
               categories={categories}
               onAddCategory={onAddCategory}
               onUpdateCategory={onUpdateCategory}
@@ -165,7 +155,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
             key={activeGruppe.id}
             studiengruppe={activeGruppe}
             program={program}
-            modules={modules}
+            allModules={modules}
             onDrop={onDrop}
             getModuleById={getModuleById}
             onDragStart={onDragStart}
