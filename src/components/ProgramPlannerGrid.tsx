@@ -3,10 +3,11 @@
 
 import React, { useMemo } from 'react';
 import type { Module, Program, Studiengruppe, AbsoluteSemester } from '@/types';
-import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, getAbsoluteSemesterFor } from '@/constants';
+import { RELATIVE_SEMESTERS, CP_LIMIT_PER_SEMESTER, getAbsoluteSemesterFor, CATEGORY_ORDER } from '@/constants';
 import { ModuleCard } from '@/components/ModuleCard';
 import { ModuleSidebar } from '@/components/ModuleSidebar';
 import { PlannerControls } from '@/components/PlannerControls';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ProgramPlannerGridProps {
     studiengruppe: Studiengruppe;
@@ -28,82 +29,25 @@ interface ProgramPlannerGridProps {
     finalLockedInstances: Set<string>;
 }
 
-const SemesterColumn: React.FC<{
-  semester: { id: string; name: string };
-  studiengruppe: Studiengruppe;
-  getModuleById: (id: string) => Module | undefined;
-  onDrop: (studiengruppeId: string, semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => void;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, moduleId: string, instanceId: string) => void;
-  onToggleModuleLock: (studiengruppeId: string, instanceId: string) => void;
-  finalLockedInstances: Set<string>;
-  cpSum: number;
-  absoluteSemesterName: string | undefined;
-  isHeatmapVisible: boolean;
-}> = ({ semester, studiengruppe, getModuleById, onDrop, onDragStart, onToggleModuleLock, finalLockedInstances, cpSum, absoluteSemesterName, isHeatmapVisible }) => {
-
+const DropTargetCell: React.FC<{
+    onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
+    children?: React.ReactNode;
+}> = ({ onDrop, children }) => {
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
     };
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        const draggedModuleId = e.dataTransfer.getData("moduleId");
-        onDrop(studiengruppe.id, semester.id, draggedModuleId, e);
-    };
-
-    const moduleInstances = studiengruppe.plan.semesters[semester.id] || [];
-    
-    const cpExceeded = cpSum > CP_LIMIT_PER_SEMESTER;
-
-    const heatmapIntensity = isHeatmapVisible ? Math.min(1, cpSum / CP_LIMIT_PER_SEMESTER) : 0;
-    const heatmapColor = `rgba(239, 68, 68, ${heatmapIntensity * 0.5})`;
-
     return (
-        <div className="flex flex-col gap-2 p-2 rounded-lg bg-card border border-border min-w-[180px]">
-            <div className="text-center pb-2 border-b border-border">
-                <h3 className="font-semibold text-foreground">{semester.name}</h3>
-                <p className={`text-xs ${cpExceeded ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
-                    {absoluteSemesterName || '...'} | {cpSum} CP
-                </p>
+        <td 
+            className="p-1 border-t border-r border-border h-20"
+            onDragOver={handleDragOver}
+            onDrop={onDrop}
+        >
+            <div className="h-full w-full">
+                {children}
             </div>
-            <div 
-                className="flex-grow min-h-[150px] bg-background/30 rounded-md p-1 transition-colors duration-300"
-                style={{ backgroundColor: isHeatmapVisible ? heatmapColor : undefined }}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-            >
-                <div className="grid grid-cols-2 gap-1 h-full">
-                    {moduleInstances.map((instanceId) => {
-                        const module = getModuleById(instanceId);
-                        if (!module) return null;
-
-                        return (
-                             <div 
-                                className="h-16" 
-                                key={instanceId}
-                                onDragOver={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                }}
-                                onDrop={(e) => {
-                                    e.stopPropagation();
-                                    onDrop(studiengruppe.id, semester.id, instanceId, e);
-                                }}
-                            >
-                                <ModuleCard
-                                    module={module}
-                                    instanceId={instanceId}
-                                    onDragStart={onDragStart}
-                                    isDraggable={true}
-                                    isLocked={finalLockedInstances.has(instanceId)}
-                                    onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
-                                />
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        </div>
+        </td>
     );
 };
 
@@ -126,6 +70,66 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     }, [studiengruppe.plan.semesters, getModuleById]);
 
     const totalCp = useMemo(() => Object.values(cpSums).reduce((sum, cp) => sum + cp, 0), [cpSums]);
+
+    const programModules = useMemo(() => {
+        return modules.filter(m => program.moduleIds.includes(m.id));
+    }, [modules, program.moduleIds]);
+    
+    const categorizedModules = useMemo(() => {
+        const grouped = programModules.reduce((acc, module) => {
+            const category = module.category || 'Unkategorisiert';
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(module);
+            return acc;
+        }, {} as Record<string, Module[]>);
+
+        const orderedGroup: { category: string, modules: Module[] }[] = [];
+        const categoryOrder = program.categoryOrder || CATEGORY_ORDER;
+        
+        categoryOrder.forEach(catName => {
+            if (grouped[catName]) {
+                orderedGroup.push({ category: catName, modules: grouped[catName].sort((a,b) => a.name.localeCompare(b.name))});
+            }
+        });
+        
+        Object.keys(grouped).forEach(catName => {
+             if (!categoryOrder.includes(catName)) {
+                 orderedGroup.push({ category: catName, modules: grouped[catName].sort((a,b) => a.name.localeCompare(b.name))});
+             }
+        });
+
+        return orderedGroup;
+    }, [programModules, program.categoryOrder]);
+
+    const semesterHeaders = useMemo(() => {
+        return RELATIVE_SEMESTERS.slice(0, program.semesters).map((sem, index) => {
+            const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, index);
+            const cpSum = cpSums[sem.id] || 0;
+            const cpExceeded = cpSum > CP_LIMIT_PER_SEMESTER;
+            const heatmapIntensity = isHeatmapVisible ? Math.min(1, cpSum / CP_LIMIT_PER_SEMESTER) : 0;
+            const heatmapColor = `rgba(239, 68, 68, ${heatmapIntensity * 0.5})`;
+            
+            return {
+                ...sem,
+                absoluteName: absoluteSemester?.name || '...',
+                cpSum,
+                cpExceeded,
+                heatmapColor,
+            };
+        });
+    }, [program.semesters, studiengruppe.startSemester, cpSums, isHeatmapVisible]);
+
+    const placedModulesMap = useMemo(() => {
+        const map = new Map<string, string>(); // instanceId -> semesterId
+        for (const semId in studiengruppe.plan.semesters) {
+            for (const instanceId of studiengruppe.plan.semesters[semId]) {
+                map.set(instanceId, semId);
+            }
+        }
+        return map;
+    }, [studiengruppe.plan]);
 
     return (
         <div className="flex h-full gap-4">
@@ -155,28 +159,66 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                     modules={modules}
                 />
                 
-                <div className="flex-grow overflow-x-auto pb-4">
-                    <div className="inline-flex gap-4">
-                        {RELATIVE_SEMESTERS.slice(0, program.semesters).map((sem, index) => {
-                            const absoluteSemester = getAbsoluteSemesterFor(studiengruppe.startSemester, index);
-                            return (
-                                <SemesterColumn
-                                    key={sem.id}
-                                    semester={sem}
-                                    studiengruppe={studiengruppe}
-                                    getModuleById={getModuleById}
-                                    onDrop={onDrop}
-                                    onDragStart={onDragStart}
-                                    onToggleModuleLock={onToggleModuleLock}
-                                    finalLockedInstances={finalLockedInstances}
-                                    cpSum={cpSums[sem.id] || 0}
-                                    absoluteSemesterName={absoluteSemester?.name}
-                                    isHeatmapVisible={isHeatmapVisible}
-                                />
-                            )
-                        })}
-                    </div>
-                </div>
+                <ScrollArea className="flex-grow rounded-lg border border-border bg-card">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="sticky top-0 bg-card z-10 shadow-sm">
+                                <th className="p-2 text-left w-[300px] min-w-[300px] font-semibold text-foreground">Modul</th>
+                                {semesterHeaders.map(sem => (
+                                    <th key={sem.id} className="p-2 text-center font-semibold text-foreground border-l border-border" style={{backgroundColor: isHeatmapVisible ? sem.heatmapColor : undefined}}>
+                                        {sem.name}
+                                        <p className={`text-xs font-normal ${sem.cpExceeded ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                                            {sem.absoluteName}
+                                        </p>
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {categorizedModules.map(({ category, modules: catModules }) => (
+                                <React.Fragment key={category}>
+                                    <tr className="bg-muted/20">
+                                        <td colSpan={1 + semesterHeaders.length} className="p-2 font-bold text-foreground border-t border-border">{category}</td>
+                                    </tr>
+                                    {catModules.map(module => (
+                                        <tr key={module.id}>
+                                            <td className="p-2 border-t border-border flex items-center gap-2">
+                                                <span className="text-muted-foreground text-xs w-10">{module.shortName}</span>
+                                                <span className="text-sm">{module.name}</span>
+                                            </td>
+                                            {semesterHeaders.map(sem => {
+                                                const instanceId = module.type === 'Pool' 
+                                                  ? Object.entries(studiengruppe.plan.semesters)
+                                                      .find(([semId, instances]) => semId === sem.id && instances.some(instId => instId.startsWith(module.id + '-')))?.[1]
+                                                      .find(instId => instId.startsWith(module.id + '-'))
+                                                  : module.id;
+
+                                                const placedSemesterId = instanceId ? placedModulesMap.get(instanceId) : undefined;
+                                                const isPlacedInThisCell = placedSemesterId === sem.id;
+                                                const droppableModuleId = module.type === 'Pool' ? module.id : instanceId || module.id;
+
+                                                return (
+                                                    <DropTargetCell key={sem.id} onDrop={(e) => onDrop(studiengruppe.id, sem.id, droppableModuleId, e)}>
+                                                        {isPlacedInThisCell && instanceId && (
+                                                            <ModuleCard
+                                                                module={module}
+                                                                instanceId={instanceId}
+                                                                onDragStart={onDragStart}
+                                                                isDraggable={true}
+                                                                isLocked={finalLockedInstances.has(instanceId)}
+                                                                onToggleLock={() => onToggleModuleLock(studiengruppe.id, instanceId)}
+                                                            />
+                                                        )}
+                                                    </DropTargetCell>
+                                                )
+                                            })}
+                                        </tr>
+                                    ))}
+                                </React.Fragment>
+                            ))}
+                        </tbody>
+                    </table>
+                </ScrollArea>
             </div>
         </div>
     );
