@@ -1,3 +1,4 @@
+
 export interface Category {
   id: string;
   name: string;
@@ -6,23 +7,22 @@ export interface Category {
 export interface Module {
   id: string;
   name: string;
-  ects: number; // Legacy, will use cp
   sws: number;
   cp: number;
-  workload: number;
   type: 'Pflicht' | 'Wahlpflicht' | 'Pool';
   category: string;
+  programIds?: string[];
+  // Optional fields that might be added back later or are calculated
+  workload?: number;
   shortName?: string;
-  fachbereich: 'Design' | 'Psychologie' | 'Wirtschaft';
+  fachbereich?: 'Design' | 'Psychologie' | 'Wirtschaft';
   instanceCount?: number;
-  // New detailed fields
   description?: string;
   learningOutcomes?: string;
   assessment?: string;
-  // User request additions
-  prerequisites?: string[]; // E.g., ['M5'] - Module IDs that must be taken before this one.
-  forbiddenSemesters?: number[]; // E.g., [1, 2] - Relative semesters where this module cannot be placed.
-  maxParticipants?: number; // Max students for a course instance
+  prerequisites?: string[];
+  forbiddenSemesters?: number[];
+  maxParticipants?: number;
   semesterRecommendation?: string;
 }
 
@@ -48,11 +48,19 @@ export interface AbsoluteSemester {
   type: 'SS' | 'WS';
 }
 
+// This is the structure used by the UI components
 export interface ProgramPlan {
   semesters: {
-    // Enthält jetzt reguläre Modul-IDs oder Instanz-IDs wie 'POOL_WP-1'
+    // Contains regular module IDs or instance IDs like 'POOL_WP-1'
     [semesterId: string]: string[]; 
   };
+}
+
+// This represents the new plan structure from cohorts.json
+export interface RawPlan {
+  modules: {
+    [moduleId: string]: number | number[]; // e.g. { "G1": 1, "WP1-8": [2, 4] }
+  }
 }
 
 export interface Plan {
@@ -69,7 +77,7 @@ export interface Studiengruppe {
   name: string; // "B.A. Grafikdesign..."
   programId: string;
   startSemester: AbsoluteSemester;
-  plan: ProgramPlan;
+  plan: ProgramPlan; // This will be the transformed plan
   studentCount: number;
   shortName: string;
   type: 'klassisch' | 'dual';
