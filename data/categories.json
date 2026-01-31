@@ -1,0 +1,14 @@
+[
+  {
+    "id": "sguek",
+    "name": "Studiengangübergreifende Kompetenzen"
+  },
+  {
+    "id": "sgsk",
+    "name": "Studiengangspezifische Kompetenzen"
+  },
+  {
+    "id": "wmsa",
+    "name": "Weitere Module und Studienabschnitte"
+  }
+]
