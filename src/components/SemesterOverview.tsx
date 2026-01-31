@@ -3,40 +3,43 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { Studiengruppe, Module, AbsoluteSemester, Program } from '../types';
+import type { Cohort, Module, AbsoluteSemester, Program } from '../types';
 import { getRelativeSemesterIndex, RELATIVE_SEMESTERS } from '../constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { TRANSLATIONS, DEFAULT_LANGUAGE } from '@/translations';
 
 interface ProgramSectionProps {
     program: Program;
-    studiengruppen: Studiengruppe[];
+    cohorts: Cohort[];
     modules: Module[];
     selectedSemester: AbsoluteSemester;
     getModuleById: (id: string) => Module | undefined;
-    onSelectGroup: (groupId: string) => void;
+    onSelectGroup: (cohortId: string) => void;
+    allSemesters: AbsoluteSemester[];
 }
 
-const ProgramSection: React.FC<ProgramSectionProps> = ({ program, studiengruppen, modules, selectedSemester, getModuleById, onSelectGroup }) => {
+const ProgramSection: React.FC<ProgramSectionProps & { lang?: keyof typeof TRANSLATIONS }> = ({ program, cohorts, modules, selectedSemester, getModuleById, onSelectGroup, allSemesters, lang = DEFAULT_LANGUAGE }) => {
+    const t = TRANSLATIONS[lang];
 
-    const relevantGroups = useMemo(() => studiengruppen
+    const relevantGroups = useMemo(() => cohorts
         .filter(sg => sg.programId === program.id)
         .map(sg => {
-            const relativeIndex = getRelativeSemesterIndex(sg.startSemester, selectedSemester);
+            const relativeIndex = getRelativeSemesterIndex(allSemesters, sg.startSemester, selectedSemester);
             if (relativeIndex < 0 || relativeIndex >= program.semesters) return null;
 
             const relativeSemId = `sem${relativeIndex + 1}`;
             const moduleInstancesInSem = sg.plan.semesters[relativeSemId] || [];
-            
+
             return {
                 ...sg,
                 relativeIndex,
                 moduleInstancesInSem
             };
         })
-        .filter(Boolean) as (Studiengruppe & { relativeIndex: number; moduleInstancesInSem: string[] })[], [studiengruppen, program, selectedSemester]);
-    
+        .filter(Boolean) as (Cohort & { relativeIndex: number; moduleInstancesInSem: string[] })[], [cohorts, program, selectedSemester]);
+
     if (relevantGroups.length === 0) return null;
 
     const programModules = useMemo(() => modules.filter(m => program.moduleIds.includes(m.id)), [modules, program.moduleIds]);
@@ -53,17 +56,17 @@ const ProgramSection: React.FC<ProgramSectionProps> = ({ program, studiengruppen
 
         const orderedGroup: { category: string, modules: Module[] }[] = [];
         const categoryOrder = program.categoryOrder || [];
-        
+
         categoryOrder.forEach(catName => {
             if (grouped[catName]) {
-                orderedGroup.push({ category: catName, modules: grouped[catName].sort((a,b) => a.name.localeCompare(b.name))});
+                orderedGroup.push({ category: catName, modules: grouped[catName].sort((a, b) => a.name.localeCompare(b.name)) });
             }
         });
-        
+
         Object.keys(grouped).forEach(catName => {
-             if (!categoryOrder.includes(catName)) {
-                 orderedGroup.push({ category: catName, modules: grouped[catName].sort((a,b) => a.name.localeCompare(b.name))});
-             }
+            if (!categoryOrder.includes(catName)) {
+                orderedGroup.push({ category: catName, modules: grouped[catName].sort((a, b) => a.name.localeCompare(b.name)) });
+            }
         });
 
         return orderedGroup;
@@ -95,13 +98,13 @@ const ProgramSection: React.FC<ProgramSectionProps> = ({ program, studiengruppen
                         </tr>
                         <tr>
                             <th className="p-2 text-muted-foreground text-left sticky left-0 z-10 bg-inherit">Semester</th>
-                             {relevantGroups.map(sg => (
+                            {relevantGroups.map(sg => (
                                 <th key={sg.id} className="p-2 text-center text-muted-foreground font-normal border-l border-border">{sg.relativeIndex + 1}.</th>
                             ))}
                         </tr>
-                         <tr>
+                        <tr>
                             <th className="p-2 text-muted-foreground text-left sticky left-0 z-10 bg-inherit">Teilnehmer</th>
-                             {relevantGroups.map(sg => (
+                            {relevantGroups.map(sg => (
                                 <th key={sg.id} className="p-2 text-center text-muted-foreground font-normal border-l border-border">{sg.studentCount}</th>
                             ))}
                         </tr>
@@ -123,14 +126,14 @@ const ProgramSection: React.FC<ProgramSectionProps> = ({ program, studiengruppen
                                         {relevantGroups.map(sg => (
                                             <td key={sg.id} className="p-2 text-center border-l border-border/50">
                                                 {sg.moduleInstancesInSem.some(instanceId => {
-                                                     const plannedModule = getModuleById(instanceId);
-                                                     if (!plannedModule) return false;
-                                                     return plannedModule.id === module.id || plannedModule.equivalentTo === module.id;
+                                                    const plannedModule = getModuleById(instanceId);
+                                                    if (!plannedModule) return false;
+                                                    return plannedModule.id === module.id || plannedModule.equivalentTo === module.id;
                                                 }) && (
-                                                    <div className="inline-block bg-primary/80 text-primary-foreground text-xs font-bold rounded px-2 py-1">
-                                                        {module.sws}
-                                                    </div>
-                                                )}
+                                                        <div className="inline-block bg-primary/80 text-primary-foreground text-xs font-bold rounded px-2 py-1">
+                                                            {module.sws}
+                                                        </div>
+                                                    )}
                                             </td>
                                         ))}
                                     </tr>
@@ -140,9 +143,9 @@ const ProgramSection: React.FC<ProgramSectionProps> = ({ program, studiengruppen
                     </tbody>
                     <tfoot className="bg-background/40 sticky bottom-0">
                         <tr>
-                            <td className="p-2 font-bold sticky left-0 bg-background/40">SWS gesamt</td>
+                            <td className="p-2 font-bold sticky left-0 bg-background/40">{t?.semesterOverview?.totalSws || 'SWS gesamt'}</td>
                             {swsTotals.map((total, index) => (
-                                 <td key={index} className="p-2 text-center font-bold border-l border-border">{total > 0 ? total : ''}</td>
+                                <td key={index} className="p-2 text-center font-bold border-l border-border">{total > 0 ? total : ''}</td>
                             ))}
                         </tr>
                     </tfoot>
@@ -154,28 +157,29 @@ const ProgramSection: React.FC<ProgramSectionProps> = ({ program, studiengruppen
 
 const calculateOfferedSws = (
     targetSemester: AbsoluteSemester,
-    studiengruppen: Studiengruppe[],
+    cohorts: Cohort[],
     programs: Program[],
-    modules: Module[]
+    modules: Module[],
+    allSemesters: AbsoluteSemester[]
 ): number => {
     const getModuleById = (id: string): Module | undefined => {
         const directMatch = modules.find(m => m.id === id);
         if (directMatch) return directMatch;
         return modules.find(m => m.type === 'Pool' && id.startsWith(m.id + '-'));
     };
-    
+
     const uniqueModuleCourses = new Set<string>();
 
-    studiengruppen.forEach(gruppe => {
-        const relativeIndex = getRelativeSemesterIndex(gruppe.startSemester, targetSemester);
-        const program = programs.find(p => p.id === gruppe.programId);
+    cohorts.forEach(cohort => {
+        const relativeIndex = getRelativeSemesterIndex(allSemesters, cohort.startSemester, targetSemester);
+        const program = programs.find(p => p.id === cohort.programId);
 
         if (!program || relativeIndex < 0 || relativeIndex >= program.semesters) {
             return;
         }
 
         const relativeSemesterId = RELATIVE_SEMESTERS[relativeIndex].id;
-        const moduleInstanceIds = gruppe.plan.semesters[relativeSemesterId] || [];
+        const moduleInstanceIds = cohort.plan.semesters[relativeSemesterId] || [];
 
         moduleInstanceIds.forEach(instanceId => {
             const module = getModuleById(instanceId);
@@ -185,11 +189,11 @@ const calculateOfferedSws = (
             uniqueModuleCourses.add(courseId);
         });
     });
-    
+
     let totalOfferedSws = 0;
     uniqueModuleCourses.forEach(courseId => {
         const module = getModuleById(courseId);
-        if(module) {
+        if (module) {
             totalOfferedSws += module.sws;
         }
     });
@@ -199,159 +203,167 @@ const calculateOfferedSws = (
 
 
 export const SemesterOverview: React.FC<{
-    studiengruppen: Studiengruppe[];
+    cohorts: Cohort[];
     getModuleById: (id: string) => Module | undefined;
     programs: Program[];
     selectedSemester: AbsoluteSemester;
     setSelectedSemester: (semester: AbsoluteSemester) => void;
     semesters: AbsoluteSemester[];
-    onSelectGroup: (studiengruppeId: string) => void;
+    onSelectGroup: (cohortId: string) => void;
     modules: Module[];
-}> = ({ 
-    studiengruppen, getModuleById, programs, selectedSemester, setSelectedSemester, semesters, onSelectGroup, modules
+    lang?: keyof typeof TRANSLATIONS;
+}> = ({
+    cohorts, getModuleById, programs, selectedSemester, setSelectedSemester, semesters, onSelectGroup, modules, lang = DEFAULT_LANGUAGE
 }) => {
-    
-    const handleSemesterChange = (direction: 'prev' | 'next') => {
-        const currentIndex = semesters.findIndex(s => s.id === selectedSemester.id);
-        const newIndex = direction === 'prev' ? Math.max(0, currentIndex - 1) : Math.min(semesters.length - 1, currentIndex + 1);
-        setSelectedSemester(semesters[newIndex]);
-    };
+        const t = TRANSLATIONS[lang];
 
-    const groupedByProgram = useMemo(() => {
-        const groups: { [programId: string]: Studiengruppe[] } = {};
-        for (const gruppe of studiengruppen) {
-            if (!groups[gruppe.programId]) {
-                groups[gruppe.programId] = [];
-            }
-            groups[gruppe.programId].push(gruppe);
+        if (!selectedSemester) {
+            return <div className="p-12 text-center italic opacity-50">Lade Semesterdaten...</div>;
         }
-        return groups;
-    }, [studiengruppen]);
 
-    const poolMetrics = useMemo(() => {
-        const participantGroups: Record<string, Set<string>> = {
-            'WP1-8': new Set<string>(),
-            'F5': new Set<string>(),
-            'Lab': new Set<string>(),
+        const handleSemesterChange = (direction: 'prev' | 'next') => {
+            const currentIndex = semesters.findIndex(s => s.id === selectedSemester.id);
+            const newIndex = direction === 'prev' ? Math.max(0, currentIndex - 1) : Math.min(semesters.length - 1, currentIndex + 1);
+            setSelectedSemester(semesters[newIndex]);
         };
 
-        studiengruppen.forEach(gruppe => {
-            const relativeIndex = getRelativeSemesterIndex(gruppe.startSemester, selectedSemester);
-            const program = programs.find(p => p.id === gruppe.programId);
-            
-            if (!program || relativeIndex < 0 || relativeIndex >= program.semesters) return;
-            
-            const relativeSemesterId = RELATIVE_SEMESTERS[relativeIndex].id;
-            const moduleInstanceIds = gruppe.plan.semesters[relativeSemesterId] || [];
-
-            moduleInstanceIds.forEach(instanceId => {
-                const module = getModuleById(instanceId);
-                if (!module) return;
-                const poolType = module.id as keyof typeof participantGroups;
-                if (participantGroups.hasOwnProperty(poolType)) {
-                     participantGroups[poolType].add(gruppe.id);
+        const groupedByProgram = useMemo(() => {
+            const groups: { [programId: string]: Cohort[] } = {};
+            for (const cohort of cohorts) {
+                if (!groups[cohort.programId]) {
+                    groups[cohort.programId] = [];
                 }
+                groups[cohort.programId].push(cohort);
+            }
+            return groups;
+        }, [cohorts]);
+
+        const poolMetrics = useMemo(() => {
+            const participantGroups: Record<string, Set<string>> = {
+                'WP1-8': new Set<string>(),
+                'F5': new Set<string>(),
+                'Lab': new Set<string>(),
+            };
+
+            cohorts.forEach(cohort => {
+                const relativeIndex = getRelativeSemesterIndex(semesters, cohort.startSemester, selectedSemester);
+                const program = programs.find(p => p.id === cohort.programId);
+
+                if (!program || relativeIndex < 0 || relativeIndex >= program.semesters) return;
+
+                const relativeSemesterId = RELATIVE_SEMESTERS[relativeIndex].id;
+                const moduleInstanceIds = cohort.plan.semesters[relativeSemesterId] || [];
+
+                moduleInstanceIds.forEach(instanceId => {
+                    const module = getModuleById(instanceId);
+                    if (!module) return;
+                    const poolType = module.id as keyof typeof participantGroups;
+                    if (participantGroups.hasOwnProperty(poolType)) {
+                        participantGroups[poolType].add(cohort.id);
+                    }
+                });
             });
-        });
 
-        const calculateTotalParticipants = (poolType: keyof typeof participantGroups) => {
-            return Array.from(participantGroups[poolType]).reduce((total, gruppeId) => {
-                const gruppe = studiengruppen.find(g => g.id === gruppeId);
-                return total + (gruppe?.studentCount || 0);
-            }, 0);
-        };
+            const calculateTotalParticipants = (poolType: keyof typeof participantGroups) => {
+                return Array.from(participantGroups[poolType]).reduce((total, cohortId) => {
+                    const cohort = cohorts.find(g => g.id === cohortId);
+                    return total + (cohort?.studentCount || 0);
+                }, 0);
+            };
 
-        return {
-            wpParticipants: calculateTotalParticipants('WP1-8'),
-            f5Participants: calculateTotalParticipants('F5'),
-            labParticipants: calculateTotalParticipants('Lab'),
-        };
-    }, [studiengruppen, selectedSemester, getModuleById, programs]);
+            return {
+                wpParticipants: calculateTotalParticipants('WP1-8'),
+                f5Participants: calculateTotalParticipants('F5'),
+                labParticipants: calculateTotalParticipants('Lab'),
+            };
+        }, [cohorts, selectedSemester, getModuleById, programs]);
 
-    const swsForecast = useMemo(() => {
-        const FORECAST_LENGTH = 5;
-        const startIndex = semesters.findIndex(s => s.id === selectedSemester.id);
-        if (startIndex === -1) return { current: 0, future: [] };
-    
-        const current = calculateOfferedSws(selectedSemester, studiengruppen, programs, modules);
-    
-        const future = [];
-        for (let i = 1; i <= FORECAST_LENGTH; i++) {
-            const futureSemester = semesters[startIndex + i];
-            if (!futureSemester) break;
-            const totalSws = calculateOfferedSws(futureSemester, studiengruppen, programs, modules);
-            future.push({ semester: futureSemester, totalSws });
-        }
-    
-        return { current, future };
-    }, [selectedSemester, semesters, studiengruppen, programs, modules]);
+        const swsForecast = useMemo(() => {
+            const FORECAST_LENGTH = 5;
+            const startIndex = semesters.findIndex(s => s.id === selectedSemester.id);
+            if (startIndex === -1) return { current: 0, future: [] };
 
-    return (
-        <div className="h-full flex flex-col gap-4">
-            <div className="flex justify-between items-center gap-8">
-                <div className="flex items-center gap-4">
-                     <h2 className="text-xl font-bold text-foreground">Semesterübersicht:</h2>
-                     <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => handleSemesterChange('prev')}><ChevronLeft className="h-4 w-4" /></Button>
-                         <Select value={selectedSemester.id} onValueChange={(id) => setSelectedSemester(semesters.find(s => s.id === id)!)}>
-                            <SelectTrigger className="text-base font-bold w-48">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {semesters.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        <Button variant="ghost" size="icon" onClick={() => handleSemesterChange('next')}><ChevronRight className="h-4 w-4" /></Button>
-                     </div>
-                </div>
-                 <div className="bg-card border border-border rounded-lg p-3 flex items-stretch">
-                    <div className="grid grid-cols-3 divide-x divide-border">
-                        <div className="px-4 text-center">
-                            <p className="text-xs font-medium text-muted-foreground">Teilnehmer WP</p>
-                            <p className="text-xl font-bold text-foreground">{poolMetrics.wpParticipants}</p>
-                        </div>
-                        <div className="px-4 text-center">
-                            <p className="text-xs font-medium text-muted-foreground">Teilnehmer F5/Lab</p>
-                            <p className="text-xl font-bold text-foreground">{poolMetrics.f5Participants + poolMetrics.labParticipants}</p>
-                        </div>
-                        <div className="px-4 text-center">
-                            <p className="text-xs font-medium text-muted-foreground">Lehrbedarf SWS</p>
-                            <p className="text-xl font-bold text-foreground">{swsForecast.current}</p>
+            const current = calculateOfferedSws(selectedSemester, cohorts, programs, modules, semesters);
+
+            const future = [];
+            for (let i = 1; i <= FORECAST_LENGTH; i++) {
+                const futureSemester = semesters[startIndex + i];
+                if (!futureSemester) break;
+                const totalSws = calculateOfferedSws(futureSemester, cohorts, programs, modules, semesters);
+                future.push({ semester: futureSemester, totalSws });
+            }
+
+            return { current, future };
+        }, [selectedSemester, semesters, cohorts, programs, modules]);
+
+        return (
+            <div className="h-full flex flex-col gap-4">
+                <div className="flex justify-between items-center gap-8">
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-xl font-bold text-foreground">{t.semesterOverview.title}:</h2>
+                        <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => handleSemesterChange('prev')}><ChevronLeft className="h-4 w-4" /></Button>
+                            <Select value={selectedSemester.id} onValueChange={(id) => setSelectedSemester(semesters.find(s => s.id === id)!)}>
+                                <SelectTrigger className="text-base font-bold w-48">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {semesters.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <Button variant="ghost" size="icon" onClick={() => handleSemesterChange('next')}><ChevronRight className="h-4 w-4" /></Button>
                         </div>
                     </div>
-                    <div className="border-l border-border mx-4"></div>
-                    <div className="flex flex-col justify-center">
-                        <p className="text-xs font-medium text-muted-foreground text-center mb-1">SWS Prognose</p>
-                        <div className="flex gap-4">
-                            {swsForecast.future.map(item => (
-                                <div key={item.semester.id} className="text-center">
-                                    <p className="text-xs text-muted-foreground font-semibold">{item.semester.name.replace('SS ', 'S').replace('WS ', 'W').replace('/', '-')}</p>
-                                    <p className="font-bold text-foreground">{item.totalSws}</p>
-                                </div>
-                            ))}
+                    <div className="bg-card border border-border rounded-lg p-3 flex items-stretch">
+                        <div className="grid grid-cols-3 divide-x divide-border">
+                            <div className="px-4 text-center">
+                                <p className="text-xs font-medium text-muted-foreground">{t.semesterOverview.participantsWp}</p>
+                                <p className="text-xl font-bold text-foreground">{poolMetrics.wpParticipants}</p>
+                            </div>
+                            <div className="px-4 text-center">
+                                <p className="text-xs font-medium text-muted-foreground">{t.semesterOverview.participantsF5Lab}</p>
+                                <p className="text-xl font-bold text-foreground">{poolMetrics.f5Participants + poolMetrics.labParticipants}</p>
+                            </div>
+                            <div className="px-4 text-center">
+                                <p className="text-xs font-medium text-muted-foreground">{t.semesterOverview.teachingDemand}</p>
+                                <p className="text-xl font-bold text-foreground">{swsForecast.current}</p>
+                            </div>
+                        </div>
+                        <div className="border-l border-border mx-4"></div>
+                        <div className="flex flex-col justify-center">
+                            <p className="text-xs font-medium text-muted-foreground text-center mb-1">{t.semesterOverview.forecast}</p>
+                            <div className="flex gap-4">
+                                {swsForecast.future.map(item => (
+                                    <div key={item.semester.id} className="text-center">
+                                        <p className="text-xs text-muted-foreground font-semibold">{item.semester.name.replace('SS ', 'S').replace('WS ', 'W').replace('/', '-')}</p>
+                                        <p className="font-bold text-foreground">{item.totalSws}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-auto">
-                {Object.entries(groupedByProgram).map(([programId, gruppen]) => {
-                     const program = programs.find(p => p.id === programId);
-                     if (!program) return null;
+                <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-auto">
+                    {Object.entries(groupedByProgram).map(([programId, cohorts]) => {
+                        const program = programs.find(p => p.id === programId);
+                        if (!program) return null;
 
-                     return (
-                        <ProgramSection 
-                            key={programId}
-                            program={program}
-                            studiengruppen={gruppen}
-                            modules={modules}
-                            selectedSemester={selectedSemester}
-                            getModuleById={getModuleById}
-                            onSelectGroup={onSelectGroup}
-                        />
-                     )
-                })}
+                        return (
+                            <ProgramSection
+                                key={programId}
+                                program={program}
+                                cohorts={cohorts}
+                                modules={modules}
+                                selectedSemester={selectedSemester}
+                                getModuleById={getModuleById}
+                                onSelectGroup={onSelectGroup}
+                                allSemesters={semesters}
+                                lang={lang}
+                            />
+                        )
+                    })}
+                </div>
             </div>
-        </div>
-    );
-};
+        );
+    };

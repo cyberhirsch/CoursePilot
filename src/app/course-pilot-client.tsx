@@ -4,98 +4,121 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { PlannerBoard } from '@/components/PlannerBoard';
-import type { Plan, Module, Program, Studiengruppe, AbsoluteSemester, ProgramPlan, MainCategory, PlannerViewMode, Category } from '@/types';
-import { ABSOLUTE_SEMESTERS, RELATIVE_SEMESTERS, getAbsoluteSemesterFor } from '@/constants';
+import { DEFAULT_LANGUAGE, type Language } from '@/translations';
+import type { Plan, Module, Program, Cohort, AbsoluteSemester, ProgramPlan, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment } from '@/types';
+import { RELATIVE_SEMESTERS, getAbsoluteSemesterFor } from '@/constants';
 import { LoadingSpinner } from '@/components/icons/LoadingSpinner';
 
 async function fetchData() {
-    const res = await fetch('/api/data');
-    if (!res.ok) {
-        throw new Error('Failed to fetch data');
-    }
-    return res.json();
+  const res = await fetch('/api/data');
+  if (!res.ok) {
+    throw new Error('Failed to fetch data');
+  }
+  return res.json();
 }
 
 async function postData(data: any) {
-    await fetch('/api/data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
+  await fetch('/api/data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 }
 
 // Helper to determine the real current semester based on today's date
-const getRealCurrentSemester = (): AbsoluteSemester | undefined => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth(); // 0-11
+const getRealCurrentSemester = (semesters: AbsoluteSemester[]): AbsoluteSemester | undefined => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-11
 
-    // SS: April (3) to September (8) | WS: October (9) to March (2)
-    const isSS = month >= 3 && month <= 8;
-    
-    return ABSOLUTE_SEMESTERS.find(s => {
-        if (isSS) {
-            return s.type === 'SS' && s.year === year;
-        } else {
-            // WS spans two years, e.g., WS 2023/24 starts in Oct 2023
-            const startYear = month >= 9 ? year : year - 1;
-            return s.type === 'WS' && s.year === startYear;
-        }
-    });
+  // SS: April (3) to September (8) | WS: October (9) to March (2)
+  const isSS = month >= 3 && month <= 8;
+
+  return semesters.find(s => {
+    if (isSS) {
+      return s.type === 'SS' && s.year === year;
+    } else {
+      // WS spans two years, e.g., WS 2023/24 starts in Oct 2023
+      const startYear = month >= 9 ? year : year - 1;
+      return s.type === 'WS' && s.year === startYear;
+    }
+  });
 };
 
 
 export default function CoursePilotClient() {
   const [isMounted, setIsMounted] = useState(false);
+  const [lang, setLang] = useState<Language>(DEFAULT_LANGUAGE);
 
   const [modules, setModules] = useState<Module[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [studiengruppen, setStudiengruppen] = useState<Studiengruppe[]>([]);
+  const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  
+  const [catalogs, setCatalogs] = useState<Catalogs>({ examTypes: [], teachingMethods: [], languages: [] });
+  const [users, setUsers] = useState<User[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [systemSettings, setSystemSettings] = useState<SystemSettings | undefined>(undefined);
+  const [academicCalendar, setAcademicCalendar] = useState<AcademicCalendar | undefined>(undefined);
+  const [roomAssignments, setRoomAssignments] = useState<RoomAssignment[]>([]);
+
   useEffect(() => {
     fetchData().then(data => {
-        setModules(data.modules);
-        setPrograms(data.programs);
-        setStudiengruppen(data.studiengruppen);
-        setCategories(data.categories);
-        setIsMounted(true);
+      setModules(data.modules);
+      setPrograms(data.programs);
+      setCohorts(data.cohorts);
+      setCategories(data.categories);
+      if (data.catalogs) setCatalogs(data.catalogs);
+      if (data.users) setUsers(data.users);
+      if (data.rooms) setRooms(data.rooms);
+      if (data.systemSettings) setSystemSettings(data.systemSettings);
+      if (data.academicCalendar) setAcademicCalendar(data.academicCalendar);
+      if (data.roomAssignments) setRoomAssignments(data.roomAssignments);
+      setIsMounted(true);
     }).catch(e => {
-        console.error("Failed to load from backend", e);
-        setIsMounted(true); 
+      console.error("Failed to load from backend", e);
+      setIsMounted(true);
     });
   }, []);
 
-  const fullData = useMemo(() => ({ modules, programs, studiengruppen, categories }), [modules, programs, studiengruppen, categories]);
+  const fullData = useMemo(() => ({ modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar }), [modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar]);
 
   useEffect(() => {
     if (isMounted) {
-        const handler = setTimeout(() => {
-            if (fullData.modules.length > 0) {
-                postData(fullData);
-            }
-        }, 1000); 
+      const handler = setTimeout(() => {
+        if (fullData.modules.length > 0) {
+          postData(fullData);
+        }
+      }, 1000);
 
-        return () => {
-            clearTimeout(handler);
-        };
+      return () => {
+        clearTimeout(handler);
+      };
     }
   }, [fullData, isMounted]);
 
-  
-  const [activeStudiengruppenIds, setActiveStudiengruppenIds] = useState<string[]>([]);
-  
-  const [mainCategory, setMainCategory] = useState<MainCategory>('semesterplan');
+
+  const [activeCohortIds, setActiveCohortIds] = useState<string[]>([]);
+
+  const [mainCategory, setMainCategory] = useState<MainCategory>('semester-plan');
   const [viewMode, setViewModeInternal] = useState<PlannerViewMode>('semester');
-  const [selectedSemester, setSelectedSemester] = useState<AbsoluteSemester>(ABSOLUTE_SEMESTERS.find(s => s.id === 'ws2025') || ABSOLUTE_SEMESTERS[1]);
+  const [selectedSemester, setSelectedSemester] = useState<AbsoluteSemester | undefined>(undefined);
+
+  // Set default selected semester once academic calendar is loaded
+  useEffect(() => {
+    if (academicCalendar && !selectedSemester) {
+      const defaultSem = academicCalendar.semesters.find(s => s.id === 'ws2025') || academicCalendar.semesters[0];
+      if (defaultSem) setSelectedSemester(defaultSem);
+    }
+  }, [academicCalendar, selectedSemester]);
+
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(false);
 
   const [activeBulkLocks, setActiveBulkLocks] = useState<{ [groupId: string]: { past: boolean; categories: Set<string> } }>({});
 
 
   const setViewMode = (mode: PlannerViewMode) => {
-    if (mode === 'group' && activeStudiengruppenIds.length === 0 && studiengruppen.length > 0) {
-      setActiveStudiengruppenIds([studiengruppen[0].id]);
+    if (mode === 'group' && activeCohortIds.length === 0 && cohorts.length > 0) {
+      setActiveCohortIds([cohorts[0].id]);
     }
     setViewModeInternal(mode);
   };
@@ -104,44 +127,44 @@ export default function CoursePilotClient() {
     setIsHeatmapVisible(prev => !prev);
   }, []);
 
-  const handleToggleModuleLock = useCallback((studiengruppeId: string, instanceId: string) => {
-    setStudiengruppen(prev => prev.map(sg => {
-        if (sg.id === studiengruppeId) {
-            const currentLocks = sg.userLockedModules || [];
-            const isLocked = currentLocks.includes(instanceId);
-            const newLocks = isLocked
-                ? currentLocks.filter(id => id !== instanceId)
-                : [...currentLocks, instanceId];
-            return { ...sg, userLockedModules: newLocks };
-        }
-        return sg;
+  const handleToggleModuleLock = useCallback((cohortId: string, instanceId: string) => {
+    setCohorts(prev => prev.map(sg => {
+      if (sg.id === cohortId) {
+        const currentLocks = sg.userLockedModules || [];
+        const isLocked = currentLocks.includes(instanceId);
+        const newLocks = isLocked
+          ? currentLocks.filter(id => id !== instanceId)
+          : [...currentLocks, instanceId];
+        return { ...sg, userLockedModules: newLocks };
+      }
+      return sg;
     }));
   }, []);
-  
-  const handleTogglePastLock = useCallback((studiengruppeId: string) => {
-      setActiveBulkLocks(prev => {
-          const groupLocks = prev[studiengruppeId] || { past: false, categories: new Set() };
-          return {
-              ...prev,
-              [studiengruppeId]: { ...groupLocks, past: !groupLocks.past }
-          };
-      });
+
+  const handleTogglePastLock = useCallback((cohortId: string) => {
+    setActiveBulkLocks(prev => {
+      const groupLocks = prev[cohortId] || { past: false, categories: new Set() };
+      return {
+        ...prev,
+        [cohortId]: { ...groupLocks, past: !groupLocks.past }
+      };
+    });
   }, []);
 
-  const handleToggleCategoryLock = useCallback((studiengruppeId: string, category: string) => {
-      setActiveBulkLocks(prev => {
-          const groupLocks = prev[studiengruppeId] || { past: false, categories: new Set() };
-          const newCategories = new Set(groupLocks.categories);
-          if (newCategories.has(category)) {
-              newCategories.delete(category);
-          } else {
-              newCategories.add(category);
-          }
-          return {
-              ...prev,
-              [studiengruppeId]: { ...groupLocks, categories: newCategories }
-          };
-      });
+  const handleToggleCategoryLock = useCallback((cohortId: string, category: string) => {
+    setActiveBulkLocks(prev => {
+      const groupLocks = prev[cohortId] || { past: false, categories: new Set() };
+      const newCategories = new Set(groupLocks.categories);
+      if (newCategories.has(category)) {
+        newCategories.delete(category);
+      } else {
+        newCategories.add(category);
+      }
+      return {
+        ...prev,
+        [cohortId]: { ...groupLocks, categories: newCategories }
+      };
+    });
   }, []);
 
 
@@ -162,60 +185,63 @@ export default function CoursePilotClient() {
 
   const finalLockedModulesMap = useMemo(() => {
     const map = new Map<string, Set<string>>();
-    const realCurrentSemester = getRealCurrentSemester();
-    const realCurrentSemesterIndex = realCurrentSemester 
-        ? ABSOLUTE_SEMESTERS.findIndex(s => s.id === realCurrentSemester.id)
-        : -1;
+    if (!academicCalendar) return map;
 
-    studiengruppen.forEach(sg => {
-        const finalLocks = new Set(sg.userLockedModules || []);
-        const bulkSettings = activeBulkLocks[sg.id];
+    const semesters = academicCalendar.semesters;
+    const realCurrentSemester = getRealCurrentSemester(semesters);
+    const realCurrentSemesterIndex = realCurrentSemester
+      ? semesters.findIndex(s => s.id === realCurrentSemester.id)
+      : -1;
 
-        if (bulkSettings) {
-            const allModulesInCategory = (category: string) => 
-                modules.filter(m => m.category === category).map(m => m.id);
+    cohorts.forEach(sg => {
+      const finalLocks = new Set(sg.userLockedModules || []);
+      const bulkSettings = activeBulkLocks[sg.id];
 
-            const allInstancesInPlan = Object.values(sg.plan.semesters).flat();
+      if (bulkSettings) {
+        const allModulesInCategory = (category: string) =>
+          modules.filter(m => m.category === category).map(m => m.id);
 
-            if (bulkSettings.past && realCurrentSemesterIndex !== -1) {
-                Object.entries(sg.plan.semesters).forEach(([relativeSemId, instanceIds]) => {
-                    const relativeIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === relativeSemId);
-                    if (relativeIndex === -1) return;
-                    const absoluteSem = getAbsoluteSemesterFor(sg.startSemester, relativeIndex);
-                    if (absoluteSem && ABSOLUTE_SEMESTERS.findIndex(s => s.id === absoluteSem.id) <= realCurrentSemesterIndex) {
-                        (instanceIds as string[]).forEach(id => finalLocks.add(id));
-                    }
-                });
+        const allInstancesInPlan = Object.values(sg.plan.semesters).flat();
+
+        if (bulkSettings.past && realCurrentSemesterIndex !== -1) {
+          Object.entries(sg.plan.semesters).forEach(([relativeSemId, instanceIds]) => {
+            const relativeIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === relativeSemId);
+            if (relativeIndex === -1) return;
+            const absoluteSem = getAbsoluteSemesterFor(semesters, sg.startSemester, relativeIndex);
+            if (absoluteSem && semesters.findIndex(s => s.id === absoluteSem.id) <= realCurrentSemesterIndex) {
+              (instanceIds as string[]).forEach(id => finalLocks.add(id));
             }
-
-            bulkSettings.categories.forEach(category => {
-                const moduleIdsInCategory = allModulesInCategory(category);
-                allInstancesInPlan.forEach(instanceId => {
-                    const module = getModuleById(instanceId as string);
-                    if (module && moduleIdsInCategory.includes(module.id)) {
-                        finalLocks.add(instanceId as string);
-                    }
-                });
-            });
+          });
         }
-        map.set(sg.id, finalLocks);
+
+        bulkSettings.categories.forEach(category => {
+          const moduleIdsInCategory = allModulesInCategory(category);
+          allInstancesInPlan.forEach(instanceId => {
+            const module = getModuleById(instanceId as string);
+            if (module && moduleIdsInCategory.includes(module.id)) {
+              finalLocks.add(instanceId as string);
+            }
+          });
+        });
+      }
+      map.set(sg.id, finalLocks);
     });
     return map;
-}, [studiengruppen, activeBulkLocks, modules, getModuleById]);
+  }, [cohorts, activeBulkLocks, modules, getModuleById, academicCalendar]);
 
 
-  const handleDrop = useCallback((studiengruppeId: string, semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = useCallback((cohortId: string, semesterId: string, targetModuleId: string, e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const draggedInstanceId = e.dataTransfer.getData("instanceId");
     const draggedModuleId = e.dataTransfer.getData("moduleId");
-    
+
     if (!draggedInstanceId || !draggedModuleId) {
-        console.error("Missing data from drag operation.");
-        return;
+      console.error("Missing data from drag operation.");
+      return;
     }
 
     if (draggedModuleId !== targetModuleId) {
-        return;
+      return;
     }
 
     const draggedModule = getModuleById(draggedInstanceId);
@@ -224,45 +250,45 @@ export default function CoursePilotClient() {
       return;
     }
 
-    const gruppe = studiengruppen.find(g => g.id === studiengruppeId);
-    if (!gruppe) return;
+    const cohortInstance = cohorts.find(g => g.id === cohortId);
+    if (!cohortInstance) return;
 
     const relativeSemesterIndex = RELATIVE_SEMESTERS.findIndex(s => s.id === semesterId) + 1;
-    
+
     if (draggedModule.forbiddenSemesters?.includes(relativeSemesterIndex)) {
-        alert(`Regelverletzung: Modul "${draggedModule.name}" darf nicht im ${relativeSemesterIndex}. Fachsemester platziert werden.`);
-        return;
+      alert(`Regelverletzung: Modul "${draggedModule.name}" darf nicht im ${relativeSemesterIndex}. Fachsemester platziert werden.`);
+      return;
     }
 
     if (draggedModule.prerequisites && draggedModule.prerequisites.length > 0) {
-        const planSemesters = gruppe.plan.semesters;
-        const targetSemesterOrder = RELATIVE_SEMESTERS.findIndex(s => s.id === semesterId);
+      const planSemesters = cohortInstance.plan.semesters;
+      const targetSemesterOrder = RELATIVE_SEMESTERS.findIndex(s => s.id === semesterId);
 
-        for (const prereqId of draggedModule.prerequisites) {
-            let prereqFound = false;
-            let prereqSemesterOrder = -1;
-            
-            for (const [semId, moduleIds] of Object.entries(planSemesters)) {
-              if ((moduleIds as string[]).filter(id => id !== draggedInstanceId).some(id => getModuleById(id)?.id === prereqId)) {
-                prereqFound = true;
-                prereqSemesterOrder = RELATIVE_SEMESTERS.findIndex(s => s.id === semId);
-                break;
-              }
-            }
+      for (const prereqId of draggedModule.prerequisites) {
+        let prereqFound = false;
+        let prereqSemesterOrder = -1;
 
-            if (!prereqFound || prereqSemesterOrder >= targetSemesterOrder) {
-                const prereqModule = getModuleById(prereqId);
-                alert(`Abhängigkeit verletzt: "${draggedModule.name}" erfordert, dass "${prereqModule?.name || prereqId}" vorher abgeschlossen wird.`);
-                return;
-            }
+        for (const [semId, moduleIds] of Object.entries(planSemesters)) {
+          if ((moduleIds as string[]).filter(id => id !== draggedInstanceId).some(id => getModuleById(id)?.id === prereqId)) {
+            prereqFound = true;
+            prereqSemesterOrder = RELATIVE_SEMESTERS.findIndex(s => s.id === semId);
+            break;
+          }
         }
+
+        if (!prereqFound || prereqSemesterOrder >= targetSemesterOrder) {
+          const prereqModule = getModuleById(prereqId);
+          alert(`Abhängigkeit verletzt: "${draggedModule.name}" erfordert, dass "${prereqModule?.name || prereqId}" vorher abgeschlossen wird.`);
+          return;
+        }
+      }
     }
 
     if (draggedModule.type === 'Pool') {
-      const targetSemesterModuleIds = gruppe.plan.semesters[semesterId] || [];
+      const targetSemesterModuleIds = cohortInstance.plan.semesters[semesterId] || [];
       const hasDuplicatePoolModule = targetSemesterModuleIds.some(existingInstanceId => {
         if (existingInstanceId === draggedInstanceId) return false;
-        
+
         const existingBaseModule = getModuleById(existingInstanceId);
         return existingBaseModule?.id === draggedModule.id;
       });
@@ -272,13 +298,13 @@ export default function CoursePilotClient() {
         return;
       }
     }
-    
-    setStudiengruppen(prevGruppen => 
+
+    setCohorts(prevGruppen =>
       prevGruppen.map(g => {
-        if (g.id === studiengruppeId) {
+        if (g.id === cohortId) {
           const newPlan = { ...g.plan };
           const newSemesters: { [key: string]: string[] } = JSON.parse(JSON.stringify(newPlan.semesters));
-          
+
           Object.keys(newSemesters).forEach(key => {
             newSemesters[key] = newSemesters[key].filter(id => id !== draggedInstanceId);
           });
@@ -293,19 +319,19 @@ export default function CoursePilotClient() {
         return g;
       })
     );
-  }, [getModuleById, studiengruppen]);
+  }, [getModuleById, cohorts]);
 
-  const handleUpdateStudiengruppe = useCallback((studiengruppeId: string, updates: Partial<Studiengruppe>) => {
-    setStudiengruppen(prevGruppen =>
+  const handleUpdateCohort = useCallback((cohortId: string, updates: Partial<Cohort>) => {
+    setCohorts(prevGruppen =>
       prevGruppen.map(gruppe =>
-        gruppe.id === studiengruppeId ? { ...gruppe, ...updates } : gruppe
+        gruppe.id === cohortId ? { ...gruppe, ...updates } : gruppe
       )
     );
   }, []);
 
   const handleUpdateModule = useCallback((moduleId: string, field: keyof Module, value: any) => {
-    setModules(prevModules => prevModules.map(m => 
-      m.id === moduleId ? {...m, [field]: value} : m
+    setModules(prevModules => prevModules.map(m =>
+      m.id === moduleId ? { ...m, [field]: value } : m
     ));
   }, []);
 
@@ -315,8 +341,8 @@ export default function CoursePilotClient() {
       return;
     }
     setModules(prevModules => [newModule, ...prevModules]);
-    
-    setPrograms(prevPrograms => 
+
+    setPrograms(prevPrograms =>
       prevPrograms.map(p => {
         if (programIds.includes(p.id)) {
           return { ...p, moduleIds: [...p.moduleIds, newModule.id] };
@@ -325,21 +351,21 @@ export default function CoursePilotClient() {
       })
     );
   }, [modules]);
-  
+
   const handleDeleteModule = useCallback((moduleIdToDelete: string) => {
     setModules(prev => prev.filter(m => m.id !== moduleIdToDelete));
-    
+
     setPrograms(prev => prev.map(p => ({
       ...p,
       moduleIds: p.moduleIds.filter(id => id !== moduleIdToDelete)
     })));
 
-    setStudiengruppen(prev => prev.map(sg => {
+    setCohorts(prev => prev.map(sg => {
       const newPlan = { ...sg.plan };
-      const newSemesters: {[key: string]: string[]} = { ...newPlan.semesters };
+      const newSemesters: { [key: string]: string[] } = { ...newPlan.semesters };
       Object.keys(newSemesters).forEach(semId => {
         newSemesters[semId] = newSemesters[semId].filter(instanceId => {
-           return instanceId !== moduleIdToDelete && !instanceId.startsWith(`${moduleIdToDelete}-`);
+          return instanceId !== moduleIdToDelete && !instanceId.startsWith(`${moduleIdToDelete}-`);
         });
       });
       return { ...sg, plan: { ...sg.plan, semesters: newSemesters } };
@@ -348,9 +374,9 @@ export default function CoursePilotClient() {
   }, []);
 
   const handleUpdateProgram = useCallback((programId: string, updates: Partial<Program>) => {
-      setPrograms(prevPrograms => prevPrograms.map(p =>
-          p.id === programId ? { ...p, ...updates } : p
-      ));
+    setPrograms(prevPrograms => prevPrograms.map(p =>
+      p.id === programId ? { ...p, ...updates } : p
+    ));
   }, []);
 
   const getProgramById = useCallback((id: string): Program | undefined => {
@@ -359,8 +385,8 @@ export default function CoursePilotClient() {
 
   const handleAddCategory = useCallback((newCategory: Category) => {
     if (categories.some(c => c.id === newCategory.id || c.name === newCategory.name)) {
-        alert(`Eine Kategorie mit dieser ID oder diesem Namen existiert bereits.`);
-        return;
+      alert(`Eine Kategorie mit dieser ID oder diesem Namen existiert bereits.`);
+      return;
     }
     setCategories(prev => [...prev, newCategory]);
   }, [categories]);
@@ -368,20 +394,20 @@ export default function CoursePilotClient() {
   const handleUpdateCategory = useCallback((categoryId: string, updates: Partial<Category>) => {
     let oldName = '';
     const updatedCategories = categories.map(c => {
-        if (c.id === categoryId) {
-            oldName = c.name;
-            return { ...c, ...updates };
-        }
-        return c;
+      if (c.id === categoryId) {
+        oldName = c.name;
+        return { ...c, ...updates };
+      }
+      return c;
     });
     setCategories(updatedCategories);
 
     if (oldName && updates.name && oldName !== updates.name) {
-        setModules(prevModules =>
-            prevModules.map(m =>
-                m.category === oldName ? { ...m, category: updates.name! } : m
-            )
-        );
+      setModules(prevModules =>
+        prevModules.map(m =>
+          m.category === oldName ? { ...m, category: updates.name! } : m
+        )
+      );
     }
   }, [categories]);
 
@@ -390,40 +416,58 @@ export default function CoursePilotClient() {
     if (!categoryToDelete) return;
 
     if (modules.some(m => m.category === categoryToDelete.name)) {
-        alert(`Die Kategorie "${categoryToDelete.name}" kann nicht gelöscht werden, da sie noch von Modulen verwendet wird.`);
-        return;
+      alert(`Die Kategorie "${categoryToDelete.name}" kann nicht gelöscht werden, da sie noch von Modulen verwendet wird.`);
+      return;
     }
 
     if (window.confirm(`Möchten Sie die Kategorie "${categoryToDelete.name}" wirklich löschen?`)) {
-        setCategories(prev => prev.filter(c => c.id !== categoryId));
+      setCategories(prev => prev.filter(c => c.id !== categoryId));
     }
   }, [categories, modules]);
 
-  const handleAddStudiengruppe = useCallback((newStudiengruppe: Studiengruppe, saveAsTemplate: boolean) => {
-    if (studiengruppen.some(sg => sg.id === newStudiengruppe.id)) {
-      alert(`Eine Studiengruppe mit der ID "${newStudiengruppe.id}" existiert bereits.`);
+  const handleUpdateRoom = useCallback((roomId: string, updates: Partial<Room>) => {
+    setRooms(prev => prev.map(r => r.id === roomId ? { ...r, ...updates } : r));
+  }, []);
+
+  const handleAddRoom = useCallback((newRoom: Room) => {
+    if (rooms.some(r => r.id === newRoom.id)) {
+      alert(`Ein Raum mit der ID "${newRoom.id}" existiert bereits.`);
+      return;
+    }
+    setRooms(prev => [...prev, newRoom]);
+  }, [rooms]);
+
+  const handleDeleteRoom = useCallback((roomId: string) => {
+    if (window.confirm(`Möchten Sie den Raum "${roomId}" wirklich löschen?`)) {
+      setRooms(prev => prev.filter(r => r.id !== roomId));
+    }
+  }, []);
+
+  const handleAddCohort = useCallback((newCohort: Cohort, saveAsTemplate?: boolean) => {
+    if (cohorts.some(sg => sg.id === newCohort.id)) {
+      alert(`Eine Studiengruppe mit der ID "${newCohort.id}" existiert bereits.`);
       return false;
     }
-    
-    setStudiengruppen(prev => [...prev, newStudiengruppe]);
-    setActiveStudiengruppenIds([newStudiengruppe.id]);
+
+    setCohorts(prev => [...prev, newCohort]);
+    setActiveCohortIds([newCohort.id]);
 
     if (saveAsTemplate) {
-        handleUpdateProgram(newStudiengruppe.programId, { templatePlan: newStudiengruppe.plan });
+      handleUpdateProgram(newCohort.programId, { templatePlan: newCohort.plan });
     }
 
     return true;
-  }, [studiengruppen, handleUpdateProgram]);
+  }, [cohorts, handleUpdateProgram]);
 
-  const activeStudiengruppen = useMemo(() => {
-    return studiengruppen.filter(sg => activeStudiengruppenIds.includes(sg.id));
-  }, [studiengruppen, activeStudiengruppenIds]);
+  const activeCohorts = useMemo(() => {
+    return cohorts.filter(sg => activeCohortIds.includes(sg.id));
+  }, [cohorts, activeCohortIds]);
 
-  const handleSelectGroup = (studiengruppeId: string) => {
+  const handleSelectGroup = (cohortId: string) => {
     setViewMode('group');
-    setActiveStudiengruppenIds([studiengruppeId]);
+    setActiveCohortIds([cohortId]);
   };
-  
+
   if (!isMounted) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -434,27 +478,29 @@ export default function CoursePilotClient() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header 
+      <Header
         mainCategory={mainCategory}
         setMainCategory={setMainCategory}
         viewMode={viewMode}
         setViewMode={setViewMode}
+        lang={lang}
+        setLang={setLang}
       />
       <main className="flex-grow p-4">
         <PlannerBoard
           mainCategory={mainCategory}
           viewMode={viewMode}
-          onDrop={handleDrop} 
+          onDrop={handleDrop}
           getModuleById={getModuleById}
           getProgramById={getProgramById}
           onDragStart={handleDragStart}
-          studiengruppen={studiengruppen}
-          activeStudiengruppen={activeStudiengruppen}
-          selectedSemester={selectedSemester}
+          cohorts={cohorts}
+          activeCohorts={activeCohorts}
+          selectedSemester={selectedSemester!}
           setSelectedSemester={setSelectedSemester}
-          semesters={ABSOLUTE_SEMESTERS}
+          semesters={academicCalendar?.semesters || []}
           onSelectGroup={handleSelectGroup}
-          onUpdateStudiengruppe={handleUpdateStudiengruppe}
+          onUpdateCohort={handleUpdateCohort}
           modules={modules}
           programs={programs}
           onUpdateModule={handleUpdateModule}
@@ -471,12 +517,25 @@ export default function CoursePilotClient() {
           onAddCategory={handleAddCategory}
           onUpdateCategory={handleUpdateCategory}
           onDeleteCategory={handleDeleteCategory}
-          onAddStudiengruppe={handleAddStudiengruppe}
+          onAddCohort={handleAddCohort}
           onUpdateProgram={handleUpdateProgram}
+          lang={lang}
+          catalogs={catalogs}
+          onUpdateCatalogs={setCatalogs}
+          users={users}
+          rooms={rooms}
+          onUpdateRoom={handleUpdateRoom}
+          onAddRoom={handleAddRoom}
+          onDeleteRoom={handleDeleteRoom}
+          systemSettings={systemSettings}
+          onUpdateSystemSettings={setSystemSettings}
+          academicCalendar={academicCalendar}
+          onUpdateAcademicCalendar={setAcademicCalendar}
+          roomAssignments={roomAssignments}
+          onUpdateRoomAssignments={setRoomAssignments}
         />
       </main>
     </div>
   );
 };
 
-    

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "usr_super",
+    "name": "Super User",
+    "email": "superuser@coursepilot.de",
+    "role": "superuser",
+    "department": null,
+    "universityId": "999999"
+  },
+  {
+    "id": "usr_admin",
+    "name": "System Admin",
+    "email": "admin@coursepilot.de",
+    "role": "admin",
+    "department": null,
+    "universityId": "999998"
+  },
+  {
+    "id": "usr_coord_design",
+    "name": "Prof. Design Coordinator",
+    "email": "coord.design@coursepilot.de",
+    "role": "coordinator",
+    "department": "Design",
+    "universityId": "100001"
+  },
+  {
+    "id": "usr_prof_max",
+    "name": "Prof. Dr. Max Mustermann",
+    "email": "max.mustermann@coursepilot.de",
+    "role": "professor",
+    "department": "Design",
+    "universityId": "100002"
+  },
+  {
+    "id": "usr_prof_erika",
+    "name": "Prof. Dr. Erika Musterfrau",
+    "email": "erika.musterfrau@coursepilot.de",
+    "role": "professor",
+    "department": "Wirtschaft",
+    "universityId": "100003"
+  },
+  {
+    "id": "usr_lecturer_film",
+    "name": "Dozent Film & Post",
+    "email": "film.dozent@coursepilot.de",
+    "role": "lecturer",
+    "department": "Design",
+    "universityId": "200001"
+  },
+  {
+    "id": "usr_lecturer_code",
+    "name": "Dozent Coding",
+    "email": "code.dozent@coursepilot.de",
+    "role": "lecturer",
+    "department": "Design",
+    "universityId": "200002"
+  },
+  {
+    "id": "usr_student_01",
+    "name": "Lisa Studentin",
+    "email": "lisa.student@stud.coursepilot.de",
+    "role": "student",
+    "department": "Design",
+    "cohortId": "k-BA-GDVK-24Wi",
+    "universityId": "300001"
+  },
+  {
+    "id": "usr_student_02",
+    "name": "Tom Student",
+    "email": "tom.student@stud.coursepilot.de",
+    "role": "student",
+    "department": "Design",
+    "cohortId": "k-BA-GDIM-24Wi",
+    "universityId": "300002"
+  },
+  {
+    "id": "usr_guest",
+    "name": "Gast User",
+    "email": "gast@external.de",
+    "role": "guest",
+    "department": null
+  }
+]

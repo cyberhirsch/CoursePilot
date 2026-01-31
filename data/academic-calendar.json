@@ -1,0 +1,171 @@
+{
+  "academicYearStartMonth": 10,
+  "semesters": [
+    {
+      "id": "ws2021",
+      "name": "WS 2021/22",
+      "type": "WS",
+      "year": 2021,
+      "lecturesStart": "2021-10-04",
+      "lecturesEnd": "2022-01-28",
+      "examsStart": "2022-01-31",
+      "examsEnd": "2022-02-11",
+      "lectureBreakStart": "2021-12-23",
+      "lectureBreakEnd": "2022-01-05"
+    },
+    {
+      "id": "ss2022",
+      "name": "SS 2022",
+      "type": "SS",
+      "year": 2022,
+      "lecturesStart": "2022-03-21",
+      "lecturesEnd": "2022-07-08",
+      "examsStart": "2022-07-11",
+      "examsEnd": "2022-07-22"
+    },
+    {
+      "id": "ws2022",
+      "name": "WS 2022/23",
+      "type": "WS",
+      "year": 2022,
+      "lecturesStart": "2022-10-04",
+      "lecturesEnd": "2023-01-27",
+      "examsStart": "2023-01-30",
+      "examsEnd": "2023-02-10",
+      "lectureBreakStart": "2022-12-23",
+      "lectureBreakEnd": "2023-01-05"
+    },
+    {
+      "id": "ss2023",
+      "name": "SS 2023",
+      "type": "SS",
+      "year": 2023,
+      "lecturesStart": "2023-03-20",
+      "lecturesEnd": "2023-07-07",
+      "examsStart": "2023-07-10",
+      "examsEnd": "2023-07-21"
+    },
+    {
+      "id": "ws2023",
+      "name": "WS 2023/24",
+      "type": "WS",
+      "year": 2023,
+      "lecturesStart": "2023-10-02",
+      "lecturesEnd": "2024-01-26",
+      "examsStart": "2024-01-29",
+      "examsEnd": "2024-02-09",
+      "lectureBreakStart": "2023-12-23",
+      "lectureBreakEnd": "2024-01-05"
+    },
+    {
+      "id": "ss2024",
+      "name": "SS 2024",
+      "type": "SS",
+      "year": 2024,
+      "lecturesStart": "2024-03-18",
+      "lecturesEnd": "2024-07-05",
+      "examsStart": "2024-07-08",
+      "examsEnd": "2024-07-19"
+    },
+    {
+      "id": "ws2024",
+      "name": "WS 2024/25",
+      "type": "WS",
+      "year": 2024,
+      "lecturesStart": "2024-10-01",
+      "lecturesEnd": "2025-01-31",
+      "examsStart": "2025-02-03",
+      "examsEnd": "2025-02-14",
+      "lectureBreakStart": "2024-12-23",
+      "lectureBreakEnd": "2025-01-05"
+    },
+    {
+      "id": "ss2025",
+      "name": "SS 2025",
+      "type": "SS",
+      "year": 2025,
+      "lecturesStart": "2025-03-24",
+      "lecturesEnd": "2025-07-11",
+      "examsStart": "2025-07-14",
+      "examsEnd": "2025-07-25"
+    },
+    {
+      "id": "ws2025",
+      "name": "WS 2025/26",
+      "type": "WS",
+      "year": 2025,
+      "lecturesStart": "2025-10-01",
+      "lecturesEnd": "2026-01-31",
+      "examsStart": "2026-02-02",
+      "examsEnd": "2026-02-13",
+      "lectureBreakStart": "2025-12-23",
+      "lectureBreakEnd": "2026-01-05"
+    },
+    {
+      "id": "ss2026",
+      "name": "SS 2026",
+      "type": "SS",
+      "year": 2026,
+      "lecturesStart": "2026-03-23",
+      "lecturesEnd": "2026-07-10",
+      "examsStart": "2026-07-13",
+      "examsEnd": "2026-07-24"
+    },
+    {
+      "id": "ws2026",
+      "name": "WS 2026/27",
+      "type": "WS",
+      "year": 2026,
+      "lecturesStart": "2026-10-01",
+      "lecturesEnd": "2027-01-29",
+      "examsStart": "2027-02-01",
+      "examsEnd": "2027-02-12",
+      "lectureBreakStart": "2026-12-23",
+      "lectureBreakEnd": "2027-01-05"
+    },
+    {
+      "id": "ss2027",
+      "name": "SS 2027",
+      "type": "SS",
+      "year": 2027,
+      "lecturesStart": "2027-03-22",
+      "lecturesEnd": "2027-07-09",
+      "examsStart": "2027-07-12",
+      "examsEnd": "2027-07-23"
+    },
+    {
+      "id": "ws2027",
+      "name": "WS 2027/28",
+      "type": "WS",
+      "year": 2027,
+      "lecturesStart": "2027-10-04",
+      "lecturesEnd": "2028-01-28",
+      "examsStart": "2028-01-31",
+      "examsEnd": "2028-02-11",
+      "lectureBreakStart": "2027-12-23",
+      "lectureBreakEnd": "2028-01-05"
+    },
+    {
+      "id": "ss2028",
+      "name": "SS 2028",
+      "type": "SS",
+      "year": 2028,
+      "lecturesStart": "2028-03-20",
+      "lecturesEnd": "2028-07-07",
+      "examsStart": "2028-07-10",
+      "examsEnd": "2028-07-21"
+    },
+    {
+      "id": "ws2028",
+      "name": "WS 2028/29",
+      "type": "WS",
+      "year": 2028,
+      "lecturesStart": "2028-10-02",
+      "lecturesEnd": "2029-01-26",
+      "examsStart": "2029-01-29",
+      "examsEnd": "2029-02-09",
+      "lectureBreakStart": "2028-12-23",
+      "lectureBreakEnd": "2029-01-05"
+    }
+  ]
+}

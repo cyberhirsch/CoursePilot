@@ -4,7 +4,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Genkit](https://img.shields.io/badge/AI-Genkit-orange?style=for-the-badge)](https://firebase.google.com/docs/genkit)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![Firebase](https://img.shields.io/badge/Firebase-v11-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
+[![PocketBase](https://img.shields.io/badge/PocketBase-v0.22-blue?style=for-the-badge)](https://pocketbase.io/)
 
 **CoursePilot** is a sophisticated academic planning and resource optimization platform. Designed for higher education institutions, it empowers faculty and administrators to design, manage, and optimize study programs with a modern, constraint-aware interface and AI-driven intelligence.
 
@@ -36,6 +36,18 @@ Fine-grained control over the planning process:
 
 ---
 
+## 📸 Showcase
+
+|                  **Semester Overview**                  |                   **Study Progress Plan**                   |
+| :-----------------------------------------------------: | :---------------------------------------------------------: |
+| ![Semester Overview](screenshots/semester_overview.png) | ![Study Progress Plan](screenshots/study_progress_plan.png) |
+
+|                 **Module Management**                 |
+| :---------------------------------------------------: |
+| ![Module Management](screenshots/module_overview.png) |
+
+---
+
 ## 🛠️ Tech Stack
 
 - **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
@@ -43,7 +55,7 @@ Fine-grained control over the planning process:
 - **AI Integration**: [Google Genkit](https://firebase.google.com/docs/genkit)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/)
 - **State Management**: React Hooks + Context
-- **Data Persistence**: [Firebase](https://firebase.google.com/)
+- **Data Persistence**: [PocketBase](https://pocketbase.io/) (with local JSON fallback)
 - **Components**: Radix UI, Lucide React, Recharts
 
 ---
@@ -63,7 +75,7 @@ CoursePilot features a professional "Glitchless" dark-themed aesthetic designed 
 
 ### Prerequisites
 - Node.js 20+
-- Firebase Project
+- [PocketBase](https://pocketbase.io/) instance (local or hosted)
 - Google AI API Key (for Genkit features)
 
 ### Installation
@@ -79,7 +91,15 @@ CoursePilot features a professional "Glitchless" dark-themed aesthetic designed 
    ```
 
 3. Configure environment variables:
-   Create a `.env.local` file with your Firebase and AI credentials.
+   Create a `.env.local` file with:
+   ```env
+   NEXT_PUBLIC_POCKETBASE_URL=https://api.sebhirsch.com
+   GOOGLE_GENAI_API_KEY=your_key_here
+   ```
+
+4. Manage Data:
+   - Use the built-in local JSON data by default.
+   - To migrate to PocketBase, run: `node migrate-to-pb.js` (Ensure collections `modules`, `programs`, `cohorts`, and `categories` exist).
 
 ### Development
 Run the development server:

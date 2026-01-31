@@ -1,0 +1,28 @@
+{
+  "examTypes": [
+    "Klausur (60 Min)",
+    "Klausur (90 Min)",
+    "Klausur (120 Min)",
+    "Mündliche Prüfung",
+    "Hausarbeit",
+    "Projektarbeit",
+    "Portfolio",
+    "Präsentation",
+    "Praktischer Leistungsnachweis"
+  ],
+  "teachingMethods": [
+    "Vorlesung",
+    "Seminar",
+    "Übung",
+    "Praktikum",
+    "Projekt",
+    "Tutorium",
+    "Exkursion",
+    "Selbststudium"
+  ],
+  "languages": [
+    "Deutsch",
+    "Englisch",
+    "Deutsch/Englisch"
+  ]
+}

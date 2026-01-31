@@ -1,14 +1,20 @@
 
-// src/lib/data-service.ts
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { Module, Program, Studiengruppe, Category, ProgramPlan, RawPlan } from '@/types';
+import type { Module, Program, Cohort, Category, ProgramPlan, RawPlan, Catalogs, User, Room, SystemSettings, AcademicCalendar, SemesterPeriod, RoomAssignment } from '@/types';
+import pb from './pocketbase';
 
 interface AppData {
     modules: Module[];
     programs: Program[];
-    studiengruppen: Studiengruppe[];
+    cohorts: Cohort[];
     categories: Category[];
+    catalogs: Catalogs;
+    users: User[];
+    rooms: Room[];
+    roomAssignments: RoomAssignment[];
+    systemSettings: SystemSettings;
+    academicCalendar: AcademicCalendar;
 }
 
 const dataDir = path.join(process.cwd(), 'data');
@@ -16,6 +22,12 @@ const cohortsFilePath = path.join(dataDir, 'cohorts.json');
 const modulesFilePath = path.join(dataDir, 'modules.json');
 const programsFilePath = path.join(dataDir, 'programs.json');
 const categoriesFilePath = path.join(dataDir, 'categories.json');
+const catalogsFilePath = path.join(dataDir, 'catalogs.json');
+const usersFilePath = path.join(dataDir, 'users.json');
+const roomsFilePath = path.join(dataDir, 'rooms.json');
+const roomOccupancyFilePath = path.join(dataDir, 'room-occupancy.json');
+const systemSettingsFilePath = path.join(dataDir, 'system-settings.json');
+const academicCalendarFilePath = path.join(dataDir, 'academic-calendar.json');
 
 // Helper to read a JSON file
 async function readJsonFile<T>(filePath: string): Promise<T> {
@@ -25,8 +37,8 @@ async function readJsonFile<T>(filePath: string): Promise<T> {
     } catch (error) {
         console.error(`Error reading file ${filePath}:`, error);
         if (path.basename(filePath) === 'categories.json') {
-             console.log("Returning empty array for categories as it might not exist.");
-             return [] as T;
+            console.log("Returning empty array for categories as it might not exist.");
+            return [] as T;
         }
         throw error;
     }
@@ -67,7 +79,7 @@ function transformPlan(plan: RawPlan | undefined, allModules: Module[]): Program
         }
         return a.moduleId.localeCompare(b.moduleId);
     });
-    
+
     // Process sorted instances to generate stable IDs
     allInstances.forEach(({ moduleId, semester }) => {
         const semKey = `sem${semester}`;
@@ -107,30 +119,89 @@ function inverseTransformPlan(plan: ProgramPlan, modules: Module[]): RawPlan {
             }
         });
     });
-    
+
     Object.keys(modulePlacements).forEach(moduleId => {
-       const sortedSemesters = [...new Set(modulePlacements[moduleId])].sort((a, b) => a - b);
-       if (sortedSemesters.length === 1) {
-           rawPlan.modules[moduleId] = sortedSemesters[0];
-       } else {
-           rawPlan.modules[moduleId] = sortedSemesters;
-       }
+        const sortedSemesters = [...new Set(modulePlacements[moduleId])].sort((a, b) => a - b);
+        if (sortedSemesters.length === 1) {
+            rawPlan.modules[moduleId] = sortedSemesters[0];
+        } else {
+            rawPlan.modules[moduleId] = sortedSemesters;
+        }
     });
 
     return rawPlan;
 }
 
 
-// Reads all data from the individual JSON files
+// Reads all data from PocketBase (single document) or local JSON files
 export async function getAllData(): Promise<AppData> {
-    const [modules, programsData, cohorts, categories] = await Promise.all([
+    const usePocketBase = !!process.env.NEXT_PUBLIC_POCKETBASE_URL;
+
+    if (usePocketBase) {
+        try {
+            // Fetch the first record from the 'CoursePilot' collection
+            const record = await pb.collection('CoursePilot').getFirstListItem('', { requestKey: null });
+            const data = record.data as AppData;
+
+            // We still perform the mapping/transformations to ensure UI compatibility
+            const cohorts: Cohort[] = data.cohorts.map(cohort => {
+                const program = data.programs.find(p => p.id === cohort.programId);
+                return {
+                    ...cohort,
+                    plan: transformPlan(cohort.plan as any, data.modules),
+                    semesters: cohort.semesters || program?.semesters || 7,
+                };
+            });
+
+            const transformedPrograms = data.programs.map(p => ({
+                ...p,
+                templatePlan: transformPlan(p.templatePlan as any, data.modules)
+            }));
+
+            const enrichedModules = data.modules.map(m => ({
+                ...m,
+                department: m.department || 'Design',
+                workload: m.workload || (m.cp || 0) * 30,
+                shortName: m.shortName || m.name.substring(0, 5)
+            }));
+
+            return {
+                modules: enrichedModules,
+                programs: transformedPrograms,
+                cohorts,
+                categories: data.categories,
+                catalogs: { examTypes: [], teachingMethods: [], languages: [], personInCharge: [] }, // Placeholder for PB
+                users: [], // Placeholder for PB
+                rooms: data.rooms || [],
+                roomAssignments: data.roomAssignments || [],
+                systemSettings: data.systemSettings || {} as any,
+                academicCalendar: data.academicCalendar || { academicYearStartMonth: 10, semesters: [] }
+            };
+        } catch (error) {
+            console.error("PocketBase fetch failed (single doc), falling back to local files:", error);
+        }
+    }
+
+    // Fallback to local files
+    const [modules, programsData, cohorts, categories, catalogs, users, roomsData] = await Promise.all([
         readJsonFile<Module[]>(modulesFilePath),
         readJsonFile<Program[]>(programsFilePath),
         readJsonFile<any[]>(cohortsFilePath),
         readJsonFile<Category[]>(categoriesFilePath),
+        readJsonFile<Catalogs>(catalogsFilePath).catch(() => ({
+            examTypes: [],
+            teachingMethods: [],
+            languages: [],
+            personInCharge: []
+        } as Catalogs)),
+        readJsonFile<User[]>(usersFilePath).catch(() => []),
+        readJsonFile<Room[]>(roomsFilePath).catch(() => []),
+        readJsonFile<RoomAssignment[]>(roomOccupancyFilePath).catch(() => []),
+        readJsonFile<SystemSettings>(systemSettingsFilePath).catch(() => ({} as SystemSettings)),
+        readJsonFile<AcademicCalendar>(academicCalendarFilePath).catch(() => ({ academicYearStartMonth: 10, semesters: [] })),
     ]);
 
-    const studiengruppen: Studiengruppe[] = cohorts.map(cohort => {
+    const cohortsData: Cohort[] = cohorts.map(cohort => {
         const program = programsData.find(p => p.id === cohort.programId);
         return {
             ...cohort,
@@ -138,7 +209,7 @@ export async function getAllData(): Promise<AppData> {
             semesters: cohort.semesters || program?.semesters || 7, // Fallback chain
         };
     });
-    
+
     const transformedPrograms = programsData.map(p => ({
         ...p,
         templatePlan: transformPlan(p.templatePlan as any, modules)
@@ -146,7 +217,7 @@ export async function getAllData(): Promise<AppData> {
 
     const enrichedModules = modules.map(m => ({
         ...m,
-        fachbereich: m.fachbereich || 'Design',
+        department: m.department || 'Design',
         workload: m.workload || (m.cp || 0) * 30,
         shortName: m.shortName || m.name.substring(0, 5)
     }));
@@ -154,21 +225,28 @@ export async function getAllData(): Promise<AppData> {
     return {
         modules: enrichedModules,
         programs: transformedPrograms,
-        studiengruppen,
+        cohorts: cohortsData,
         categories,
+        catalogs,
+        users,
+        rooms: (roomsData as any).rooms || roomsData,
+        roomAssignments: (roomsData as any).roomAssignments || (await readJsonFile<RoomAssignment[]>(roomOccupancyFilePath).catch(() => [])),
+        systemSettings: (roomsData as any).systemSettings || (await readJsonFile<SystemSettings>(systemSettingsFilePath).catch(() => ({} as SystemSettings))),
+        academicCalendar: (roomsData as any).academicCalendar || (await readJsonFile<AcademicCalendar>(academicCalendarFilePath).catch(() => ({ academicYearStartMonth: 10, semesters: [] }))),
     };
 }
 
-// Saves the entire data object back to the individual files
+// Saves the entire data object back to PocketBase or individual files
 export async function saveData(data: AppData): Promise<void> {
+    const usePocketBase = !!process.env.NEXT_PUBLIC_POCKETBASE_URL;
+
     try {
-        const { modules, programs, studiengruppen } = data;
+        const { modules, programs, cohorts } = data;
 
         // Strip UI-only fields from modules before saving
-        const modulesToSave = modules.map(({ fachbereich, workload, shortName, ...rest }) => rest);
+        const modulesToSave = modules.map(({ department, workload, shortName, ...rest }) => rest);
 
-        // Inverse transform plans for studiengruppen
-        const cohortsToSave = studiengruppen.map(sg => {
+        const cohortsToSave = cohorts.map(sg => {
             const { plan, ...rest } = sg;
             return {
                 ...rest,
@@ -176,22 +254,48 @@ export async function saveData(data: AppData): Promise<void> {
             };
         });
 
-        // Inverse transform template plans for programs
         const programsToSave = programs.map(p => {
-             const { templatePlan, ...rest } = p;
-             return {
-                 ...rest,
-                 templatePlan: inverseTransformPlan(templatePlan as ProgramPlan, modules)
-             };
+            const { templatePlan, ...rest } = p;
+            return {
+                ...rest,
+                templatePlan: inverseTransformPlan(templatePlan as ProgramPlan, modules)
+            };
         });
 
-        await Promise.all([
-            fs.writeFile(modulesFilePath, JSON.stringify(modulesToSave, null, 2), 'utf-8'),
-            fs.writeFile(programsFilePath, JSON.stringify(programsToSave, null, 2), 'utf-8'),
-            fs.writeFile(cohortsFilePath, JSON.stringify(cohortsToSave, null, 2), 'utf-8'),
-            fs.writeFile(categoriesFilePath, JSON.stringify(data.categories, null, 2), 'utf-8')
-        ]);
-        console.log("Data saved successfully.");
+        if (usePocketBase) {
+            const payload = {
+                modules: modulesToSave,
+                programs: programsToSave,
+                cohorts: cohortsToSave,
+                categories: data.categories,
+                rooms: data.rooms,
+                roomAssignments: data.roomAssignments
+            };
+
+            try {
+                // Try to update the first existing record
+                const record = await pb.collection('CoursePilot').getFirstListItem('', { requestKey: null });
+                await pb.collection('CoursePilot').update(record.id, { data: payload });
+            } catch (e) {
+                // If none exists, create the first one
+                await pb.collection('CoursePilot').create({ data: payload });
+            }
+            console.log("Data saved to PocketBase (single doc).");
+        } else {
+            await Promise.all([
+                fs.writeFile(modulesFilePath, JSON.stringify(modulesToSave, null, 2), 'utf-8'),
+                fs.writeFile(programsFilePath, JSON.stringify(programsToSave, null, 2), 'utf-8'),
+                fs.writeFile(cohortsFilePath, JSON.stringify(cohortsToSave, null, 2), 'utf-8'),
+                fs.writeFile(categoriesFilePath, JSON.stringify(data.categories, null, 2), 'utf-8'),
+                fs.writeFile(catalogsFilePath, JSON.stringify(data.catalogs, null, 2), 'utf-8'),
+                fs.writeFile(usersFilePath, JSON.stringify(data.users, null, 2), 'utf-8'),
+                fs.writeFile(roomsFilePath, JSON.stringify(data.rooms, null, 2), 'utf-8'),
+                fs.writeFile(roomOccupancyFilePath, JSON.stringify(data.roomAssignments, null, 2), 'utf-8'),
+                fs.writeFile(systemSettingsFilePath, JSON.stringify(data.systemSettings, null, 2), 'utf-8'),
+                fs.writeFile(academicCalendarFilePath, JSON.stringify(data.academicCalendar, null, 2), 'utf-8')
+            ]);
+            console.log("Data saved to local files.");
+        }
 
     } catch (error) {
         console.error("Failed to save data:", error);

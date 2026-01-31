@@ -1,0 +1,374 @@
+[
+  {
+    "id": "0.01",
+    "name": "Hörsaal 0.01",
+    "type": "building",
+    "capacity": 30,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "0.02",
+    "name": "Hörsaal 0.02",
+    "type": "building",
+    "capacity": 30,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "0.03",
+    "name": "Hörsaal 0.03",
+    "type": "building",
+    "capacity": 30,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "0.04",
+    "name": "Hörsaal 0.04",
+    "type": "building",
+    "capacity": 30,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "0.06",
+    "name": "Seminarraum 0.06",
+    "type": "building",
+    "capacity": 12,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "0.07",
+    "name": "Seminarraum 0.07",
+    "type": "building",
+    "capacity": 12,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "0.08",
+    "name": "Seminarraum 0.08",
+    "type": "building",
+    "capacity": 12,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "0.BR-EG",
+    "name": "Besprechungsraum EG",
+    "type": "building",
+    "capacity": 10,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "1.01",
+    "name": "PC-Raum I",
+    "type": "building",
+    "capacity": 20,
+    "workspacesPc": 20,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": true,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": true
+    },
+    "floor": "1. OG"
+  },
+  {
+    "id": "1.02",
+    "name": "Mac-Raum I",
+    "type": "building",
+    "capacity": 20,
+    "workspacesMac": 20,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": true,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": true
+    },
+    "floor": "1. OG"
+  },
+  {
+    "id": "1.03",
+    "name": "Mac-Raum II",
+    "type": "building",
+    "capacity": 26,
+    "workspacesMac": 26,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": true,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": true
+    },
+    "floor": "1. OG"
+  },
+  {
+    "id": "1.04",
+    "name": "PC-Raum II",
+    "type": "building",
+    "capacity": 20,
+    "workspacesPc": 20,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": true,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": true
+    },
+    "floor": "1. OG"
+  },
+  {
+    "id": "1.05",
+    "name": "Aula",
+    "type": "building",
+    "capacity": 56,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "1. OG"
+  },
+  {
+    "id": "1.09",
+    "name": "Hörsaal 1.09",
+    "type": "building",
+    "capacity": 32,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "1. OG"
+  },
+  {
+    "id": "1.15",
+    "name": "Besprechungsraum 1.15",
+    "type": "building",
+    "capacity": 16,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "1. OG"
+  },
+  {
+    "id": "2.BR-2OG",
+    "name": "Besprechungsraum 2.OG",
+    "type": "building",
+    "capacity": 6,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "2. OG"
+  },
+  {
+    "id": "2.02",
+    "name": "Hörsaal 2.02",
+    "type": "building",
+    "capacity": 48,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "2. OG"
+  },
+  {
+    "id": "2.03",
+    "name": "Hörsaal 2.03",
+    "type": "building",
+    "capacity": 46,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "2. OG"
+  },
+  {
+    "id": "2.04",
+    "name": "Hörsaal 2.04",
+    "type": "building",
+    "capacity": 46,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "2. OG"
+  },
+  {
+    "id": "2.06",
+    "name": "Hörsaal 2.06",
+    "type": "building",
+    "capacity": 46,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "2. OG"
+  },
+  {
+    "id": "MARKT",
+    "name": "Marktplatz",
+    "type": "building",
+    "capacity": 50,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "EG"
+  },
+  {
+    "id": "PHONE2",
+    "name": "Phonebooth 2. OG",
+    "type": "building",
+    "capacity": 1,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": true,
+      "airConditioned": false
+    },
+    "floor": "2. OG"
+  },
+  {
+    "id": "STUDIO",
+    "name": "TV- und Ton-Studio",
+    "type": "building",
+    "capacity": 30,
+    "equipment": {
+      "beamer": true,
+      "lecturerPc": true,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": true,
+      "barrierFree": true,
+      "airConditioned": true
+    },
+    "floor": "1. OG"
+  }
+]

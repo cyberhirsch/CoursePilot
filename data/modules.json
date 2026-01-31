@@ -8,7 +8,8 @@
     "category": "Weitere Module und Studienabschnitte",
     "prerequisites": [],
     "forbiddenSemesters": [],
-    "maxParticipants": 100
+    "maxParticipants": 100,
+    "fachbereich": "Design"
   },
   {
     "id": "G1",
@@ -20,7 +21,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "G2",
@@ -32,7 +34,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "G3",
@@ -44,7 +47,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "G4",
@@ -56,7 +60,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "G5",
@@ -68,7 +73,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "G6",
@@ -80,7 +86,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "WP1-8",
@@ -92,7 +99,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "F1",
@@ -103,7 +111,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "F2",
@@ -114,7 +123,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "F3",
@@ -125,7 +135,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "F4",
@@ -136,7 +147,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "F5",
@@ -147,7 +159,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "M1",
@@ -158,7 +171,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "M2",
@@ -169,7 +183,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "M3",
@@ -180,7 +195,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "M4",
@@ -191,7 +207,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "M5",
@@ -202,7 +219,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "M6",
@@ -213,7 +231,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "M7",
@@ -224,6 +243,65 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
+    ],
+    "fachbereich": "Design",
+    "duration": "1 Semester",
+    "frequency": "jedes Semester",
+    "examType": "Projektarbeit (mit Präsentation)",
+    "teachingMethods": "Seminaristischer Unterricht",
+    "language": "Deutsch",
+    "personInCharge": "Prof. Dr. Max Mustermann",
+    "workloadDetails": [
+      {
+        "description": "Präsenzstudium",
+        "hours": 60
+      },
+      {
+        "description": "Selbststudium (Projektarbeit)",
+        "hours": 90
+      }
+    ],
+    "contentTopics": [
+      "Einführung in die Filmproduktion (Pre-, Production, Post-)",
+      "Kameratechnik und Lichtsetzung",
+      "Schnitt und Montage (Adobe Premiere / DaVinci Resolve)",
+      "Color Grading und Sound Design",
+      "Visual Effects Grundlagen"
+    ],
+    "learningOutcomes": "Die Studierenden kennen die grundlegenden Abläufe einer Filmproduktion. Sie können technische Geräte (Kamera, Licht, Ton) sicher bedienen und Videomaterial professionell bearbeiten (Schnitt, Grading).",
+    "literatureItems": [
+      "Monaco, James: Film verstehen.",
+      "Murch, Walter: In the Blink of an Eye.",
+      "Online-Tutorials (LinkedIn Learning, YouTube)",
+      ""
+    ],
+    "description": "Das Modul führt in verschiedene Aspekte zeitbasierter Medien ein und befähigt die Studierenden, filmische und räumlich-\ninszenatorische Gestaltungen bei der Produktion, Postproduktion und Animation selbständig anzuwenden und zukünftig planen\nzu können.\n",
+    "contentDetails": [
+      {
+        "topic": "",
+        "content": "Einführung in die Filmproduktion (Pre-, Production, Post-)",
+        "goals": ""
+      },
+      {
+        "topic": "",
+        "content": "Kameratechnik und Lichtsetzung",
+        "goals": ""
+      },
+      {
+        "topic": "",
+        "content": "Schnitt und Montage (Adobe Premiere / DaVinci Resolve)",
+        "goals": ""
+      },
+      {
+        "topic": "",
+        "content": "Color Grading und Sound Design",
+        "goals": ""
+      },
+      {
+        "topic": "",
+        "content": "Visual Effects Grundlagen",
+        "goals": ""
+      }
     ]
   },
   {
@@ -235,7 +313,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "B1",
@@ -247,7 +326,8 @@
     "programIds": [
       "GDIM"
     ],
-    "equivalentTo": "F1"
+    "equivalentTo": "F1",
+    "fachbereich": "Design"
   },
   {
     "id": "B2",
@@ -259,7 +339,8 @@
     "programIds": [
       "GDIM"
     ],
-    "equivalentTo": "F3"
+    "equivalentTo": "F3",
+    "fachbereich": "Design"
   },
   {
     "id": "A1",
@@ -270,7 +351,14 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design",
+    "requirements": {
+      "macRoom": true,
+      "pcLab": true,
+      "beamer": false,
+      "lecturerPc": false
+    }
   },
   {
     "id": "A2",
@@ -281,7 +369,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "A3",
@@ -293,7 +382,8 @@
     "programIds": [
       "GDIM"
     ],
-    "equivalentTo": "M8"
+    "equivalentTo": "M8",
+    "fachbereich": "Design"
   },
   {
     "id": "C1",
@@ -304,7 +394,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "C2",
@@ -315,7 +406,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "C3",
@@ -326,7 +418,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "C4",
@@ -337,7 +430,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "S1",
@@ -348,7 +442,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "S2",
@@ -359,7 +454,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "S3",
@@ -370,7 +466,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "S4",
@@ -381,7 +478,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "S5",
@@ -392,7 +490,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "I1",
@@ -403,7 +502,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "I2",
@@ -414,7 +514,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "I3",
@@ -425,7 +526,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "I4",
@@ -436,7 +538,8 @@
     "category": "Studiengangspezifische Kompetenzen",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "Lab",
@@ -447,7 +550,8 @@
     "category": "Weitere Module und Studienabschnitte",
     "programIds": [
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "Sp",
@@ -458,7 +562,8 @@
     "category": "Weitere Module und Studienabschnitte",
     "programIds": [
       "GDVK"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "Rep",
@@ -470,7 +575,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "Prkt",
@@ -482,7 +588,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design"
   },
   {
     "id": "BA-A",
@@ -494,6 +601,8 @@
     "programIds": [
       "GDVK",
       "GDIM"
-    ]
+    ],
+    "fachbereich": "Design",
+    "personInCharge": "Prof. Dr. Max Mustermann"
   }
 ]

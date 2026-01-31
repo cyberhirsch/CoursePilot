@@ -9,8 +9,8 @@
  * - ConsolidateModulesOutput - The return type for the consolidateModules function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const ConsolidateModulesInputSchema = z.object({
     modules: z.array(
@@ -30,7 +30,7 @@ const ConsolidateModulesInputSchema = z.object({
             moduleIds: z.array(z.string()),
         })
     ),
-    studiengruppen: z.array(
+    cohorts: z.array(
         z.object({
             id: z.string(),
             shortName: z.string(),
@@ -74,10 +74,10 @@ export async function consolidateModules(input: ConsolidateModulesInput): Promis
 
 const consolidateModulesPrompt = ai.definePrompt({
     name: 'consolidateModulesPrompt',
-    input: {schema: ConsolidateModulesInputSchema},
-    output: {schema: ConsolidateModulesOutputSchema},
+    input: { schema: ConsolidateModulesInputSchema },
+    output: { schema: ConsolidateModulesOutputSchema },
     prompt: `Analyze the following university course planning data to optimize teaching resources.
-Your goal is to consolidate module offerings across different study groups ("Studiengruppen") to minimize the total number of weekly semester hours (SWS) required.
+Your goal is to consolidate module offerings across different study groups ("Cohorts") to minimize the total number of weekly semester hours (SWS) required.
 
 Constraints & Rules:
 1.  A consolidation is only possible if the same module (or an instance of the same pool module) is planned for multiple groups in the EXACT SAME absolute semester.
@@ -104,7 +104,7 @@ const consolidateModulesFlow = ai.defineFlow(
         outputSchema: ConsolidateModulesOutputSchema,
     },
     async input => {
-        const {output} = await consolidateModulesPrompt(input);
+        const { output } = await consolidateModulesPrompt(input);
         return output!;
     }
 );
