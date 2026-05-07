@@ -370,5 +370,209 @@
       "airConditioned": true
     },
     "floor": "1. OG"
+  },
+  {
+    "id": "R124",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R125",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R126",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R127",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R128",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R129",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R130",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R131",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R132",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R133",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R134",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
+  },
+  {
+    "id": "R135",
+    "name": "Neuer Raum",
+    "type": "building",
+    "capacity": 30,
+    "workspacesMac": 0,
+    "workspacesPc": 0,
+    "equipment": {
+      "beamer": false,
+      "lecturerPc": false,
+      "macRoom": false,
+      "pcLab": false,
+      "darkenable": false,
+      "barrierFree": false,
+      "airConditioned": false
+    }
   }
 ]

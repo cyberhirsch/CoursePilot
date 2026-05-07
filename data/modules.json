@@ -1,358 +1,358 @@
 [
   {
     "id": "BPxP",
-    "name": "Betriebliche Praxisprojekte",
+    "name": "Collaborative Research Projects",
     "sws": 2,
     "cp": 10,
     "type": "Pflicht",
-    "category": "Weitere Module und Studienabschnitte",
+    "category": "Electives & Thesis",
     "prerequisites": [],
     "forbiddenSemesters": [],
     "maxParticipants": 100,
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "G1",
-    "name": "Wissenschaftliches Propädeutikum",
+    "name": "Foundations of Science",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangübergreifende Kompetenzen",
+    "category": "Core Competencies",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "G2",
-    "name": "Personale und soziale Kompetenzen",
+    "name": "Human Factors & Ethics",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangübergreifende Kompetenzen",
+    "category": "Core Competencies",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "G3",
-    "name": "Medien- und Kommunikationswissenschaft",
+    "name": "Information Theory",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangübergreifende Kompetenzen",
+    "category": "Core Competencies",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "G4",
-    "name": "Wirtschaftswissenschaften",
+    "name": "Innovation Management",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangübergreifende Kompetenzen",
+    "category": "Core Competencies",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "G5",
-    "name": "Interkulturalität",
+    "name": "Global Perspectives",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangübergreifende Kompetenzen",
+    "category": "Core Competencies",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "G6",
-    "name": "Empirische Methodenlehre",
+    "name": "Data Analytics",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangübergreifende Kompetenzen",
+    "category": "Core Competencies",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "WP1-8",
-    "name": "Wahlpflicht Pool",
+    "name": "Elective Concentration",
     "sws": 3,
     "cp": 5,
     "type": "Pool",
-    "category": "Studiengangübergreifende Kompetenzen",
+    "category": "Core Competencies",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "F1",
-    "name": "Kunst-/Designgeschichte und -theorie",
+    "name": "History of Automation",
     "sws": 2,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "F2",
-    "name": "Gestaltungsprozess und Kreativität",
+    "name": "Systems Design Process",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "F3",
-    "name": "Farbe, Form, Komposition",
+    "name": "Visual Interface Dynamics",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "F4",
-    "name": "Grafik und Bild",
+    "name": "Signal Visualization",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "F5",
-    "name": "Projektwerkstatt (5 Module)",
+    "name": "Advanced Prototyping (5 Modules)",
     "sws": 4,
     "cp": 5,
     "type": "Pool",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "M1",
-    "name": "Fotografie",
+    "name": "Sensor Integration",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "M2",
-    "name": "Layout",
+    "name": "Network Topology",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "M3",
-    "name": "Prepress/Press",
+    "name": "Industrial Manufacturing",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "M4",
-    "name": "Grafik in Raum und Umgebung",
+    "name": "Spatial Computing",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "M5",
-    "name": "Grundlagen Interface- und Interaktionsdesign",
+    "name": "HCI Foundations",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "M6",
-    "name": "Interaktive Medien",
+    "name": "Embedded Systems",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "M7",
-    "name": "Film- und Postproduktion",
+    "name": "Control Theory",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design",
+    "fachbereich": "Applied Engineering",
     "duration": "1 Semester",
     "frequency": "jedes Semester",
-    "examType": "Projektarbeit (mit Präsentation)",
+    "examType": "Project Work (with Presentation)",
     "teachingMethods": "Seminaristischer Unterricht",
-    "language": "Deutsch",
-    "personInCharge": "Prof. Dr. Max Mustermann",
+    "language": "English",
+    "personInCharge": "Prof. Dr. Alex Generic",
     "workloadDetails": [
       {
-        "description": "Präsenzstudium",
+        "description": "Contact Hours",
         "hours": 60
       },
       {
-        "description": "Selbststudium (Projektarbeit)",
+        "description": "Self-study (Project Work)",
         "hours": 90
       }
     ],
     "contentTopics": [
-      "Einführung in die Filmproduktion (Pre-, Production, Post-)",
-      "Kameratechnik und Lichtsetzung",
-      "Schnitt und Montage (Adobe Premiere / DaVinci Resolve)",
-      "Color Grading und Sound Design",
-      "Visual Effects Grundlagen"
+      "Introduction to Control Systems",
+      "Feedback Loops and PID Control",
+      "System Identification",
+      "Frequency Response Analysis",
+      "Digital Control Implementation"
     ],
-    "learningOutcomes": "Die Studierenden kennen die grundlegenden Abläufe einer Filmproduktion. Sie können technische Geräte (Kamera, Licht, Ton) sicher bedienen und Videomaterial professionell bearbeiten (Schnitt, Grading).",
+    "learningOutcomes": "Students understand the basic cycles of a control system. They can safely operate technical equipment and professionally process system data.",
     "literatureItems": [
-      "Monaco, James: Film verstehen.",
-      "Murch, Walter: In the Blink of an Eye.",
-      "Online-Tutorials (LinkedIn Learning, YouTube)",
+      "Dorf, Richard C.: Modern Control Systems.",
+      "Aström, Karl J.: Feedback Systems.",
+      "Online-Tutorials (edX, Coursera)",
       ""
     ],
-    "description": "Das Modul führt in verschiedene Aspekte zeitbasierter Medien ein und befähigt die Studierenden, filmische und räumlich-\ninszenatorische Gestaltungen bei der Produktion, Postproduktion und Animation selbständig anzuwenden und zukünftig planen\nzu können.\n",
+    "description": "The module introduces various aspects of time-based systems and enables students to independently apply and plan control-oriented designs.",
     "contentDetails": [
       {
         "topic": "",
-        "content": "Einführung in die Filmproduktion (Pre-, Production, Post-)",
+        "content": "Introduction to Control Systems",
         "goals": ""
       },
       {
         "topic": "",
-        "content": "Kameratechnik und Lichtsetzung",
+        "content": "Feedback Loops and PID Control",
         "goals": ""
       },
       {
         "topic": "",
-        "content": "Schnitt und Montage (Adobe Premiere / DaVinci Resolve)",
+        "content": "System Identification",
         "goals": ""
       },
       {
         "topic": "",
-        "content": "Color Grading und Sound Design",
+        "content": "Frequency Response Analysis",
         "goals": ""
       },
       {
         "topic": "",
-        "content": "Visual Effects Grundlagen",
+        "content": "Digital Control Implementation",
         "goals": ""
       }
     ]
   },
   {
     "id": "M8",
-    "name": "Motion Design",
+    "name": "Kinematics",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "B1",
-    "name": "Kunst-/Designgeschichte und -theorie",
+    "name": "History of Automation",
     "sws": 2,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
     "equivalentTo": "F1",
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "B2",
-    "name": "Gestaltungs- und Designgrundlagen",
+    "name": "Visual Interface Dynamics",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
     "equivalentTo": "F3",
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "A1",
-    "name": "Concept Art",
+    "name": "Algorithmic Logic",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design",
+    "fachbereich": "Applied Engineering",
     "requirements": {
       "macRoom": true,
       "pcLab": true,
@@ -362,247 +362,248 @@
   },
   {
     "id": "A2",
-    "name": "2D Character Animation",
+    "name": "Autonomous Agents",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "A3",
-    "name": "Motion Design",
+    "name": "Kinematics",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
     "equivalentTo": "M8",
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "C1",
-    "name": "Modelling & Texturing",
+    "name": "3D Computer Vision",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Lecturer Computing"
   },
   {
     "id": "C2",
-    "name": "Lighting & Shading",
+    "name": "Optical Simulation",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "C3",
-    "name": "Rigging & 3D Character Animation",
+    "name": "Robot Mechanics",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "C4",
-    "name": "Simulation & FX",
+    "name": "Physical Modeling",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "S1",
-    "name": "Grundlagen Spieleentwicklung",
+    "name": "AI Systems Engineering",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "S2",
-    "name": "Game Engines & Projektmanagement",
+    "name": "Cyber-Physical Systems & PM",
     "sws": 5,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "S3",
-    "name": "Level Design",
+    "name": "Environment Mapping",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "S4",
-    "name": "Spielmechanik",
+    "name": "Mechanism Design",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "S5",
-    "name": "Sound Design",
+    "name": "Acoustic Sensors",
     "sws": 2,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "I1",
-    "name": "Interactive and Visual Storytelling",
+    "name": "Human-Machine Interface",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "I2",
-    "name": "Programmierung & Visual Scripting",
+    "name": "Logic Programming",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "I3",
-    "name": "Grundlagen Interface- und Interaktionsdesign",
+    "name": "HCI Foundations",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "I4",
-    "name": "Interaktive Medien",
+    "name": "Embedded Systems",
     "sws": 4,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Studiengangspezifische Kompetenzen",
+    "category": "Specialized Competencies",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "Lab",
-    "name": "Game & Interactive Lab",
+    "name": "Innovation Lab",
     "sws": 3,
     "cp": 5,
     "type": "Pool",
-    "category": "Weitere Module und Studienabschnitte",
+    "category": "Electives & Thesis",
     "programIds": [
-      "GDIM"
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "Sp",
-    "name": "Selbstpräsentation",
+    "name": "Professional Development",
     "sws": 2,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Weitere Module und Studienabschnitte",
+    "category": "Electives & Thesis",
     "programIds": [
-      "GDVK"
+      "DSA"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "Rep",
-    "name": "Repetitorium",
+    "name": "Synthesis Review",
     "sws": 3,
     "cp": 5,
     "type": "Pflicht",
-    "category": "Weitere Module und Studienabschnitte",
+    "category": "Electives & Thesis",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "Prkt",
-    "name": "Praktikum",
+    "name": "Industrial Internship",
     "sws": 3,
     "cp": 30,
     "type": "Pflicht",
-    "category": "Weitere Module und Studienabschnitte",
+    "category": "Electives & Thesis",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design"
+    "fachbereich": "Applied Engineering"
   },
   {
     "id": "BA-A",
-    "name": "Bachelorarbeit",
+    "name": "Capstone Project",
     "sws": 2,
     "cp": 10,
     "type": "Pflicht",
-    "category": "Weitere Module und Studienabschnitte",
+    "category": "Electives & Thesis",
     "programIds": [
-      "GDVK",
-      "GDIM"
+      "DSA",
+      "ARAI"
     ],
-    "fachbereich": "Design",
-    "personInCharge": "Prof. Dr. Max Mustermann"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Prof. Dr. Alex Generic"
   }
 ]

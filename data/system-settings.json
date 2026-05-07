@@ -1,9 +1,10 @@
 {
   "currentSemester": "ss2025",
   "institutions": {
-    "defaultLocation": "Köln",
+    "defaultLocation": "Traunstein",
     "campusLocations": [
-      "Köln"
+      "Traunstein",
+      "Ruhpolding"
     ]
   },
   "academicCalendar": {
@@ -18,8 +19,20 @@
     "defaultRoomBufferMinutes": 15
   },
   "daySchedule": {
-    "startHour": "08:00",
+    "startHour": "09:00",
     "endHour": "20:00",
-    "standardPauseMinutes": 15
+    "standardPauseMinutes": 15,
+    "eventBreakDurationMinutes": 15,
+    "eventBreakIntervalMinutes": 90,
+    "plannedWeekdays": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday"
+    ],
+    "useLunchBreak": true,
+    "lunchBreakStart": "12:00",
+    "lunchBreakEnd": "13:00"
   }
 }

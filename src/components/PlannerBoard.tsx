@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import type { Module, Program, Cohort, AbsoluteSemester, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment } from '@/types';
+import type { Module, Program, Cohort, AbsoluteSemester, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability as LecturerAvailabilityData, SchedulePlan } from '@/types';
 import { TRANSLATIONS, DEFAULT_LANGUAGE } from '@/translations';
 import { ProgramPlannerGrid } from '@/components/ProgramPlannerGrid';
 import { SemesterOverview } from '@/components/SemesterOverview';
@@ -16,6 +16,10 @@ import { RoomAvailability } from '@/components/RoomAvailability';
 import { SettingsVariables } from '@/components/SettingsVariables';
 import { SettingsGeneral } from '@/components/SettingsGeneral';
 import { SettingsCalendar } from '@/components/SettingsCalendar';
+import { LecturerOverview } from '@/components/LecturerOverview';
+import { LecturerAvailability as LecturerAvailabilityView } from '@/components/LecturerAvailability';
+import { SchedulePlanner } from '@/components/SchedulePlanner';
+import { UserManagement } from '@/components/UserManagement';
 
 
 interface PlannerBoardProps {
@@ -54,6 +58,9 @@ interface PlannerBoardProps {
   catalogs?: Catalogs;
   onUpdateCatalogs?: (catalogs: Catalogs) => void;
   users?: User[];
+  onAddUser?: (user: User) => void;
+  onUpdateUser?: (userId: string, updates: Partial<User>) => void;
+  onDeleteUser?: (userId: string) => void;
   rooms?: Room[];
   onUpdateRoom?: (roomId: string, updates: Partial<Room>) => void;
   onAddRoom?: (room: Room) => void;
@@ -63,7 +70,11 @@ interface PlannerBoardProps {
   academicCalendar?: AcademicCalendar;
   onUpdateAcademicCalendar?: (calendar: AcademicCalendar) => void;
   roomAssignments?: RoomAssignment[];
-  onUpdateRoomAssignments?: (assignments: RoomAssignment[]) => void;
+  onUpdateRoomAssignments?: (assignments: RoomAssignment[], options?: { reconcileSchedule?: boolean }) => void;
+  lecturerAvailabilities?: LecturerAvailabilityData[];
+  onUpdateLecturerAvailabilities?: (availabilities: LecturerAvailabilityData[]) => void;
+  schedulePlan?: SchedulePlan | null;
+  onUpdateSchedulePlan?: (plan: SchedulePlan | null) => void;
 }
 
 export const PlannerBoard: React.FC<PlannerBoardProps> = ({
@@ -102,6 +113,9 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
   catalogs,
   onUpdateCatalogs,
   users = [],
+  onAddUser = () => { },
+  onUpdateUser = () => { },
+  onDeleteUser = () => { },
   rooms = [],
   onUpdateRoom = () => { },
   onAddRoom = () => { },
@@ -112,11 +126,35 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
   onUpdateAcademicCalendar,
   roomAssignments = [],
   onUpdateRoomAssignments = () => { },
+  lecturerAvailabilities = [],
+  onUpdateLecturerAvailabilities = () => { },
+  schedulePlan = null,
+  onUpdateSchedulePlan = () => { },
 }) => {
   const t = TRANSLATIONS[lang];
 
-  if (mainCategory !== 'semester-plan' && mainCategory !== 'modules' && mainCategory !== 'lecturers' && mainCategory !== 'rooms' && mainCategory !== 'user-management' && mainCategory !== 'settings' && mainCategory !== 'examinations') {
-    return <PlaceholderPage title={t.navigation[mainCategory.replace(/-./g, x => x[1].toUpperCase()) as keyof typeof t.navigation] || mainCategory} />;
+  if (mainCategory !== 'semester-plan' && mainCategory !== 'schedule' && mainCategory !== 'modules' && mainCategory !== 'lecturers' && mainCategory !== 'rooms' && mainCategory !== 'user-management' && mainCategory !== 'settings' && mainCategory !== 'examinations') {
+    const fallbackKey = String(mainCategory).replace(/-./g, (match: string) => match[1].toUpperCase()) as keyof typeof t.navigation;
+    return <PlaceholderPage title={t.navigation[fallbackKey] || String(mainCategory)} />;
+  }
+
+  if (viewMode === 'schedule-planner' || mainCategory === 'schedule') {
+    return <SchedulePlanner
+      modules={modules}
+      cohorts={cohorts}
+      users={users}
+      rooms={rooms}
+      selectedSemester={selectedSemester}
+      setSelectedSemester={setSelectedSemester}
+      semesters={semesters}
+      lecturerAvailabilities={lecturerAvailabilities}
+      roomAssignments={roomAssignments}
+      onUpdateRoomAssignments={onUpdateRoomAssignments}
+      schedulePlan={schedulePlan}
+      onUpdateSchedulePlan={onUpdateSchedulePlan}
+      systemSettings={systemSettings}
+      onUpdateSystemSettings={onUpdateSystemSettings}
+    />;
   }
 
   if (viewMode === 'modules') {
@@ -196,11 +234,24 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
   }
 
   if (viewMode === 'lecturer-overview') {
-    return <PlaceholderPage title={t.lecturers?.overview || 'Lecturer Overview'} />;
+    return <LecturerOverview
+      users={users}
+      modules={modules}
+      schedulePlan={schedulePlan}
+      lecturerAvailabilities={lecturerAvailabilities}
+      onUpdateLecturerAvailabilities={onUpdateLecturerAvailabilities}
+      systemSettings={systemSettings}
+    />;
   }
 
   if (viewMode === 'availability') {
-    return <PlaceholderPage title={t.lecturers?.availability || 'Availability'} />;
+    return <LecturerAvailabilityView
+      users={users}
+      lecturerAvailabilities={lecturerAvailabilities}
+      onUpdateLecturerAvailabilities={onUpdateLecturerAvailabilities}
+      schedulePlan={schedulePlan}
+      systemSettings={systemSettings}
+    />;
   }
 
   if (viewMode === 'room-overview') {
@@ -233,11 +284,25 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
   }
 
   if (viewMode === 'user-profile') {
-    return <PlaceholderPage title={t.userManagement?.profile || 'Profile'} />;
+    return <UserManagement
+      users={users}
+      cohorts={cohorts}
+      onAddUser={onAddUser}
+      onUpdateUser={onUpdateUser}
+      onDeleteUser={onDeleteUser}
+      mode="profile"
+    />;
   }
 
   if (viewMode === 'user-groups') {
-    return <PlaceholderPage title={t.userManagement?.groups || 'User Groups'} />;
+    return <UserManagement
+      users={users}
+      cohorts={cohorts}
+      onAddUser={onAddUser}
+      onUpdateUser={onUpdateUser}
+      onDeleteUser={onDeleteUser}
+      mode="groups"
+    />;
   }
 
   if (viewMode === 'settings-general') {

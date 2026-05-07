@@ -1,0 +1,1265 @@
+{
+  "semesterId": "ss2026",
+  "planningMode": "semester",
+  "status": "planning",
+  "semesterStartDate": "2026-03-23",
+  "semesterEndDate": "2026-07-10",
+  "weekStartDate": "2026-03-23",
+  "weekEndDate": "2026-07-12",
+  "generatedAt": "2026-05-07T20:24:05.421Z",
+  "entries": [
+    {
+      "id": "class-ss2026:G6",
+      "semesterId": "ss2026",
+      "moduleId": "G6",
+      "moduleName": "Data Analytics",
+      "moduleInstanceIds": [
+        "G6"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-25Wk"
+      ],
+      "cohortNames": [
+        "25Wk"
+      ],
+      "lecturerUserId": "usr_prof_max",
+      "lecturerName": "Prof. Dr. Alex Generic",
+      "roomId": "2.BR-2OG",
+      "roomName": "Besprechungsraum 2.OG",
+      "day": "monday",
+      "date": "2026-03-23",
+      "occurrenceDates": [
+        "2026-03-23",
+        "2026-03-30",
+        "2026-04-06",
+        "2026-04-13",
+        "2026-04-20",
+        "2026-04-27",
+        "2026-05-04",
+        "2026-05-11",
+        "2026-05-18",
+        "2026-05-25",
+        "2026-06-01",
+        "2026-06-08",
+        "2026-06-15",
+        "2026-06-22",
+        "2026-06-29",
+        "2026-07-06"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 5,
+      "score": 7.4,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:G3",
+      "semesterId": "ss2026",
+      "moduleId": "G3",
+      "moduleName": "Information Theory",
+      "moduleInstanceIds": [
+        "G3",
+        "G3"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-09k",
+        "kBA-GDVK-25Sk"
+      ],
+      "cohortNames": [
+        "09k",
+        "25Sk"
+      ],
+      "lecturerUserId": "usr_admin",
+      "lecturerName": "System Support",
+      "roomId": "0.BR-EG",
+      "roomName": "Besprechungsraum EG",
+      "day": "monday",
+      "date": "2026-03-23",
+      "occurrenceDates": [
+        "2026-03-23",
+        "2026-03-30",
+        "2026-04-06",
+        "2026-04-13",
+        "2026-04-20",
+        "2026-04-27",
+        "2026-05-04",
+        "2026-05-11",
+        "2026-05-18",
+        "2026-05-25",
+        "2026-06-01",
+        "2026-06-08",
+        "2026-06-15",
+        "2026-06-22",
+        "2026-06-29",
+        "2026-07-06"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 4,
+      "score": 9.4,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:M6",
+      "semesterId": "ss2026",
+      "moduleId": "M6",
+      "moduleName": "Embedded Systems",
+      "moduleInstanceIds": [
+        "M6"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-34k"
+      ],
+      "cohortNames": [
+        "34k"
+      ],
+      "lecturerUserId": "usr_coord_design",
+      "lecturerName": "Academic Coordinator",
+      "roomId": "0.BR-EG",
+      "roomName": "Besprechungsraum EG",
+      "day": "monday",
+      "date": "2026-03-23",
+      "occurrenceDates": [
+        "2026-03-23",
+        "2026-03-30",
+        "2026-04-06",
+        "2026-04-13",
+        "2026-04-20",
+        "2026-04-27",
+        "2026-05-04",
+        "2026-05-11",
+        "2026-05-18",
+        "2026-05-25",
+        "2026-06-01",
+        "2026-06-08",
+        "2026-06-15",
+        "2026-06-22",
+        "2026-06-29",
+        "2026-07-06"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 7,
+      "score": 8.2,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:I2",
+      "semesterId": "ss2026",
+      "moduleId": "I2",
+      "moduleName": "Logic Programming",
+      "moduleInstanceIds": [
+        "I2",
+        "I2"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-08",
+        "KBA-GDIM-09k"
+      ],
+      "cohortNames": [
+        "08",
+        "09k"
+      ],
+      "lecturerUserId": "usr_lecturer_film",
+      "lecturerName": "Lecturer Control Theory",
+      "roomId": "2.BR-2OG",
+      "roomName": "Besprechungsraum 2.OG",
+      "day": "monday",
+      "date": "2026-03-23",
+      "occurrenceDates": [
+        "2026-03-23",
+        "2026-03-30",
+        "2026-04-06",
+        "2026-04-13",
+        "2026-04-20",
+        "2026-04-27",
+        "2026-05-04",
+        "2026-05-11",
+        "2026-05-18",
+        "2026-05-25",
+        "2026-06-01",
+        "2026-06-08",
+        "2026-06-15",
+        "2026-06-22",
+        "2026-06-29",
+        "2026-07-06"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 4,
+      "score": 7.8,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:M8",
+      "semesterId": "ss2026",
+      "moduleId": "M8",
+      "moduleName": "Kinematics",
+      "moduleInstanceIds": [
+        "M8"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-33"
+      ],
+      "cohortNames": [
+        "33"
+      ],
+      "lecturerUserId": "usr_prof_erika",
+      "lecturerName": "Prof. Dr. Jordan Sample",
+      "roomId": "0.06",
+      "roomName": "Seminarraum 0.06",
+      "day": "monday",
+      "date": "2026-03-23",
+      "occurrenceDates": [
+        "2026-03-23",
+        "2026-03-30",
+        "2026-04-06",
+        "2026-04-13",
+        "2026-04-20",
+        "2026-04-27",
+        "2026-05-04",
+        "2026-05-11",
+        "2026-05-18",
+        "2026-05-25",
+        "2026-06-01",
+        "2026-06-08",
+        "2026-06-15",
+        "2026-06-22",
+        "2026-06-29",
+        "2026-07-06"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 3,
+      "score": 10.6,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:WP1-8",
+      "semesterId": "ss2026",
+      "moduleId": "WP1-8",
+      "moduleName": "Elective Concentration",
+      "moduleInstanceIds": [
+        "WP1-8-3",
+        "WP1-8-1",
+        "WP1-8-3",
+        "WP1-8-2",
+        "WP1-8-1",
+        "WP1-8-1"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-08",
+        "KBA-GDIM-25Wk",
+        "kBA-GDVK-33",
+        "kBA-GDVK-34k",
+        "kBA-GDVK-25Sk",
+        "GDIM-25Wd"
+      ],
+      "cohortNames": [
+        "08",
+        "25Wk",
+        "33",
+        "34k",
+        "25Sk",
+        "25Wd"
+      ],
+      "lecturerUserId": "usr_lecturer_code",
+      "lecturerName": "Lecturer Computing",
+      "roomId": "1.03",
+      "roomName": "Mac-Raum II",
+      "day": "tuesday",
+      "date": "2026-03-24",
+      "occurrenceDates": [
+        "2026-03-24",
+        "2026-03-31",
+        "2026-04-07",
+        "2026-04-14",
+        "2026-04-21",
+        "2026-04-28",
+        "2026-05-05",
+        "2026-05-12",
+        "2026-05-19",
+        "2026-05-26",
+        "2026-06-02",
+        "2026-06-09",
+        "2026-06-16",
+        "2026-06-23",
+        "2026-06-30",
+        "2026-07-07"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 22,
+      "score": 4.6,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:BA-A",
+      "semesterId": "ss2026",
+      "moduleId": "BA-A",
+      "moduleName": "Capstone Project",
+      "moduleInstanceIds": [
+        "BA-A"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-32k"
+      ],
+      "cohortNames": [
+        "32k"
+      ],
+      "lecturerUserId": "usr_prof_max",
+      "lecturerName": "Prof. Dr. Alex Generic",
+      "roomId": "1.01",
+      "roomName": "PC-Raum I",
+      "day": "tuesday",
+      "date": "2026-03-24",
+      "occurrenceDates": [
+        "2026-03-24",
+        "2026-03-31",
+        "2026-04-07",
+        "2026-04-14",
+        "2026-04-21",
+        "2026-04-28",
+        "2026-05-05",
+        "2026-05-12",
+        "2026-05-19",
+        "2026-05-26",
+        "2026-06-02",
+        "2026-06-09",
+        "2026-06-16",
+        "2026-06-23",
+        "2026-06-30",
+        "2026-07-07"
+      ],
+      "startTime": "09:00",
+      "endTime": "10:30",
+      "sws": 2,
+      "participants": 18,
+      "score": 0.8,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:F2",
+      "semesterId": "ss2026",
+      "moduleId": "F2",
+      "moduleName": "Systems Design Process",
+      "moduleInstanceIds": [
+        "F2"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-25Wk"
+      ],
+      "cohortNames": [
+        "25Wk"
+      ],
+      "lecturerUserId": "usr_prof_erika",
+      "lecturerName": "Prof. Dr. Jordan Sample",
+      "roomId": "2.BR-2OG",
+      "roomName": "Besprechungsraum 2.OG",
+      "day": "tuesday",
+      "date": "2026-03-24",
+      "occurrenceDates": [
+        "2026-03-24",
+        "2026-03-31",
+        "2026-04-07",
+        "2026-04-14",
+        "2026-04-21",
+        "2026-04-28",
+        "2026-05-05",
+        "2026-05-12",
+        "2026-05-19",
+        "2026-05-26",
+        "2026-06-02",
+        "2026-06-09",
+        "2026-06-16",
+        "2026-06-23",
+        "2026-06-30",
+        "2026-07-07"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 5,
+      "score": 3.4,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:F5",
+      "semesterId": "ss2026",
+      "moduleId": "F5",
+      "moduleName": "Advanced Prototyping (5 Modules)",
+      "moduleInstanceIds": [
+        "F5-5",
+        "F5-4",
+        "F5-3",
+        "F5-2",
+        "F5-1"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-32k",
+        "kBA-GDVK-33",
+        "kBA-GDVK-34k",
+        "kBA-GDVK-25Sk",
+        "kBA-GDVK-25Wk"
+      ],
+      "cohortNames": [
+        "32k",
+        "33",
+        "34k",
+        "25Sk",
+        "25Wk"
+      ],
+      "lecturerUserId": "usr_coord_design",
+      "lecturerName": "Academic Coordinator",
+      "roomId": "2.03",
+      "roomName": "Hörsaal 2.03",
+      "day": "tuesday",
+      "date": "2026-03-24",
+      "occurrenceDates": [
+        "2026-03-24",
+        "2026-03-31",
+        "2026-04-07",
+        "2026-04-14",
+        "2026-04-21",
+        "2026-04-28",
+        "2026-05-05",
+        "2026-05-12",
+        "2026-05-19",
+        "2026-05-26",
+        "2026-06-02",
+        "2026-06-09",
+        "2026-06-16",
+        "2026-06-23",
+        "2026-06-30",
+        "2026-07-07"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 34,
+      "score": 7.8,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:S3",
+      "semesterId": "ss2026",
+      "moduleId": "S3",
+      "moduleName": "Environment Mapping",
+      "moduleInstanceIds": [
+        "S3",
+        "S3"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-08",
+        "KBA-GDIM-09k"
+      ],
+      "cohortNames": [
+        "08",
+        "09k"
+      ],
+      "lecturerUserId": "usr_prof_max",
+      "lecturerName": "Prof. Dr. Alex Generic",
+      "roomId": "2.BR-2OG",
+      "roomName": "Besprechungsraum 2.OG",
+      "day": "tuesday",
+      "date": "2026-03-24",
+      "occurrenceDates": [
+        "2026-03-24",
+        "2026-03-31",
+        "2026-04-07",
+        "2026-04-14",
+        "2026-04-21",
+        "2026-04-28",
+        "2026-05-05",
+        "2026-05-12",
+        "2026-05-19",
+        "2026-05-26",
+        "2026-06-02",
+        "2026-06-09",
+        "2026-06-16",
+        "2026-06-23",
+        "2026-06-30",
+        "2026-07-07"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 4,
+      "score": 13.8,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:M5",
+      "semesterId": "ss2026",
+      "moduleId": "M5",
+      "moduleName": "HCI Foundations",
+      "moduleInstanceIds": [
+        "M5"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-25Sk"
+      ],
+      "cohortNames": [
+        "25Sk"
+      ],
+      "lecturerUserId": "usr_lecturer_code",
+      "lecturerName": "Lecturer Computing",
+      "roomId": "PHONE2",
+      "roomName": "Phonebooth 2. OG",
+      "day": "tuesday",
+      "date": "2026-03-24",
+      "occurrenceDates": [
+        "2026-03-24",
+        "2026-03-31",
+        "2026-04-07",
+        "2026-04-14",
+        "2026-04-21",
+        "2026-04-28",
+        "2026-05-05",
+        "2026-05-12",
+        "2026-05-19",
+        "2026-05-26",
+        "2026-06-02",
+        "2026-06-09",
+        "2026-06-16",
+        "2026-06-23",
+        "2026-06-30",
+        "2026-07-07"
+      ],
+      "startTime": "16:30",
+      "endTime": "19:45",
+      "sws": 4,
+      "participants": 1,
+      "score": 36,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:Prkt",
+      "semesterId": "ss2026",
+      "moduleId": "Prkt",
+      "moduleName": "Industrial Internship",
+      "moduleInstanceIds": [
+        "Prkt",
+        "Prkt",
+        "Prkt"
+      ],
+      "cohortIds": [
+        "BA-GDIM-06",
+        "KBA-GDIM-07",
+        "kBA-GDVK-33"
+      ],
+      "cohortNames": [
+        "06",
+        "07",
+        "33"
+      ],
+      "lecturerUserId": "usr_coord_design",
+      "lecturerName": "Academic Coordinator",
+      "roomId": "1.01",
+      "roomName": "PC-Raum I",
+      "day": "wednesday",
+      "date": "2026-03-25",
+      "occurrenceDates": [
+        "2026-03-25",
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29",
+        "2026-05-06",
+        "2026-05-13",
+        "2026-05-20",
+        "2026-05-27",
+        "2026-06-03",
+        "2026-06-10",
+        "2026-06-17",
+        "2026-06-24",
+        "2026-07-01",
+        "2026-07-08"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 18,
+      "score": 3.8,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:Rep",
+      "semesterId": "ss2026",
+      "moduleId": "Rep",
+      "moduleName": "Synthesis Review",
+      "moduleInstanceIds": [
+        "Rep"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-32k"
+      ],
+      "cohortNames": [
+        "32k"
+      ],
+      "lecturerUserId": "usr_lecturer_film",
+      "lecturerName": "Lecturer Control Theory",
+      "roomId": "1.02",
+      "roomName": "Mac-Raum I",
+      "day": "wednesday",
+      "date": "2026-03-25",
+      "occurrenceDates": [
+        "2026-03-25",
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29",
+        "2026-05-06",
+        "2026-05-13",
+        "2026-05-20",
+        "2026-05-27",
+        "2026-06-03",
+        "2026-06-10",
+        "2026-06-17",
+        "2026-06-24",
+        "2026-07-01",
+        "2026-07-08"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 18,
+      "score": 3.8,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:G2",
+      "semesterId": "ss2026",
+      "moduleId": "G2",
+      "moduleName": "Human Factors & Ethics",
+      "moduleInstanceIds": [
+        "G2",
+        "G2",
+        "G2"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-25Wk",
+        "kBA-GDVK-25Wk",
+        "GDIM-25Wd"
+      ],
+      "cohortNames": [
+        "25Wk",
+        "25Wk",
+        "25Wd"
+      ],
+      "lecturerUserId": "usr_prof_max",
+      "lecturerName": "Prof. Dr. Alex Generic",
+      "roomId": "1.15",
+      "roomName": "Besprechungsraum 1.15",
+      "day": "wednesday",
+      "date": "2026-03-25",
+      "occurrenceDates": [
+        "2026-03-25",
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29",
+        "2026-05-06",
+        "2026-05-13",
+        "2026-05-20",
+        "2026-05-27",
+        "2026-06-03",
+        "2026-06-10",
+        "2026-06-17",
+        "2026-06-24",
+        "2026-07-01",
+        "2026-07-08"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 15,
+      "score": 3.4,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:G4",
+      "semesterId": "ss2026",
+      "moduleId": "G4",
+      "moduleName": "Innovation Management",
+      "moduleInstanceIds": [
+        "G4",
+        "G4"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-08",
+        "kBA-GDVK-34k"
+      ],
+      "cohortNames": [
+        "08",
+        "34k"
+      ],
+      "lecturerUserId": "usr_admin",
+      "lecturerName": "System Support",
+      "roomId": "0.BR-EG",
+      "roomName": "Besprechungsraum EG",
+      "day": "wednesday",
+      "date": "2026-03-25",
+      "occurrenceDates": [
+        "2026-03-25",
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29",
+        "2026-05-06",
+        "2026-05-13",
+        "2026-05-20",
+        "2026-05-27",
+        "2026-06-03",
+        "2026-06-10",
+        "2026-06-17",
+        "2026-06-24",
+        "2026-07-01",
+        "2026-07-08"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 8,
+      "score": 3.8,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:S1",
+      "semesterId": "ss2026",
+      "moduleId": "S1",
+      "moduleName": "AI Systems Engineering",
+      "moduleInstanceIds": [
+        "S1",
+        "S1"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-25Wk",
+        "GDIM-25Wd"
+      ],
+      "cohortNames": [
+        "25Wk",
+        "25Wd"
+      ],
+      "lecturerUserId": "usr_prof_erika",
+      "lecturerName": "Prof. Dr. Jordan Sample",
+      "roomId": "0.BR-EG",
+      "roomName": "Besprechungsraum EG",
+      "day": "wednesday",
+      "date": "2026-03-25",
+      "occurrenceDates": [
+        "2026-03-25",
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29",
+        "2026-05-06",
+        "2026-05-13",
+        "2026-05-20",
+        "2026-05-27",
+        "2026-06-03",
+        "2026-06-10",
+        "2026-06-17",
+        "2026-06-24",
+        "2026-07-01",
+        "2026-07-08"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 10,
+      "score": 3,
+      "warnings": [],
+      "occurrenceOverrides": [
+        {
+          "originalDate": "2026-03-25",
+          "date": "2026-03-25",
+          "roomId": "2.BR-2OG",
+          "roomName": "Besprechungsraum 2.OG",
+          "startTime": "13:00",
+          "endTime": "16:15",
+          "lecturerName": "Prof. Dr. Jordan Sample"
+        }
+      ]
+    },
+    {
+      "id": "class-ss2026:I3",
+      "semesterId": "ss2026",
+      "moduleId": "I3",
+      "moduleName": "HCI Foundations",
+      "moduleInstanceIds": [
+        "I3"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-09k"
+      ],
+      "cohortNames": [
+        "09k"
+      ],
+      "lecturerUserId": "usr_coord_design",
+      "lecturerName": "Academic Coordinator",
+      "roomId": "2.BR-2OG",
+      "roomName": "Besprechungsraum 2.OG",
+      "day": "wednesday",
+      "date": "2026-03-25",
+      "occurrenceDates": [
+        "2026-03-25",
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29",
+        "2026-05-06",
+        "2026-05-13",
+        "2026-05-20",
+        "2026-05-27",
+        "2026-06-03",
+        "2026-06-10",
+        "2026-06-17",
+        "2026-06-24",
+        "2026-07-01",
+        "2026-07-08"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 3,
+      "score": 19.2,
+      "warnings": [],
+      "occurrenceOverrides": [
+        {
+          "originalDate": "2026-03-25",
+          "date": "2026-03-25",
+          "roomId": "0.BR-EG",
+          "roomName": "Besprechungsraum EG",
+          "startTime": "13:00",
+          "endTime": "16:15",
+          "lecturerName": "Academic Coordinator"
+        }
+      ]
+    },
+    {
+      "id": "class-ss2026:Sp",
+      "semesterId": "ss2026",
+      "moduleId": "Sp",
+      "moduleName": "Professional Development",
+      "moduleInstanceIds": [
+        "Sp"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-25Wk"
+      ],
+      "cohortNames": [
+        "25Wk"
+      ],
+      "lecturerUserId": "usr_lecturer_film",
+      "lecturerName": "Lecturer Control Theory",
+      "roomId": "0.06",
+      "roomName": "Seminarraum 0.06",
+      "day": "wednesday",
+      "date": "2026-03-25",
+      "occurrenceDates": [
+        "2026-03-25",
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29",
+        "2026-05-06",
+        "2026-05-13",
+        "2026-05-20",
+        "2026-05-27",
+        "2026-06-03",
+        "2026-06-10",
+        "2026-06-17",
+        "2026-06-24",
+        "2026-07-01",
+        "2026-07-08"
+      ],
+      "startTime": "13:00",
+      "endTime": "14:30",
+      "sws": 2,
+      "participants": 5,
+      "score": 20.8,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:I1",
+      "semesterId": "ss2026",
+      "moduleId": "I1",
+      "moduleName": "Human-Machine Interface",
+      "moduleInstanceIds": [
+        "I1",
+        "I1"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-25Wk",
+        "GDIM-25Wd"
+      ],
+      "cohortNames": [
+        "25Wk",
+        "25Wd"
+      ],
+      "lecturerUserId": "usr_lecturer_code",
+      "lecturerName": "Lecturer Computing",
+      "roomId": "0.BR-EG",
+      "roomName": "Besprechungsraum EG",
+      "day": "thursday",
+      "date": "2026-03-26",
+      "occurrenceDates": [
+        "2026-03-26",
+        "2026-04-02",
+        "2026-04-09",
+        "2026-04-16",
+        "2026-04-23",
+        "2026-04-30",
+        "2026-05-07",
+        "2026-05-14",
+        "2026-05-21",
+        "2026-05-28",
+        "2026-06-04",
+        "2026-06-11",
+        "2026-06-18",
+        "2026-06-25",
+        "2026-07-02",
+        "2026-07-09"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 10,
+      "score": 3,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:G5",
+      "semesterId": "ss2026",
+      "moduleId": "G5",
+      "moduleName": "Global Perspectives",
+      "moduleInstanceIds": [
+        "G5"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-33"
+      ],
+      "cohortNames": [
+        "33"
+      ],
+      "lecturerUserId": "usr_lecturer_film",
+      "lecturerName": "Lecturer Control Theory",
+      "roomId": "2.BR-2OG",
+      "roomName": "Besprechungsraum 2.OG",
+      "day": "thursday",
+      "date": "2026-03-26",
+      "occurrenceDates": [
+        "2026-03-26",
+        "2026-04-02",
+        "2026-04-09",
+        "2026-04-16",
+        "2026-04-23",
+        "2026-04-30",
+        "2026-05-07",
+        "2026-05-14",
+        "2026-05-21",
+        "2026-05-28",
+        "2026-06-04",
+        "2026-06-11",
+        "2026-06-18",
+        "2026-06-25",
+        "2026-07-02",
+        "2026-07-09"
+      ],
+      "startTime": "09:00",
+      "endTime": "11:30",
+      "sws": 3,
+      "participants": 3,
+      "score": 19.2,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:M1",
+      "semesterId": "ss2026",
+      "moduleId": "M1",
+      "moduleName": "Sensor Integration",
+      "moduleInstanceIds": [
+        "M1"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-34k"
+      ],
+      "cohortNames": [
+        "34k"
+      ],
+      "lecturerUserId": "usr_coord_design",
+      "lecturerName": "Academic Coordinator",
+      "roomId": "0.BR-EG",
+      "roomName": "Besprechungsraum EG",
+      "day": "thursday",
+      "date": "2026-03-26",
+      "occurrenceDates": [
+        "2026-03-26",
+        "2026-04-02",
+        "2026-04-09",
+        "2026-04-16",
+        "2026-04-23",
+        "2026-04-30",
+        "2026-05-07",
+        "2026-05-14",
+        "2026-05-21",
+        "2026-05-28",
+        "2026-06-04",
+        "2026-06-11",
+        "2026-06-18",
+        "2026-06-25",
+        "2026-07-02",
+        "2026-07-09"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 7,
+      "score": 4.2,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:Lab",
+      "semesterId": "ss2026",
+      "moduleId": "Lab",
+      "moduleName": "Innovation Lab",
+      "moduleInstanceIds": [
+        "Lab-4",
+        "Lab-2"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-09k",
+        "KBA-GDIM-25Wk"
+      ],
+      "cohortNames": [
+        "09k",
+        "25Wk"
+      ],
+      "lecturerUserId": "usr_lecturer_film",
+      "lecturerName": "Lecturer Control Theory",
+      "roomId": "0.06",
+      "roomName": "Seminarraum 0.06",
+      "day": "thursday",
+      "date": "2026-03-26",
+      "occurrenceDates": [
+        "2026-03-26",
+        "2026-04-02",
+        "2026-04-09",
+        "2026-04-16",
+        "2026-04-23",
+        "2026-04-30",
+        "2026-05-07",
+        "2026-05-14",
+        "2026-05-21",
+        "2026-05-28",
+        "2026-06-04",
+        "2026-06-11",
+        "2026-06-18",
+        "2026-06-25",
+        "2026-07-02",
+        "2026-07-09"
+      ],
+      "startTime": "13:00",
+      "endTime": "15:30",
+      "sws": 3,
+      "participants": 8,
+      "score": 4.6,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:M2",
+      "semesterId": "ss2026",
+      "moduleId": "M2",
+      "moduleName": "Network Topology",
+      "moduleInstanceIds": [
+        "M2"
+      ],
+      "cohortIds": [
+        "kBA-GDVK-25Wk"
+      ],
+      "cohortNames": [
+        "25Wk"
+      ],
+      "lecturerUserId": "usr_prof_max",
+      "lecturerName": "Prof. Dr. Alex Generic",
+      "roomId": "2.BR-2OG",
+      "roomName": "Besprechungsraum 2.OG",
+      "day": "thursday",
+      "date": "2026-03-26",
+      "occurrenceDates": [
+        "2026-03-26",
+        "2026-04-02",
+        "2026-04-09",
+        "2026-04-16",
+        "2026-04-23",
+        "2026-04-30",
+        "2026-05-07",
+        "2026-05-14",
+        "2026-05-21",
+        "2026-05-28",
+        "2026-06-04",
+        "2026-06-11",
+        "2026-06-18",
+        "2026-06-25",
+        "2026-07-02",
+        "2026-07-09"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 5,
+      "score": 3.4,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:C2",
+      "semesterId": "ss2026",
+      "moduleId": "C2",
+      "moduleName": "Optical Simulation",
+      "moduleInstanceIds": [
+        "C2"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-08"
+      ],
+      "cohortNames": [
+        "08"
+      ],
+      "lecturerUserId": "usr_lecturer_code",
+      "lecturerName": "Lecturer Computing",
+      "roomId": "PHONE2",
+      "roomName": "Phonebooth 2. OG",
+      "day": "thursday",
+      "date": "2026-03-26",
+      "occurrenceDates": [
+        "2026-03-26",
+        "2026-04-02",
+        "2026-04-09",
+        "2026-04-16",
+        "2026-04-23",
+        "2026-04-30",
+        "2026-05-07",
+        "2026-05-14",
+        "2026-05-21",
+        "2026-05-28",
+        "2026-06-04",
+        "2026-06-11",
+        "2026-06-18",
+        "2026-06-25",
+        "2026-07-02",
+        "2026-07-09"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 1,
+      "score": 18,
+      "warnings": []
+    },
+    {
+      "id": "class-ss2026:S4",
+      "semesterId": "ss2026",
+      "moduleId": "S4",
+      "moduleName": "Mechanism Design",
+      "moduleInstanceIds": [
+        "S4"
+      ],
+      "cohortIds": [
+        "KBA-GDIM-09k"
+      ],
+      "cohortNames": [
+        "09k"
+      ],
+      "lecturerUserId": "usr_coord_design",
+      "lecturerName": "Academic Coordinator",
+      "roomId": "2.BR-2OG",
+      "roomName": "Besprechungsraum 2.OG",
+      "day": "friday",
+      "date": "2026-03-27",
+      "occurrenceDates": [
+        "2026-03-27",
+        "2026-04-03",
+        "2026-04-10",
+        "2026-04-17",
+        "2026-04-24",
+        "2026-05-01",
+        "2026-05-08",
+        "2026-05-15",
+        "2026-05-22",
+        "2026-05-29",
+        "2026-06-05",
+        "2026-06-12",
+        "2026-06-19",
+        "2026-06-26",
+        "2026-07-03",
+        "2026-07-10"
+      ],
+      "startTime": "13:00",
+      "endTime": "16:15",
+      "sws": 4,
+      "participants": 3,
+      "score": 22.2,
+      "warnings": []
+    }
+  ],
+  "unscheduled": [
+    {
+      "id": "issue-ss2026:A1",
+      "moduleId": "A1",
+      "moduleName": "Algorithmic Logic",
+      "cohortIds": [
+        "KBA-GDIM-25Wk",
+        "GDIM-25Wd"
+      ],
+      "cohortNames": [
+        "25Wk",
+        "25Wd"
+      ],
+      "reason": "Kein Raum erfuellt Kapazitaet und Raumanforderungen."
+    }
+  ],
+  "adjustmentLog": [
+    {
+      "id": "adj-1778185474341-swap-a",
+      "type": "manual-change",
+      "classId": "class-ss2026:I3",
+      "moduleId": "I3",
+      "fromDate": "2026-03-25",
+      "toDate": "2026-03-25",
+      "note": "Termine per Drag and Drop getauscht: HCI Foundations mit AI Systems Engineering.",
+      "createdAt": "2026-05-07T20:24:34.341Z"
+    },
+    {
+      "id": "adj-1778185474341-swap-b",
+      "type": "manual-change",
+      "classId": "class-ss2026:S1",
+      "moduleId": "S1",
+      "fromDate": "2026-03-25",
+      "toDate": "2026-03-25",
+      "note": "Termine per Drag and Drop getauscht: AI Systems Engineering mit HCI Foundations.",
+      "createdAt": "2026-05-07T20:24:34.341Z"
+    }
+  ],
+  "summary": {
+    "totalOfferings": 26,
+    "scheduledOfferings": 25,
+    "unscheduledOfferings": 1,
+    "totalSws": 85,
+    "plannedRoomAssignments": 400,
+    "teachingWeeks": 16
+  }
+}

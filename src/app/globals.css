@@ -80,6 +80,21 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
   }
+
+  select {
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--background));
+  }
+
+  select option {
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--popover));
+  }
+
+  select option:checked {
+    color: hsl(var(--primary-foreground));
+    background-color: hsl(var(--primary));
+  }
   
   /* Custom Scrollbar Styles */
   ::-webkit-scrollbar {

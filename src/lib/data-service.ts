@@ -1,7 +1,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { Module, Program, Cohort, Category, ProgramPlan, RawPlan, Catalogs, User, Room, SystemSettings, AcademicCalendar, SemesterPeriod, RoomAssignment } from '@/types';
+import type { Module, Program, Cohort, Category, ProgramPlan, RawPlan, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability, SchedulePlan } from '@/types';
 import pb from './pocketbase';
 
 interface AppData {
@@ -15,9 +15,11 @@ interface AppData {
     roomAssignments: RoomAssignment[];
     systemSettings: SystemSettings;
     academicCalendar: AcademicCalendar;
+    lecturerAvailabilities: LecturerAvailability[];
+    schedulePlan: SchedulePlan | null;
 }
 
-const dataDir = path.join(process.cwd(), 'data');
+const dataDir = process.env.COURSEPILOT_DATA_DIR || path.join(process.cwd(), 'data');
 const cohortsFilePath = path.join(dataDir, 'cohorts.json');
 const modulesFilePath = path.join(dataDir, 'modules.json');
 const programsFilePath = path.join(dataDir, 'programs.json');
@@ -28,6 +30,8 @@ const roomsFilePath = path.join(dataDir, 'rooms.json');
 const roomOccupancyFilePath = path.join(dataDir, 'room-occupancy.json');
 const systemSettingsFilePath = path.join(dataDir, 'system-settings.json');
 const academicCalendarFilePath = path.join(dataDir, 'academic-calendar.json');
+const lecturerAvailabilityFilePath = path.join(dataDir, 'lecturer-availability.json');
+const scheduleFilePath = path.join(dataDir, 'schedule.json');
 
 // Helper to read a JSON file
 async function readJsonFile<T>(filePath: string): Promise<T> {
@@ -170,12 +174,14 @@ export async function getAllData(): Promise<AppData> {
                 programs: transformedPrograms,
                 cohorts,
                 categories: data.categories,
-                catalogs: { examTypes: [], teachingMethods: [], languages: [], personInCharge: [] }, // Placeholder for PB
-                users: [], // Placeholder for PB
+                catalogs: data.catalogs || { examTypes: [], teachingMethods: [], languages: [], personInCharge: [] },
+                users: data.users || [],
                 rooms: data.rooms || [],
                 roomAssignments: data.roomAssignments || [],
                 systemSettings: data.systemSettings || {} as any,
-                academicCalendar: data.academicCalendar || { academicYearStartMonth: 10, semesters: [] }
+                academicCalendar: data.academicCalendar || { academicYearStartMonth: 10, semesters: [] },
+                lecturerAvailabilities: data.lecturerAvailabilities || [],
+                schedulePlan: data.schedulePlan || null
             };
         } catch (error) {
             console.error("PocketBase fetch failed (single doc), falling back to local files:", error);
@@ -183,7 +189,20 @@ export async function getAllData(): Promise<AppData> {
     }
 
     // Fallback to local files
-    const [modules, programsData, cohorts, categories, catalogs, users, roomsData] = await Promise.all([
+    const [
+        modules,
+        programsData,
+        cohorts,
+        categories,
+        catalogs,
+        users,
+        roomsData,
+        roomAssignments,
+        systemSettings,
+        academicCalendar,
+        lecturerAvailabilities,
+        schedulePlan,
+    ] = await Promise.all([
         readJsonFile<Module[]>(modulesFilePath),
         readJsonFile<Program[]>(programsFilePath),
         readJsonFile<any[]>(cohortsFilePath),
@@ -199,6 +218,8 @@ export async function getAllData(): Promise<AppData> {
         readJsonFile<RoomAssignment[]>(roomOccupancyFilePath).catch(() => []),
         readJsonFile<SystemSettings>(systemSettingsFilePath).catch(() => ({} as SystemSettings)),
         readJsonFile<AcademicCalendar>(academicCalendarFilePath).catch(() => ({ academicYearStartMonth: 10, semesters: [] })),
+        readJsonFile<LecturerAvailability[]>(lecturerAvailabilityFilePath).catch(() => []),
+        readJsonFile<SchedulePlan | null>(scheduleFilePath).catch(() => null),
     ]);
 
     const cohortsData: Cohort[] = cohorts.map(cohort => {
@@ -230,9 +251,11 @@ export async function getAllData(): Promise<AppData> {
         catalogs,
         users,
         rooms: (roomsData as any).rooms || roomsData,
-        roomAssignments: (roomsData as any).roomAssignments || (await readJsonFile<RoomAssignment[]>(roomOccupancyFilePath).catch(() => [])),
-        systemSettings: (roomsData as any).systemSettings || (await readJsonFile<SystemSettings>(systemSettingsFilePath).catch(() => ({} as SystemSettings))),
-        academicCalendar: (roomsData as any).academicCalendar || (await readJsonFile<AcademicCalendar>(academicCalendarFilePath).catch(() => ({ academicYearStartMonth: 10, semesters: [] }))),
+        roomAssignments: (roomsData as any).roomAssignments || roomAssignments,
+        systemSettings: (roomsData as any).systemSettings || systemSettings,
+        academicCalendar: (roomsData as any).academicCalendar || academicCalendar,
+        lecturerAvailabilities,
+        schedulePlan,
     };
 }
 
@@ -268,8 +291,14 @@ export async function saveData(data: AppData): Promise<void> {
                 programs: programsToSave,
                 cohorts: cohortsToSave,
                 categories: data.categories,
+                catalogs: data.catalogs,
+                users: data.users,
                 rooms: data.rooms,
-                roomAssignments: data.roomAssignments
+                roomAssignments: data.roomAssignments,
+                systemSettings: data.systemSettings,
+                academicCalendar: data.academicCalendar,
+                lecturerAvailabilities: data.lecturerAvailabilities,
+                schedulePlan: data.schedulePlan
             };
 
             try {
@@ -292,7 +321,9 @@ export async function saveData(data: AppData): Promise<void> {
                 fs.writeFile(roomsFilePath, JSON.stringify(data.rooms, null, 2), 'utf-8'),
                 fs.writeFile(roomOccupancyFilePath, JSON.stringify(data.roomAssignments, null, 2), 'utf-8'),
                 fs.writeFile(systemSettingsFilePath, JSON.stringify(data.systemSettings, null, 2), 'utf-8'),
-                fs.writeFile(academicCalendarFilePath, JSON.stringify(data.academicCalendar, null, 2), 'utf-8')
+                fs.writeFile(academicCalendarFilePath, JSON.stringify(data.academicCalendar, null, 2), 'utf-8'),
+                fs.writeFile(lecturerAvailabilityFilePath, JSON.stringify(data.lecturerAvailabilities, null, 2), 'utf-8'),
+                fs.writeFile(scheduleFilePath, JSON.stringify(data.schedulePlan, null, 2), 'utf-8')
             ]);
             console.log("Data saved to local files.");
         }

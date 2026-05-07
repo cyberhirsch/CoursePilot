@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import type { Room, Module, Cohort, RoomAssignment } from '@/types';
 import { TRANSLATIONS, DEFAULT_LANGUAGE } from '@/translations';
+import { Pencil, Save, Trash2, X } from 'lucide-react';
 
 interface RoomOccupancyProps {
     rooms: Room[];
@@ -22,8 +23,17 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
     lang = DEFAULT_LANGUAGE,
 }) => {
     const t = TRANSLATIONS[lang];
-    const [selectedDate, setSelectedDate] = useState(new Date('2026-01-31')); // Default to date in screenshot
+    const toDateInputValue = (date: Date) => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const [selectedDate, setSelectedDate] = useState(toDateInputValue(new Date()));
     const [showAddForm, setShowAddForm] = useState(false);
+    const [editingAssignment, setEditingAssignment] = useState<RoomAssignment | null>(null);
+    const [editDraft, setEditDraft] = useState<RoomAssignment | null>(null);
     const [newAssignment, setNewAssignment] = useState<Partial<RoomAssignment>>({
         startTime: '08:00',
         endTime: '12:00',
@@ -33,7 +43,7 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
     });
 
     const formattedDate = useMemo(() => {
-        return selectedDate.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', {
+        return new Date(`${selectedDate}T00:00:00`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', {
             weekday: 'long',
             day: '2-digit',
             month: 'long',
@@ -44,10 +54,9 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
     const hours = Array.from({ length: 15 }, (_, i) => i + 8); // 08:00 to 22:00 to match screenshot
 
     const filteredAssignments = useMemo(() => {
-        const dateStr = selectedDate.toISOString().split('T')[0];
         const assignments: Record<string, RoomAssignment[]> = {};
 
-        roomAssignments.filter(a => a.date === dateStr).forEach(a => {
+        roomAssignments.filter(a => a.date === selectedDate).forEach(a => {
             if (!assignments[a.roomId]) assignments[a.roomId] = [];
             assignments[a.roomId].push(a);
         });
@@ -61,12 +70,106 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
     };
 
     const changeDate = (days: number) => {
-        const newDate = new Date(selectedDate);
+        const newDate = new Date(`${selectedDate}T00:00:00`);
         newDate.setDate(newDate.getDate() + days);
-        setSelectedDate(newDate);
+        setSelectedDate(toDateInputValue(newDate));
     };
 
-    const setToday = () => setSelectedDate(new Date());
+    const setToday = () => setSelectedDate(toDateInputValue(new Date()));
+
+    const timeToMinutes = (time: string) => {
+        const [hour = '0', minute = '0'] = time.split(':');
+        return Number(hour) * 60 + Number(minute);
+    };
+
+    const rangesOverlap = (startA: string, endA: string, startB: string, endB: string) => {
+        return timeToMinutes(startA) < timeToMinutes(endB) && timeToMinutes(startB) < timeToMinutes(endA);
+    };
+
+    const roomBlockedOn = (room: Room, date: string, startTime: string, endTime: string) => {
+        return (room.blockedPeriods || []).some(block => {
+            if (!block.start || !block.end) return false;
+            const blockStartDate = block.start.slice(0, 10);
+            const blockEndDate = block.end.slice(0, 10);
+            if (date < blockStartDate || date > blockEndDate) return false;
+
+            const blockStartTime = block.start.slice(11, 16) || '00:00';
+            const blockEndTime = block.end.slice(11, 16) || '23:59';
+            return rangesOverlap(startTime, endTime, blockStartTime, blockEndTime);
+        });
+    };
+
+    const openEdit = (assignment: RoomAssignment) => {
+        setEditingAssignment(assignment);
+        setEditDraft({ ...assignment });
+        setShowAddForm(false);
+    };
+
+    const closeEdit = () => {
+        setEditingAssignment(null);
+        setEditDraft(null);
+    };
+
+    const validateAssignment = (assignment: RoomAssignment) => {
+        if (!assignment.roomId || !assignment.date || !assignment.startTime || !assignment.endTime || !assignment.title.trim()) {
+            alert('Bitte Raum, Datum, Uhrzeit und Titel ausfuellen.');
+            return false;
+        }
+
+        if (timeToMinutes(assignment.startTime) >= timeToMinutes(assignment.endTime)) {
+            alert('Die Endzeit muss nach der Startzeit liegen.');
+            return false;
+        }
+
+        const room = rooms.find(item => item.id === assignment.roomId);
+        if (room && roomBlockedOn(room, assignment.date, assignment.startTime, assignment.endTime)) {
+            alert('Der Raum ist in diesem Zeitraum gesperrt.');
+            return false;
+        }
+
+        const roomConflict = roomAssignments.some(item =>
+            item.id !== assignment.id
+            && item.roomId === assignment.roomId
+            && item.date === assignment.date
+            && rangesOverlap(assignment.startTime, assignment.endTime, item.startTime, item.endTime)
+        );
+
+        if (roomConflict) {
+            alert('Dieser Raum ist in diesem Zeitraum bereits belegt.');
+            return false;
+        }
+
+        const personConflict = assignment.person
+            ? roomAssignments.some(item =>
+                item.id !== assignment.id
+                && item.person === assignment.person
+                && item.date === assignment.date
+                && rangesOverlap(assignment.startTime, assignment.endTime, item.startTime, item.endTime)
+            )
+            : false;
+
+        if (personConflict) {
+            alert('Die eingetragene Person hat in diesem Zeitraum bereits einen Termin.');
+            return false;
+        }
+
+        return true;
+    };
+
+    const saveEdit = () => {
+        if (!editDraft || !validateAssignment(editDraft)) return;
+
+        onUpdateRoomAssignments(roomAssignments.map(item =>
+            item.id === editDraft.id ? editDraft : item
+        ));
+        setSelectedDate(editDraft.date);
+        closeEdit();
+    };
+
+    const deleteAssignment = (assignmentId: string) => {
+        onUpdateRoomAssignments(roomAssignments.filter(item => item.id !== assignmentId));
+        closeEdit();
+    };
 
     return (
         <div className="flex flex-col h-full space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -105,12 +208,17 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
                 <div className="flex gap-2">
                     <input
                         type="date"
-                        value={selectedDate.toISOString().split('T')[0]}
-                        onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                        value={selectedDate}
+                        onChange={(e) => {
+                            if (e.target.value) setSelectedDate(e.target.value);
+                        }}
                         className="bg-muted border-none rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-primary outline-none transition-all cursor-pointer"
                     />
                     <button
-                        onClick={() => setShowAddForm(!showAddForm)}
+                        onClick={() => {
+                            closeEdit();
+                            setShowAddForm(!showAddForm);
+                        }}
                         className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-black hover:bg-primary/90 transition-all flex items-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,6 +228,89 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
                     </button>
                 </div>
             </div>
+
+            {editDraft && (
+                <div className="bg-card border border-primary/30 p-6 rounded-2xl shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex items-center justify-between gap-4 mb-4">
+                        <h3 className="text-sm font-black uppercase text-primary flex items-center gap-2">
+                            <Pencil className="h-4 w-4" />
+                            Termin bearbeiten
+                        </h3>
+                        <button
+                            onClick={closeEdit}
+                            className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
+                            title="Schliessen"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-7 gap-4">
+                        <input
+                            type="date"
+                            value={editDraft.date}
+                            onChange={event => setEditDraft({ ...editDraft, date: event.target.value })}
+                            className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
+                        />
+                        <select
+                            value={editDraft.roomId}
+                            onChange={event => setEditDraft({ ...editDraft, roomId: event.target.value })}
+                            className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
+                        >
+                            {rooms.map(room => <option key={room.id} value={room.id}>{room.id} - {room.name}</option>)}
+                        </select>
+                        <input
+                            type="time"
+                            value={editDraft.startTime}
+                            onChange={event => setEditDraft({ ...editDraft, startTime: event.target.value })}
+                            className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
+                        />
+                        <input
+                            type="time"
+                            value={editDraft.endTime}
+                            onChange={event => setEditDraft({ ...editDraft, endTime: event.target.value })}
+                            className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
+                        />
+                        <input
+                            value={editDraft.title}
+                            onChange={event => setEditDraft({ ...editDraft, title: event.target.value })}
+                            className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
+                        />
+                        <input
+                            value={editDraft.person || ''}
+                            onChange={event => setEditDraft({ ...editDraft, person: event.target.value })}
+                            placeholder="Person"
+                            className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
+                        />
+                        <div className="flex gap-2">
+                            <button
+                                onClick={saveEdit}
+                                className="flex-grow bg-primary text-primary-foreground rounded-lg text-xs font-black uppercase inline-flex items-center justify-center gap-2"
+                            >
+                                <Save className="h-3.5 w-3.5" />
+                                Speichern
+                            </button>
+                            <button
+                                onClick={() => deleteAssignment(editDraft.id)}
+                                className="bg-destructive/15 text-destructive hover:bg-destructive/20 p-2 rounded-lg"
+                                title="Termin loeschen"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <textarea
+                        value={editDraft.purpose || ''}
+                        onChange={event => setEditDraft({ ...editDraft, purpose: event.target.value })}
+                        placeholder="Zweck / Anmerkung"
+                        className="mt-4 w-full bg-muted border-none rounded-lg px-3 py-2 text-xs font-medium min-h-20"
+                    />
+                    {editingAssignment?.id.startsWith('schedule-') && (
+                        <p className="mt-3 text-xs text-muted-foreground">
+                            Dieser Termin stammt aus dem Semesterplan. Die Aenderung wird als einzelner Termin-Override gespeichert.
+                        </p>
+                    )}
+                </div>
+            )}
 
             {showAddForm && (
                 <div className="bg-card border border-primary/30 p-6 rounded-2xl shadow-xl animate-in fade-in zoom-in-95 duration-200">
@@ -167,7 +358,7 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
                                     const assignment: RoomAssignment = {
                                         id: `occ-${Date.now()}`,
                                         roomId: newAssignment.roomId!,
-                                        date: selectedDate.toISOString().split('T')[0],
+                                        date: selectedDate,
                                         startTime: newAssignment.startTime!,
                                         endTime: newAssignment.endTime!,
                                         title: newAssignment.title!,
@@ -236,6 +427,8 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
                                     return (
                                         <div
                                             key={event.id}
+                                            onClick={() => openEdit(event)}
+                                            title="Termin bearbeiten"
                                             className="absolute top-2 bottom-2 rounded-xl shadow-lg border border-white/10 flex flex-col p-3 overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform active:scale-95 group/tile"
                                             style={{
                                                 left: `${(start - 8) * (100 / 14)}%`,
@@ -250,7 +443,7 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        onUpdateRoomAssignments(roomAssignments.filter(a => a.id !== event.id));
+                                                        deleteAssignment(event.id);
                                                     }}
                                                     className="opacity-0 group-hover/tile:opacity-100 hover:text-red-200 transition-all"
                                                 >

@@ -18,7 +18,7 @@ export interface User {
   name: string;
   email: string;
   role: 'superuser' | 'admin' | 'coordinator' | 'professor' | 'lecturer' | 'student' | 'guest';
-  department?: 'Design' | 'Psychologie' | 'Wirtschaft' | null;
+  department?: string | null;
   cohortId?: string;
   universityId?: string; // Matrikelnummer or Personalnummer
 }
@@ -189,6 +189,12 @@ export interface AcademicCalendar {
 
 export interface SystemSettings {
   currentSemester: string;
+  academicCalendar: {
+    lecturesStart: string;
+    lecturesEnd: string;
+    examsStart?: string;
+    examsEnd?: string;
+  };
   institutions: {
     defaultLocation: string;
     campusLocations: string[];
@@ -202,11 +208,33 @@ export interface SystemSettings {
     startHour: string;
     endHour: string;
     standardPauseMinutes: number;
+    eventBreakDurationMinutes?: number;
+    eventBreakIntervalMinutes?: number;
+    plannedWeekdays?: Weekday[];
+    useLunchBreak?: boolean;
+    lunchBreakStart?: string;
+    lunchBreakEnd?: string;
   };
 }
 
+export type Weekday = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+
+export interface AvailabilitySlot {
+  day: Weekday;
+  startTime: string;
+  endTime: string;
+}
+
+export interface LecturerAvailability {
+  userId: string;
+  availableSlots: AvailabilitySlot[];
+  unavailableSlots?: AvailabilitySlot[];
+  maxSwsPerDay?: number;
+  notes?: string;
+}
+
 export type MainCategory = 'semester-plan' | 'schedule' | 'examinations' | 'user-management' | 'settings' | 'modules' | 'rooms' | 'lecturers';
-export type PlannerViewMode = 'semester' | 'group' | 'modules' | 'optimization' | 'module-details' | 'lecturer-overview' | 'availability' | 'room-overview' | 'room-occupancy' | 'room-availability' | 'user-profile' | 'user-groups' | 'settings-general' | 'settings-variables' | 'settings-calendar' | 'exam-transcript' | 'exam-grading' | 'exam-admin' | 'exam-schedule';
+export type PlannerViewMode = 'semester' | 'group' | 'modules' | 'optimization' | 'schedule-planner' | 'module-details' | 'lecturer-overview' | 'availability' | 'room-overview' | 'room-occupancy' | 'room-availability' | 'user-profile' | 'user-groups' | 'settings-general' | 'settings-variables' | 'settings-calendar' | 'exam-transcript' | 'exam-grading' | 'exam-admin' | 'exam-schedule';
 
 export interface RoomAssignment {
   id: string;
@@ -220,4 +248,87 @@ export interface RoomAssignment {
   moduleId?: string;
   cohortId?: string;
   color?: string;
+  lockKind?: 'soft' | 'hard';
+}
+
+export interface ScheduledClassOccurrenceOverride {
+  originalDate: string;
+  date: string;
+  roomId: string;
+  roomName: string;
+  startTime: string;
+  endTime: string;
+  lecturerName?: string;
+  title?: string;
+  purpose?: string;
+  color?: string;
+  lockKind?: 'soft' | 'hard';
+}
+
+export interface ScheduledClass {
+  id: string;
+  semesterId: string;
+  moduleId: string;
+  moduleName: string;
+  moduleInstanceIds: string[];
+  cohortIds: string[];
+  cohortNames: string[];
+  lecturerUserId?: string;
+  lecturerName: string;
+  roomId: string;
+  roomName: string;
+  day: Weekday;
+  date: string;
+  occurrenceDates: string[];
+  startTime: string;
+  endTime: string;
+  sws: number;
+  participants: number;
+  score: number;
+  warnings: string[];
+  occurrenceOverrides?: ScheduledClassOccurrenceOverride[];
+}
+
+export interface ScheduleIssue {
+  id: string;
+  moduleId: string;
+  moduleName: string;
+  cohortIds: string[];
+  cohortNames: string[];
+  reason: string;
+}
+
+export type SchedulePlanStatus = 'planning' | 'locked';
+
+export interface ScheduleAdjustment {
+  id: string;
+  type: 'deleted-occurrence' | 'replacement-added' | 'manual-change';
+  classId?: string;
+  moduleId?: string;
+  fromDate?: string;
+  toDate?: string;
+  note?: string;
+  createdAt: string;
+}
+
+export interface SchedulePlan {
+  semesterId: string;
+  planningMode: 'semester';
+  status: SchedulePlanStatus;
+  semesterStartDate: string;
+  semesterEndDate: string;
+  weekStartDate: string;
+  weekEndDate: string;
+  generatedAt: string;
+  entries: ScheduledClass[];
+  unscheduled: ScheduleIssue[];
+  adjustmentLog?: ScheduleAdjustment[];
+  summary: {
+    totalOfferings: number;
+    scheduledOfferings: number;
+    unscheduledOfferings: number;
+    totalSws: number;
+    plannedRoomAssignments: number;
+    teachingWeeks: number;
+  };
 }

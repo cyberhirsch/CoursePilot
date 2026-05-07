@@ -161,6 +161,32 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({
                                     className="w-full bg-muted border-none rounded-lg px-3 py-1.5 text-xs font-bold focus:ring-2 focus:ring-primary outline-none transition-all"
                                 />
                             </label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <label className="block">
+                                    <span className="text-[10px] font-bold uppercase block mb-1">Pause in Termin (Min)</span>
+                                    <input
+                                        type="number"
+                                        value={systemSettings.daySchedule.eventBreakDurationMinutes ?? 15}
+                                        onChange={e => onUpdateSystemSettings({
+                                            ...systemSettings,
+                                            daySchedule: { ...systemSettings.daySchedule, eventBreakDurationMinutes: Math.max(0, Number(e.target.value) || 0) }
+                                        })}
+                                        className="w-full bg-muted border-none rounded-lg px-3 py-1.5 text-xs font-bold focus:ring-2 focus:ring-primary outline-none transition-all"
+                                    />
+                                </label>
+                                <label className="block">
+                                    <span className="text-[10px] font-bold uppercase block mb-1">Intervall (Min)</span>
+                                    <input
+                                        type="number"
+                                        value={systemSettings.daySchedule.eventBreakIntervalMinutes ?? 90}
+                                        onChange={e => onUpdateSystemSettings({
+                                            ...systemSettings,
+                                            daySchedule: { ...systemSettings.daySchedule, eventBreakIntervalMinutes: Math.max(0, Number(e.target.value) || 0) }
+                                        })}
+                                        className="w-full bg-muted border-none rounded-lg px-3 py-1.5 text-xs font-bold focus:ring-2 focus:ring-primary outline-none transition-all"
+                                    />
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>

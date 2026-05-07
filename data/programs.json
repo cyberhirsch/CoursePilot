@@ -1,7 +1,7 @@
 [
   {
-    "id": "GDVK",
-    "name": "B.A. Grafikdesign und Visuelle Kommunikation",
+    "id": "DSA",
+    "name": "B.Sc. Digital Systems and Automation",
     "semesters": 7,
     "defaultStudents": 56,
     "moduleIds": [
@@ -32,9 +32,9 @@
       "BPxP"
     ],
     "categoryOrder": [
-      "Studiengangübergreifende Kompetenzen",
-      "Studiengangspezifische Kompetenzen",
-      "Weitere Module und Studienabschnitte"
+      "Core Competencies",
+      "Specialized Competencies",
+      "Electives & Thesis"
     ],
     "templatePlan": {
       "modules": {
@@ -73,8 +73,8 @@
     }
   },
   {
-    "id": "GDIM",
-    "name": "B.A. Game Design and Interactive Media",
+    "id": "ARAI",
+    "name": "B.Sc. Advanced Robotics and AI",
     "semesters": 8,
     "defaultStudents": 35,
     "moduleIds": [
@@ -105,9 +105,9 @@
       "BA-A"
     ],
     "categoryOrder": [
-      "Studiengangübergreifende Kompetenzen",
-      "Studiengangspezifische Kompetenzen",
-      "Weitere Module und Studienabschnitte"
+      "Core Competencies",
+      "Specialized Competencies",
+      "Electives & Thesis"
     ],
     "templatePlan": {
       "modules": {

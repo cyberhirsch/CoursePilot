@@ -1,8 +1,8 @@
 [
   {
     "id": "BA-GDIM-05",
-    "name": "B.A. Game Design und Interaktive Medien 05",
-    "programId": "GDIM",
+    "name": "B.Sc. Advanced Robotics and AI 05",
+    "programId": "ARAI",
     "startSemester": {
       "id": "ws2022",
       "name": "WS 2022/23",
@@ -55,8 +55,8 @@
   },
   {
     "id": "BA-GDIM-06",
-    "name": "B.A. Game Design und Interaktive Medien 06",
-    "programId": "GDIM",
+    "name": "B.Sc. Advanced Robotics and AI 06",
+    "programId": "ARAI",
     "startSemester": {
       "id": "ss2023",
       "name": "SS 2023",
@@ -115,8 +115,8 @@
   },
   {
     "id": "KBA-GDIM-07",
-    "name": "B.A. Game Design und Interaktive Medien 07",
-    "programId": "GDIM",
+    "name": "B.Sc. Advanced Robotics and AI 07",
+    "programId": "ARAI",
     "startSemester": {
       "id": "ws2023",
       "name": "WS 2023/24",
@@ -175,8 +175,8 @@
   },
   {
     "id": "KBA-GDIM-08",
-    "name": "B.A. Game Design und Interaktive Medien 08",
-    "programId": "GDIM",
+    "name": "B.Sc. Advanced Robotics and AI 08",
+    "programId": "ARAI",
     "startSemester": {
       "id": "ss2024",
       "name": "SS 2024",
@@ -235,8 +235,8 @@
   },
   {
     "id": "KBA-GDIM-09k",
-    "name": "B.A. Game Design und Interaktive Medien 09k",
-    "programId": "GDIM",
+    "name": "B.Sc. Advanced Robotics and AI 09k",
+    "programId": "ARAI",
     "startSemester": {
       "id": "ws2024",
       "name": "WS 2024/25",
@@ -289,8 +289,8 @@
   },
   {
     "id": "KBA-GDIM-25Wk",
-    "name": "B.A. Game Design und Interaktive Medien 25Wk",
-    "programId": "GDIM",
+    "name": "B.Sc. Advanced Robotics and AI 25Wk",
+    "programId": "ARAI",
     "startSemester": {
       "id": "ws2025",
       "name": "WS 2025/26",
@@ -349,8 +349,8 @@
   },
   {
     "id": "kBA-GDVK-28",
-    "name": "B.A. Grafikdesign und Visuelle Kommunikation 28",
-    "programId": "GDVK",
+    "name": "B.Sc. Digital Systems and Automation 28",
+    "programId": "DSA",
     "startSemester": {
       "id": "ws2021",
       "name": "WS 2021/22",
@@ -388,8 +388,8 @@
   },
   {
     "id": "kBA-GDVK-31k",
-    "name": "B.A. Grafikdesign und Visuelle Kommunikation 31k",
-    "programId": "GDVK",
+    "name": "B.Sc. Digital Systems and Automation 31k",
+    "programId": "DSA",
     "startSemester": {
       "id": "ss2023",
       "name": "SS 2023",
@@ -439,8 +439,8 @@
   },
   {
     "id": "kBA-GDVK-32k",
-    "name": "B.A. Grafikdesign und Visuelle Kommunikation 32k",
-    "programId": "GDVK",
+    "name": "B.Sc. Digital Systems and Automation 32k",
+    "programId": "DSA",
     "startSemester": {
       "id": "ws2023",
       "name": "WS 2023/24",
@@ -489,8 +489,8 @@
   },
   {
     "id": "kBA-GDVK-33",
-    "name": "B.A. Grafikdesign und Visuelle Kommunikation 33",
-    "programId": "GDVK",
+    "name": "B.Sc. Digital Systems and Automation 33",
+    "programId": "DSA",
     "startSemester": {
       "id": "ss2024",
       "name": "SS 2024",
@@ -540,8 +540,8 @@
   },
   {
     "id": "kBA-GDVK-34k",
-    "name": "B.A. Grafikdesign und Visuelle Kommunikation 34k",
-    "programId": "GDVK",
+    "name": "B.Sc. Digital Systems and Automation 34k",
+    "programId": "DSA",
     "startSemester": {
       "id": "ws2024",
       "name": "WS 2024/25",
@@ -590,8 +590,8 @@
   },
   {
     "id": "kBA-GDVK-25Sk",
-    "name": "B.A. Grafikdesign und Visuelle Kommunikation 25Sk",
-    "programId": "GDVK",
+    "name": "B.Sc. Digital Systems and Automation 25Sk",
+    "programId": "DSA",
     "startSemester": {
       "id": "ss2025",
       "name": "SS 2025",
@@ -640,8 +640,8 @@
   },
   {
     "id": "kBA-GDVK-25Wk",
-    "name": "B.A. Grafikdesign und Visuelle Kommunikation 25Wk",
-    "programId": "GDVK",
+    "name": "B.Sc. Digital Systems and Automation 25Wk",
+    "programId": "DSA",
     "startSemester": {
       "id": "ws2025",
       "name": "WS 2025/26",
@@ -690,8 +690,8 @@
   },
   {
     "id": "GDIM-25Wd",
-    "name": "B.A. Game Design und Interaktive Medien  25Wd",
-    "programId": "GDIM",
+    "name": "B.Sc. Advanced Robotics and AI  25Wd",
+    "programId": "ARAI",
     "startSemester": {
       "id": "ws2025",
       "name": "WS 2025/26",

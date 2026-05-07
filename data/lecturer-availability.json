@@ -1,0 +1,123 @@
+[
+  {
+    "userId": "usr_prof_max",
+    "maxSwsPerDay": 6,
+    "availableSlots": [
+      {
+        "day": "monday",
+        "startTime": "08:00",
+        "endTime": "16:00"
+      },
+      {
+        "day": "tuesday",
+        "startTime": "09:00",
+        "endTime": "18:00"
+      },
+      {
+        "day": "wednesday",
+        "startTime": "08:00",
+        "endTime": "14:00"
+      },
+      {
+        "day": "thursday",
+        "startTime": "10:00",
+        "endTime": "18:00"
+      }
+    ],
+    "unavailableSlots": [],
+    "notes": "Research block on Friday."
+  },
+  {
+    "userId": "usr_prof_erika",
+    "maxSwsPerDay": 6,
+    "availableSlots": [
+      {
+        "day": "monday",
+        "startTime": "10:00",
+        "endTime": "18:00"
+      },
+      {
+        "day": "tuesday",
+        "startTime": "08:00",
+        "endTime": "14:00"
+      },
+      {
+        "day": "wednesday",
+        "startTime": "09:00",
+        "endTime": "18:00"
+      },
+      {
+        "day": "friday",
+        "startTime": "08:00",
+        "endTime": "13:00"
+      }
+    ],
+    "unavailableSlots": []
+  },
+  {
+    "userId": "usr_lecturer_film",
+    "maxSwsPerDay": 8,
+    "availableSlots": [
+      {
+        "day": "monday",
+        "startTime": "08:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "wednesday",
+        "startTime": "08:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "thursday",
+        "startTime": "08:00",
+        "endTime": "16:00"
+      }
+    ],
+    "unavailableSlots": []
+  },
+  {
+    "userId": "usr_lecturer_code",
+    "maxSwsPerDay": 8,
+    "availableSlots": [
+      {
+        "day": "tuesday",
+        "startTime": "08:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "thursday",
+        "startTime": "08:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "friday",
+        "startTime": "08:00",
+        "endTime": "15:00"
+      }
+    ],
+    "unavailableSlots": []
+  },
+  {
+    "userId": "usr_admin",
+    "maxSwsPerDay": 4,
+    "availableSlots": [
+      {
+        "day": "monday",
+        "startTime": "09:00",
+        "endTime": "15:00"
+      },
+      {
+        "day": "tuesday",
+        "startTime": "09:00",
+        "endTime": "15:00"
+      },
+      {
+        "day": "wednesday",
+        "startTime": "09:00",
+        "endTime": "15:00"
+      }
+    ],
+    "unavailableSlots": []
+  }
+]

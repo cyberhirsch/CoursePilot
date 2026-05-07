@@ -5,9 +5,10 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { PlannerBoard } from '@/components/PlannerBoard';
 import { DEFAULT_LANGUAGE, type Language } from '@/translations';
-import type { Plan, Module, Program, Cohort, AbsoluteSemester, ProgramPlan, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment } from '@/types';
+import type { Plan, Module, Program, Cohort, AbsoluteSemester, ProgramPlan, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability, SchedulePlan } from '@/types';
 import { RELATIVE_SEMESTERS, getAbsoluteSemesterFor } from '@/constants';
 import { LoadingSpinner } from '@/components/icons/LoadingSpinner';
+import { reconcileScheduleAfterAssignmentChange } from '@/lib/schedule-optimizer';
 
 async function fetchData() {
   const res = await fetch('/api/data');
@@ -45,6 +46,35 @@ const getRealCurrentSemester = (semesters: AbsoluteSemester[]): AbsoluteSemester
   });
 };
 
+const getSemesterOrder = (semester: AbsoluteSemester): number => {
+  return semester.year * 2 + (semester.type === 'WS' ? 1 : 0);
+};
+
+const getDefaultFutureSemester = (
+  semesters: AbsoluteSemester[],
+  now = new Date()
+): AbsoluteSemester | undefined => {
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-11
+  const isSummerSemester = month >= 3 && month <= 8;
+  const targetType: AbsoluteSemester['type'] = isSummerSemester ? 'WS' : 'SS';
+  const targetYear = isSummerSemester
+    ? year
+    : month >= 9
+      ? year + 1
+      : year;
+
+  const exactMatch = semesters.find(semester =>
+    semester.type === targetType && semester.year === targetYear
+  );
+  if (exactMatch) return exactMatch;
+
+  const sortedSemesters = [...semesters].sort((a, b) => getSemesterOrder(a) - getSemesterOrder(b));
+  const targetOrder = targetYear * 2 + (targetType === 'WS' ? 1 : 0);
+  return sortedSemesters.find(semester => getSemesterOrder(semester) >= targetOrder)
+    || sortedSemesters[sortedSemesters.length - 1];
+};
+
 
 export default function CoursePilotClient() {
   const [isMounted, setIsMounted] = useState(false);
@@ -60,6 +90,8 @@ export default function CoursePilotClient() {
   const [systemSettings, setSystemSettings] = useState<SystemSettings | undefined>(undefined);
   const [academicCalendar, setAcademicCalendar] = useState<AcademicCalendar | undefined>(undefined);
   const [roomAssignments, setRoomAssignments] = useState<RoomAssignment[]>([]);
+  const [lecturerAvailabilities, setLecturerAvailabilities] = useState<LecturerAvailability[]>([]);
+  const [schedulePlan, setSchedulePlan] = useState<SchedulePlan | null>(null);
 
   useEffect(() => {
     fetchData().then(data => {
@@ -73,6 +105,8 @@ export default function CoursePilotClient() {
       if (data.systemSettings) setSystemSettings(data.systemSettings);
       if (data.academicCalendar) setAcademicCalendar(data.academicCalendar);
       if (data.roomAssignments) setRoomAssignments(data.roomAssignments);
+      if (data.lecturerAvailabilities) setLecturerAvailabilities(data.lecturerAvailabilities);
+      if (typeof data.schedulePlan !== 'undefined') setSchedulePlan(data.schedulePlan);
       setIsMounted(true);
     }).catch(e => {
       console.error("Failed to load from backend", e);
@@ -80,7 +114,7 @@ export default function CoursePilotClient() {
     });
   }, []);
 
-  const fullData = useMemo(() => ({ modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar }), [modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar]);
+  const fullData = useMemo(() => ({ modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar, lecturerAvailabilities, schedulePlan }), [modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar, lecturerAvailabilities, schedulePlan]);
 
   useEffect(() => {
     if (isMounted) {
@@ -106,7 +140,7 @@ export default function CoursePilotClient() {
   // Set default selected semester once academic calendar is loaded
   useEffect(() => {
     if (academicCalendar && !selectedSemester) {
-      const defaultSem = academicCalendar.semesters.find(s => s.id === 'ws2025') || academicCalendar.semesters[0];
+      const defaultSem = getDefaultFutureSemester(academicCalendar.semesters) || academicCalendar.semesters[0];
       if (defaultSem) setSelectedSemester(defaultSem);
     }
   }, [academicCalendar, selectedSemester]);
@@ -443,6 +477,93 @@ export default function CoursePilotClient() {
     }
   }, []);
 
+  const handleAddUser = useCallback((newUser: User) => {
+    if (users.some(user => user.id === newUser.id)) {
+      alert(`Ein Nutzer mit der ID "${newUser.id}" existiert bereits.`);
+      return;
+    }
+    setUsers(prev => [...prev, newUser]);
+  }, [users]);
+
+  const handleUpdateUser = useCallback((userId: string, updates: Partial<User>) => {
+    setUsers(prev => prev.map(user => user.id === userId ? { ...user, ...updates } : user));
+
+    if (updates.id && updates.id !== userId) {
+      setLecturerAvailabilities(prev => prev.map(item =>
+        item.userId === userId ? { ...item, userId: updates.id! } : item
+      ));
+      setSchedulePlan(prev => prev
+        ? {
+          ...prev,
+          entries: prev.entries.map(entry =>
+            entry.lecturerUserId === userId ? { ...entry, lecturerUserId: updates.id } : entry
+          )
+        }
+        : prev
+      );
+    }
+
+    const currentUser = users.find(user => user.id === userId);
+    if (currentUser?.name && updates.name && currentUser.name !== updates.name) {
+      setModules(prev => prev.map(module =>
+        module.personInCharge === currentUser.name
+          ? { ...module, personInCharge: updates.name }
+          : module
+      ));
+    }
+  }, [users]);
+
+  const handleDeleteUser = useCallback((userId: string) => {
+    const user = users.find(item => item.id === userId);
+    if (!user) return;
+
+    if (window.confirm(`Möchten Sie den Nutzer "${user.name}" wirklich löschen?`)) {
+      setUsers(prev => prev.filter(item => item.id !== userId));
+      setLecturerAvailabilities(prev => prev.filter(item => item.userId !== userId));
+      setSchedulePlan(prev => prev
+        ? {
+          ...prev,
+          entries: prev.entries.map(entry =>
+            entry.lecturerUserId === userId
+              ? { ...entry, lecturerUserId: undefined, lecturerName: 'N.N.', warnings: [...entry.warnings, 'Der zugeordnete Nutzer wurde geloescht.'] }
+              : entry
+          )
+        }
+        : prev
+      );
+      setModules(prev => prev.map(module =>
+        module.personInCharge === user.name
+          ? { ...module, personInCharge: '' }
+          : module
+      ));
+    }
+  }, [users]);
+
+  const handleUpdateRoomAssignments = useCallback((
+    nextAssignments: RoomAssignment[],
+    options?: { reconcileSchedule?: boolean }
+  ) => {
+    if (options?.reconcileSchedule === false || !schedulePlan) {
+      setRoomAssignments(nextAssignments);
+      return;
+    }
+
+    const reconciliation = reconcileScheduleAfterAssignmentChange({
+      plan: schedulePlan,
+      previousAssignments: roomAssignments,
+      nextAssignments,
+      rooms,
+    });
+
+    if (reconciliation.changed) {
+      setSchedulePlan(reconciliation.plan);
+      setRoomAssignments(reconciliation.roomAssignments);
+      return;
+    }
+
+    setRoomAssignments(nextAssignments);
+  }, [roomAssignments, rooms, schedulePlan]);
+
   const handleAddCohort = useCallback((newCohort: Cohort, saveAsTemplate?: boolean) => {
     if (cohorts.some(sg => sg.id === newCohort.id)) {
       alert(`Eine Studiengruppe mit der ID "${newCohort.id}" existiert bereits.`);
@@ -523,6 +644,9 @@ export default function CoursePilotClient() {
           catalogs={catalogs}
           onUpdateCatalogs={setCatalogs}
           users={users}
+          onAddUser={handleAddUser}
+          onUpdateUser={handleUpdateUser}
+          onDeleteUser={handleDeleteUser}
           rooms={rooms}
           onUpdateRoom={handleUpdateRoom}
           onAddRoom={handleAddRoom}
@@ -532,10 +656,13 @@ export default function CoursePilotClient() {
           academicCalendar={academicCalendar}
           onUpdateAcademicCalendar={setAcademicCalendar}
           roomAssignments={roomAssignments}
-          onUpdateRoomAssignments={setRoomAssignments}
+          onUpdateRoomAssignments={handleUpdateRoomAssignments}
+          lecturerAvailabilities={lecturerAvailabilities}
+          onUpdateLecturerAvailabilities={setLecturerAvailabilities}
+          schedulePlan={schedulePlan}
+          onUpdateSchedulePlan={setSchedulePlan}
         />
       </main>
     </div>
   );
 };
-

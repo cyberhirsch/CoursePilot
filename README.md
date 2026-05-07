@@ -1,128 +1,173 @@
-# 🧭 CoursePilot
+# CoursePilot
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![Genkit](https://img.shields.io/badge/AI-Genkit-orange?style=for-the-badge)](https://firebase.google.com/docs/genkit)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![PocketBase](https://img.shields.io/badge/PocketBase-v0.22-blue?style=for-the-badge)](https://pocketbase.io/)
+CoursePilot is a Next.js application for academic program planning, module administration, room planning, and AI-assisted teaching-load optimization. It is aimed at higher-education teams that need to coordinate cohorts, curricula, room capacity, and semester-by-semester resource demand.
 
-**CoursePilot** is a sophisticated academic planning and resource optimization platform. Designed for higher education institutions, it empowers faculty and administrators to design, manage, and optimize study programs with a modern, constraint-aware interface and AI-driven intelligence.
+The app currently runs as a local-first planning tool backed by JSON files in `data/`, with optional PocketBase persistence for shared deployments.
 
----
+## Current Features
 
-## ✨ Key Features
+- Semester overview across cohorts, programs, modules, participants, and SWS demand.
+- Cohort-specific study-progress plans with drag-and-drop module placement.
+- Validation for prerequisites, forbidden semesters, duplicate pool modules, and locked modules.
+- Module overview and module-sheet editing, including categories, workload, teaching details, room requirements, and program assignment.
+- Category, catalog, academic-calendar, and general settings management.
+- Room inventory, room occupancy, and room availability views.
+- Lecturer overview with assigned modules, daily SWS limits, and availability windows.
+- Automated weekly schedule generation based on cohort plans, room capacity/equipment, room blocks, lecturer availability, and conflict checks.
+- AI-assisted module consolidation suggestions using Google Genkit and Google AI.
+- German and English UI labels.
 
-### 🗓️ Interactive Planner Board
-A premium drag-and-drop interface for semester-wise module allocation. 
-- **Validation Engine**: Real-time checks for prerequisites and forbidden semesters.
-- **Pool Management**: Seamlessly handle elective pools (Wahlpflichtfächer).
-- **Multi-View Modes**: Switch between global **Semester View** and focused **Study Group Plans**.
+Several navigation areas are scaffolded for future work. Examinations, user profile, and user groups currently render placeholder screens.
 
-### 🤖 AI Course Optimization
-Integrated with **Google Genkit**, CoursePilot includes a specialized **Consolidation Agent**.
-- **Resource Efficiency**: Automatically identifies opportunities to merge course offerings across different study groups.
-- **Teaching Load (SWS) Reduction**: Calculates potential savings in Weekly Semester Hours (SWS).
-- **Constraint Respect**: Suggestions honor locked modules and curriculum rules.
+## Screenshots
 
-### 🔒 Advanced Control & Locking
-Fine-grained control over the planning process:
-- **Individual Locking**: Prevent specific modules from being moved or consolidated.
-- **Bulk Locking**: Quickly lock all past semesters or entire module categories.
-- **Category Management**: Organize curriculum into logical segments for better oversight.
+| Semester overview | Study progress plan |
+| --- | --- |
+| ![Semester overview](screenshots/semester_overview.png) | ![Study progress plan](screenshots/study_progress_plan.png) |
 
-### 📊 Strategic Visualizations
-- **Heatmaps**: Visualize workload and resource allocation density.
-- **Program Templates**: Manage master templates for different degree programs to ensure consistency.
+| Module overview |
+| --- |
+| ![Module overview](screenshots/module_overview.png) |
 
----
+## Tech Stack
 
-## 📸 Showcase
+- Next.js 15 with the App Router
+- React 18 and TypeScript 5
+- Tailwind CSS 3 and shadcn/ui-style components
+- Radix UI, lucide-react, Recharts, and @hello-pangea/dnd
+- Google Genkit 1.13 with the Google AI provider
+- PocketBase client support for optional remote persistence
 
-|                  **Semester Overview**                  |                   **Study Progress Plan**                   |
-| :-----------------------------------------------------: | :---------------------------------------------------------: |
-| ![Semester Overview](screenshots/semester_overview.png) | ![Study Progress Plan](screenshots/study_progress_plan.png) |
+## Prerequisites
 
-|                 **Module Management**                 |
-| :---------------------------------------------------: |
-| ![Module Management](screenshots/module_overview.png) |
+- Node.js 20 or newer
+- npm
+- Optional: a Google AI API key for the optimization panel
+- Optional: a PocketBase instance with a `CoursePilot` collection containing a JSON `data` field
 
----
+## Getting Started
 
-## 🛠️ Tech Stack
+Install dependencies:
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **AI Integration**: [Google Genkit](https://firebase.google.com/docs/genkit)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/)
-- **State Management**: React Hooks + Context
-- **Data Persistence**: [PocketBase](https://pocketbase.io/) (with local JSON fallback)
-- **Components**: Radix UI, Lucide React, Recharts
+```bash
+npm install
+```
 
----
+Start the Next.js development server:
 
-## 🎨 Design System
-
-CoursePilot features a professional "Glitchless" dark-themed aesthetic designed for focus and clarity.
-
-- **Primary**: `#3F51B5` (Deep Indigo) - Professional & Trustworthy.
-- **Background**: `#212121` (Slate Charcoal) - Eye-strain reduction.
-- **Accent**: `#00BCD4` (Vibrant Cyan) - Highlighting interactions.
-- **Typography**: [Inter](https://rsms.me/inter/) for UI, **Source Code Pro** for technical IDs.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 20+
-- [PocketBase](https://pocketbase.io/) instance (local or hosted)
-- Google AI API Key (for Genkit features)
-
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-repo/CoursePilot.git
-   cd CoursePilot
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Configure environment variables:
-   Create a `.env.local` file with:
-   ```env
-   NEXT_PUBLIC_POCKETBASE_URL=https://api.sebhirsch.com
-   GOOGLE_GENAI_API_KEY=your_key_here
-   ```
-
-4. Manage Data:
-   - Use the built-in local JSON data by default.
-   - To migrate to PocketBase, run: `node migrate-to-pb.js` (Ensure collections `modules`, `programs`, `cohorts`, and `categories` exist).
-
-### Development
-Run the development server:
 ```bash
 npm run dev
 ```
 
-Start the Genkit Developer UI:
+Open [http://localhost:9002](http://localhost:9002).
+
+The dev script runs `next dev --turbopack -p 9002`.
+
+## Environment Variables
+
+The app works without environment variables by reading and writing the local JSON files in `data/`.
+
+Create `.env.local` only when you want optional integrations:
+
+```env
+GOOGLE_GENAI_API_KEY=your_google_ai_key
+NEXT_PUBLIC_POCKETBASE_URL=https://your-pocketbase.example.com
+```
+
+`GOOGLE_GENAI_API_KEY` enables the Genkit optimization flow. `NEXT_PUBLIC_POCKETBASE_URL` switches data loading and saving to PocketBase. If the initial PocketBase read fails, the app falls back to local JSON data for that request.
+
+## Data
+
+Local application data lives in `data/`:
+
+- `modules.json`: module catalog and module rules.
+- `programs.json`: degree programs and template plans.
+- `cohorts.json`: active cohort instances and their plans.
+- `categories.json`: module categories.
+- `catalogs.json`: selectable values such as exam types and teaching methods.
+- `users.json`: user records for planned user-management features.
+- `rooms.json`: room inventory.
+- `room-occupancy.json`: room assignments.
+- `system-settings.json`: global planning settings.
+- `academic-calendar.json`: semester periods and academic-year settings.
+- `lecturer-availability.json`: weekly availability and daily SWS limits for teaching staff.
+- `schedule.json`: the latest generated weekly schedule.
+
+The API route at `src/app/api/data/route.ts` reads this data through `src/lib/data-service.ts` and saves UI changes back after edits.
+
+## AI Optimization
+
+Start the Genkit Developer UI when working on the consolidation flow:
+
 ```bash
 npm run genkit:dev
 ```
 
----
+For watch mode:
 
-## 📂 Project Structure
+```bash
+npm run genkit:watch
+```
 
-- `src/app`: Next.js App Router pages and layouts.
-- `src/ai`: Genkit AI flows and configuration (Consolidation Agent).
-- `src/components`: Reusable UI components (Planner, Board, Header).
-- `src/types`: TypeScript interfaces for Modules, Programs, and Plans.
-- `data`: Seed data for categories, programs, and modules.
+The optimization flow is defined in `src/ai/flows/consolidate-modules.ts`. It analyzes module placements across cohorts and suggests same-semester consolidations while excluding locked modules.
 
----
+## PocketBase
 
-## 🧭 Project Status
-This project is currently in active development.
+PocketBase is optional. When `NEXT_PUBLIC_POCKETBASE_URL` is set, CoursePilot reads and writes the first record in the `CoursePilot` collection and expects a JSON field named `data`.
+
+Current PocketBase saves include the core planning and room-planning payload: modules, programs, cohorts, categories, rooms, and room assignments. Local JSON mode persists the full set of files listed above.
+
+For local-data migration, review and run:
+
+```bash
+node migrate-to-pb.js
+```
+
+Note: `migrate-to-pb.js` currently targets the configured hosted PocketBase instance in the script. Update it before using a different instance.
+
+## Scripts
+
+```bash
+npm run dev           # Start Next.js on port 9002 with Turbopack
+npm run build         # Create a production build
+npm run start         # Start the production server
+npm run lint          # Run Next linting
+npm run typecheck     # Run TypeScript without emitting files
+npm run genkit:dev    # Start Genkit Developer UI
+npm run genkit:watch  # Start Genkit Developer UI in watch mode
+```
+
+## Project Structure
+
+```text
+src/app/                 Next.js routes, layout, API routes, and CoursePilot client shell
+src/components/          Planner, module, room, settings, and UI components
+src/ai/                  Genkit configuration and AI flows
+src/lib/                 Data service, PocketBase client, and utilities
+src/hooks/               Shared React hooks
+src/types.ts             Shared application types
+src/translations.ts      German and English UI strings
+data/                    Local JSON persistence
+docs/                    Project notes, research material, and module-description PDFs
+screenshots/             README screenshots
+```
+
+## Production
+
+Build the app:
+
+```bash
+npm run build
+```
+
+Run the production server:
+
+```bash
+npm run start
+```
+
+CoursePilot uses server-side API routes for data access, so deploy it to an environment that supports Node.js.
+
+## Status
+
+CoursePilot is in active development. The core planning, module, room, settings, and AI optimization surfaces are present; several administrative areas are intentionally scaffolded as placeholders.

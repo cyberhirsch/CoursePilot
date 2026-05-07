@@ -99,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
 
   const mainNavItems: ({ key: MainCategory; label: string; inactive?: boolean } | { type: 'divider' })[] = [
     { key: 'semester-plan', label: t.navigation.semesterPlan },
-    { key: 'schedule', label: t.navigation.schedule, inactive: true },
+    { key: 'schedule', label: t.navigation.schedule },
     { key: 'examinations', label: t.navigation.examinations },
     { key: 'modules', label: t.navigation.modules },
     { key: 'lecturers', label: t.navigation.lecturers },
@@ -150,6 +150,8 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
                               setViewMode('module-details');
                             } else if (key === 'semester-plan') {
                               setViewMode('semester');
+                            } else if (key === 'schedule') {
+                              setViewMode('schedule-planner');
                             } else if (key === 'examinations') {
                               setViewMode('exam-transcript');
                             } else if (key === 'lecturers') {
