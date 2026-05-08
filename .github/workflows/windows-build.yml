@@ -17,8 +17,6 @@ jobs:
     runs-on: windows-latest
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-      ELECTRON_BUILDER_CACHE: ${{ runner.temp }}\electron-builder-cache
-      ELECTRON_CACHE: ${{ runner.temp }}\electron-cache
       NEXT_TELEMETRY_DISABLED: '1'
 
     steps:
