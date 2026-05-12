@@ -10,8 +10,6 @@ No part of this software may be used, reproduced, modified, distributed, or host
 
 ### Obtaining Permission
 
-If you would like to use this software, contribute to it, or incorporate it into another project, please contact the author for permission:
-
-**Contact:** [seb@coursepilot.de](mailto:seb@coursepilot.de) (or via GitHub issues/profile)
+If you would like to use this software, contribute to it, or incorporate it into another project, please contact the author for permission via GitHub issues/profile
 
 By accessing this source code, you acknowledge that you have no license to use it except as expressly permitted by the copyright holder.

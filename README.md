@@ -149,8 +149,7 @@ CoursePilot uses server-side API routes for data access, so deploy it to an envi
 
 Copyright (c) 2026 Seb Hirsch. All rights reserved.
 
-This software is provided as "source available". Use, reproduction, or distribution is prohibited without explicit written permission. See [LICENSE.md](LICENSE.md) for details or contact [seb@coursepilot.de](mailto:seb@coursepilot.de) for inquiries.
-
+This software is provided as "source available". Use, reproduction, or distribution is prohibited without explicit written permission. See [LICENSE.md](LICENSE.md) for details or contact the author for inquiries.
 ## Status
 
 CoursePilot is in active development. The core planning, module, room, and settings surfaces are present; several administrative areas are intentionally scaffolded as placeholders.
