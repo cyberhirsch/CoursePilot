@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="CoursePilot Dokumentation fuer Datenpflege, CSV-Import und Stundenplanung.">
+    <meta name="copyright" content="Copyright (c) 2026 Seb Hirsch">
+    <title>CoursePilot Dokumentation</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="CoursePilot Dokumentation">
+        <img src="assets/logo.png" alt="" width="36" height="36">
+        <span>CoursePilot Docs</span>
+      </a>
+    </header>
+
+    <main id="top">
+      <section class="intro" aria-label="Dokumentationsuebersicht">
+        <div>
+          <p class="section-label">Ueberblick</p>
+          <h2>Vom Datenbestand bis zum fertigen Stundenplan.</h2>
+        </div>
+        <p>
+          Dieses Handbuch beschreibt den vollstaendigen Ablauf in CoursePilot:
+          Stammdaten manuell einpflegen oder per CSV aus Excel importieren,
+          Semesterplaene kontrollieren, den Stundenplan erzeugen, Konflikte
+          nacharbeiten und den fertigen Plan exportieren.
+        </p>
+      </section>
+
+      <div class="manual-layout">
+        <aside class="side-menu" aria-label="Kapitel">
+          <div class="side-menu-title">Kapitel</div>
+          <a href="#grundprinzip">1. Grundprinzip</a>
+          <a href="#datenpflege">2. Datenpflege vorbereiten</a>
+          <a href="#manuell-einpflegen">3. Daten manuell einpflegen</a>
+          <a href="#csv-import">4. Daten per CSV importieren</a>
+          <a href="#excel-vorbereiten">5. Excel als CSV vorbereiten</a>
+          <a href="#csv-spalten">6. Benoetigte CSV-Spalten</a>
+          <a href="#import-durchfuehren">7. Import durchfuehren</a>
+          <a href="#stundenplan-erzeugen">8. Stundenplan erzeugen</a>
+          <a href="#ergebnis-kontrollieren">9. Ergebnis kontrollieren</a>
+          <a href="#konflikte-loesen">10. Konflikte loesen</a>
+          <a href="#termine-bearbeiten">11. Termine bearbeiten</a>
+          <a href="#plan-sperren">12. Plan sperren</a>
+          <a href="#exportieren">13. Exportieren</a>
+          <a href="#checkliste">14. Checkliste</a>
+          <a href="#vollansichten">Vollansichten</a>
+        </aside>
+
+        <article class="manual-content">
+          <section id="grundprinzip" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 01</p>
+            <h2>Grundprinzip</h2>
+            <p>
+              Die Stundenplanung erzeugt aus den gepflegten Semesterplaenen
+              einen wiederkehrenden Plan fuer ein ausgewaehltes Semester.
+              CoursePilot plant dabei nur Module, die in den Gruppenplaenen
+              fuer dieses Semester vorgesehen sind.
+            </p>
+            <p>Der Planungsalgorithmus beruecksichtigt:</p>
+            <ul>
+              <li>Studiengruppen und deren Modulbelegung je Fachsemester.</li>
+              <li>Module mit SWS, Teilnehmenden, Raumanforderungen und Modulverantwortlichen.</li>
+              <li>Dozenten mit woechentlicher Verfuegbarkeit, Sperrzeiten und maximalen SWS pro Tag.</li>
+              <li>Raeume mit Kapazitaet, Ausstattung und blockierten Zeiten.</li>
+              <li>Semesterzeitraum, Vorlesungswochen und Vorlesungspausen.</li>
+              <li>Systemregeln wie Tagesstart, Tagesende, Pausen zwischen Terminen, Mittagspause und geplante Wochentage.</li>
+            </ul>
+            <div class="callout">
+              <strong>Wichtig:</strong> Fuer alle zu planenden Module muss ein
+              gueltiger Modulverantwortlicher hinterlegt sein. Fehlt diese
+              Zuordnung, zeigt CoursePilot vor der Planung eine Tabelle mit den
+              betroffenen Modulen und Dropdowns zur direkten Korrektur.
+            </div>
+            <figure class="manual-figure">
+              <img src="assets/screenshots/crops/chapter-03-semester-overview.png" alt="Semesteruebersicht mit Gruppen, Teilnehmern und SWS-Prognose" loading="lazy">
+              <figcaption>Die Semesteruebersicht zeigt, welche Gruppen und Module fuer ein Semester relevant sind.</figcaption>
+            </figure>
+          </section>
+
+          <section id="datenpflege" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 02</p>
+            <h2>Datenpflege vorbereiten</h2>
+            <p>Vor der Stundenplanung sollten die Daten in dieser Reihenfolge gepflegt werden:</p>
+            <ol>
+              <li>Akademischer Kalender</li>
+              <li>Kataloge und Kategorien</li>
+              <li>Nutzer und Dozenten</li>
+              <li>Raeume</li>
+              <li>Module</li>
+              <li>Studiengaenge</li>
+              <li>Gruppen und Semesterplaene</li>
+              <li>Dozenten-Verfuegbarkeiten</li>
+              <li>Optionale Raumbelegungen oder Sperrzeiten</li>
+            </ol>
+            <p>
+              Diese Reihenfolge ist wichtig, weil spaetere Daten auf fruehere
+              Daten verweisen. Ein Modul verweist zum Beispiel auf Kategorien,
+              Studiengaenge und einen Modulverantwortlichen. Ein Gruppenplan
+              verweist auf Module und Studiengaenge.
+            </p>
+          </section>
+
+          <section id="manuell-einpflegen" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 03</p>
+            <h2>Daten manuell einpflegen</h2>
+
+            <h3>3.1 Akademischen Kalender anlegen</h3>
+            <p>Oeffnen: <code>Einstellungen -&gt; Kalender</code></p>
+            <p>Pflegen Sie dort:</p>
+            <ul>
+              <li>Beginn des akademischen Jahres.</li>
+              <li>Semester-ID, z. B. <code>ws2026</code> oder <code>ss2027</code>.</li>
+              <li>Semestername, z. B. <code>WS 2026/27</code>.</li>
+              <li>Typ: <code>WS</code> oder <code>SS</code>.</li>
+              <li>Jahr.</li>
+              <li>Vorlesungsbeginn und Vorlesungsende.</li>
+              <li>Pruefungsbeginn und Pruefungsende.</li>
+              <li>Optional: Vorlesungspause mit Start- und Enddatum.</li>
+            </ul>
+            <p>
+              Die Stundenplanung verwendet den Vorlesungsbeginn, das
+              Vorlesungsende und die Vorlesungspause, um die tatsaechlichen
+              Einzeltermine zu erzeugen.
+            </p>
+
+            <h3>3.2 Kategorien und Dropdown-Werte pflegen</h3>
+            <p>Oeffnen: <code>Einstellungen -&gt; Variablen</code></p>
+            <p>Pflegen Sie hier:</p>
+            <ul>
+              <li>Modulkategorien, z. B. <code>Core Competencies</code> oder <code>Electives</code>.</li>
+              <li>Pruefungsformen.</li>
+              <li>Lehrformen.</li>
+              <li>Sprachen.</li>
+            </ul>
+            <p>
+              Diese Werte helfen bei der einheitlichen Modulpflege und
+              verhindern unterschiedliche Schreibweisen.
+            </p>
+
+            <h3>3.3 Nutzer und Dozenten anlegen</h3>
+            <p>Oeffnen: <code>Nutzerverwaltung</code> oder <code>Dozenten -&gt; Dozentenuebersicht</code></p>
+            <p>Pflegen Sie fuer Dozenten mindestens:</p>
+            <ul>
+              <li>ID</li>
+              <li>Name</li>
+              <li>E-Mail</li>
+              <li>Rolle, z. B. <code>lecturer</code>, <code>professor</code>, <code>admin</code> oder <code>coordinator</code></li>
+              <li>Optional: Fachbereich</li>
+            </ul>
+            <p>
+              Nur Nutzer mit einer lehrenden Rolle koennen sinnvoll als
+              Modulverantwortliche oder Dozenten in der Stundenplanung verwendet
+              werden.
+            </p>
+
+            <h3>3.4 Raeume anlegen</h3>
+            <p>Oeffnen: <code>Raeume -&gt; Raumuebersicht</code></p>
+            <p>Pflegen Sie fuer jeden Raum:</p>
+            <ul>
+              <li>Raum-ID</li>
+              <li>Raumname</li>
+              <li>Raumtyp: <code>building</code>, <code>online</code> oder <code>hybrid</code></li>
+              <li>Kapazitaet</li>
+              <li>Ausstattung: Beamer, Dozenten-PC, Mac-Raum, PC-Labor usw.</li>
+              <li>Optional: Etage, Gebaeude, Flaeche, Link, Notizen</li>
+              <li>Optional: blockierte Zeitraeume</li>
+            </ul>
+            <p>
+              Die Raumkapazitaet und Ausstattung werden in der automatischen
+              Planung beruecksichtigt. Ein Modul mit PC-Labor-Anforderung wird
+              also nicht in einen Raum ohne PC-Labor geplant.
+            </p>
+
+            <h3>3.5 Module pflegen</h3>
+            <p>Oeffnen: <code>Module -&gt; Modulsheet</code> oder <code>Module -&gt; Moduluebersicht</code></p>
+            <p>Pflegen Sie fuer jedes Modul mindestens:</p>
+            <ul>
+              <li>Modul-ID</li>
+              <li>Name</li>
+              <li>SWS</li>
+              <li>CP</li>
+              <li>Typ: <code>Pflicht</code>, <code>Wahlpflicht</code> oder <code>Pool</code></li>
+              <li>Kategorie</li>
+              <li>Zugeordnete Studiengaenge</li>
+              <li>Modulverantwortliche(r)</li>
+              <li>Optional: Voraussetzungen, verbotene Fachsemester, maximale Teilnehmerzahl</li>
+              <li>Optional: Raumanforderungen</li>
+            </ul>
+            <p>Wichtig fuer die Stundenplanung:</p>
+            <ul>
+              <li><code>SWS</code> bestimmt die geplante Unterrichtszeit.</li>
+              <li><code>personInCharge</code> muss exakt dem Namen eines vorhandenen Dozenten entsprechen.</li>
+              <li><code>requirements</code> bestimmt, welche Raeume geeignet sind.</li>
+              <li><code>maxParticipants</code> und die Gruppengroessen helfen bei der Raumwahl.</li>
+            </ul>
+            <figure class="manual-figure">
+              <img src="assets/screenshots/crops/chapter-02-modules.png" alt="Moduluebersicht mit bearbeitbaren Modulstammdaten" loading="lazy">
+              <figcaption>Die Moduluebersicht ist der zentrale Kontrollpunkt fuer SWS, CP, Typ, Kategorie und Teilnehmer.</figcaption>
+            </figure>
+
+            <h3>3.6 Studiengaenge pflegen</h3>
+            <p>Oeffnen: <code>Semesterplan -&gt; Semesterplan</code> oder die Studiengang-/Gruppenpflege</p>
+            <p>Ein Studiengang benoetigt:</p>
+            <ul>
+              <li>ID</li>
+              <li>Name</li>
+              <li>Anzahl Semester</li>
+              <li>Standard-Teilnehmerzahl</li>
+              <li>Liste der enthaltenen Module</li>
+              <li>Optional: Reihenfolge der Kategorien</li>
+              <li>Optional: Template-Plan</li>
+            </ul>
+            <p>Der Template-Plan ist nuetzlich, um neue Gruppen schneller anzulegen.</p>
+
+            <h3>3.7 Gruppen und Semesterplaene pflegen</h3>
+            <p>Oeffnen: <code>Semesterplan -&gt; Semesterplan</code></p>
+            <p>Fuer jede Gruppe benoetigen Sie:</p>
+            <ul>
+              <li>Gruppen-ID</li>
+              <li>Name</li>
+              <li>Studiengang</li>
+              <li>Startsemester</li>
+              <li>Teilnehmendenzahl</li>
+              <li>Kurzname</li>
+              <li>Gruppentyp</li>
+              <li>Modulbelegung pro Fachsemester</li>
+            </ul>
+            <p>
+              Die Stundenplanung rechnet aus dem Startsemester und dem
+              ausgewaehlten Planungssemester aus, welches Fachsemester der
+              Gruppe gerade aktiv ist. Nur die Module in diesem Fachsemester
+              werden fuer das ausgewaehlte Semester geplant.
+            </p>
+            <figure class="manual-figure">
+              <img src="assets/screenshots/crops/chapter-03-study-plan.png" alt="Semesterplan einer Gruppe mit Modulen pro Fachsemester" loading="lazy">
+              <figcaption>Im Gruppenplan wird festgelegt, welche Module in welchem Fachsemester liegen.</figcaption>
+            </figure>
+
+            <h3>3.8 Dozenten-Verfuegbarkeit pflegen</h3>
+            <p>Oeffnen: <code>Dozenten -&gt; Verfuegbarkeit</code></p>
+            <p>Pflegen Sie:</p>
+            <ul>
+              <li>Woechentliche Verfuegbarkeiten, z. B. Montag 08:00 bis 16:00.</li>
+              <li>Woechentliche Sperrzeiten, z. B. Freitag 12:00 bis 18:00.</li>
+              <li>Datumsbezogene negative Verfuegbarkeiten, z. B. 2026-10-05 08:00 bis 18:00.</li>
+              <li>Maximale SWS pro Tag.</li>
+              <li>Optional: Notizen.</li>
+            </ul>
+            <p>
+              Negative Verfuegbarkeiten sind besonders wichtig fuer Urlaub,
+              Konferenzen, Blocktermine oder einzelne Tage, an denen ein Dozent
+              nicht verfuegbar ist.
+            </p>
+            <figure class="manual-figure">
+              <img src="assets/screenshots/crops/chapter-04-lecturers.png" alt="Dozentenuebersicht mit Lehrlast und Verfuegbarkeitsrahmen" loading="lazy">
+              <figcaption>Lehrlast, maximale Tageslast und Verfuegbarkeitsfenster sollten vor der Planung plausibel sein.</figcaption>
+            </figure>
+
+            <h3>3.9 Planungsregeln einstellen</h3>
+            <p>Oeffnen: <code>Stundenplan</code></p>
+            <p>In der rechten Einstellungsseite der Stundenplanung koennen Sie pflegen:</p>
+            <ul>
+              <li>Geplante Wochentage.</li>
+              <li>Tagesstart und Tagesende.</li>
+              <li>Pause zwischen Terminen.</li>
+              <li>Pause innerhalb laengerer Veranstaltungen.</li>
+              <li>Intervall fuer interne Pausen.</li>
+              <li>Mittagspause aktivieren/deaktivieren.</li>
+              <li>Beginn und Ende der Mittagspause.</li>
+            </ul>
+            <p>Diese Regeln beeinflussen direkt, welche Slots als planbar gelten.</p>
+            <figure class="manual-figure">
+              <img src="assets/screenshots/crops/chapter-05-schedule-settings.png" alt="Planungseinstellungen mit Tagesfenster, Pausen und Planstatus" loading="lazy">
+              <figcaption>Planungstage, Tagesfenster und Pausen definieren den verfuegbaren Suchraum.</figcaption>
+            </figure>
+          </section>
+
+          <section id="csv-import" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 04</p>
+            <h2>Daten per CSV importieren</h2>
+            <p>Oeffnen: <code>Einstellungen -&gt; Import</code></p>
+            <p>Dort gibt es fuer jede JSON-Datei eine eigene Import-Karte. Jede Karte zeigt:</p>
+            <ul>
+              <li>den Namen der JSON-Datei,</li>
+              <li>Pflichtspalten,</li>
+              <li>optionale Spalten,</li>
+              <li>das erwartete Werteformat,</li>
+              <li>einen Button zum Herunterladen einer CSV-Vorlage,</li>
+              <li>einen Button zum Importieren einer CSV-Datei.</li>
+            </ul>
+            <p>
+              Jeder Import ersetzt die passende Datenmenge im aktuellen
+              Datenbestand. Beispiel: Ein Import fuer <code>modules.json</code>
+              ersetzt die Modulliste. Andere Datenbereiche bleiben erhalten.
+            </p>
+            <figure class="manual-figure">
+              <img src="assets/screenshots/crops/chapter-01-import.png" alt="Importkarte fuer modules.json mit Pflichtspalten und optionalen Spalten" loading="lazy">
+              <figcaption>Die Importkarten sind gleichzeitig Dokumentation und Einstieg fuer den CSV-Upload.</figcaption>
+            </figure>
+          </section>
+
+          <section id="excel-vorbereiten" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 05</p>
+            <h2>Daten aus Excel als CSV vorbereiten</h2>
+            <h3>5.1 Vorlage herunterladen</h3>
+            <ol>
+              <li>Oeffnen Sie <code>Einstellungen -&gt; Import</code>.</li>
+              <li>Suchen Sie die passende Import-Karte, z. B. <code>modules.json</code>.</li>
+              <li>Klicken Sie auf den Download-Button.</li>
+              <li>Oeffnen Sie die heruntergeladene CSV-Vorlage in Excel.</li>
+              <li>Tragen Sie Ihre Daten in die vorhandenen Spalten ein.</li>
+            </ol>
+            <p>
+              Die erste Zeile muss die Spaltennamen enthalten. Spaltennamen
+              duerfen nicht umbenannt werden.
+            </p>
+
+            <h3>5.2 Excel-Tabelle richtig aufbauen</h3>
+            <p>Beachten Sie beim Arbeiten in Excel:</p>
+            <ul>
+              <li>Keine verbundenen Zellen verwenden.</li>
+              <li>Keine Summenzeilen oder Zwischenueberschriften in den Datenbereich schreiben.</li>
+              <li>Eine Datenzeile entspricht immer genau einem Datensatz.</li>
+              <li>Datumswerte im Format <code>YYYY-MM-DD</code> speichern, z. B. <code>2026-10-05</code>.</li>
+              <li>Zeiten im Format <code>HH:mm</code> speichern, z. B. <code>09:00</code>.</li>
+              <li>Wahr/Falsch-Werte als <code>true</code> oder <code>false</code> eintragen.</li>
+              <li>Listen mit dem Zeichen <code>|</code> trennen, z. B. <code>DSA|ARAI</code>.</li>
+              <li>Mehrere Slot-Gruppen mit <code>;;</code> trennen, z. B. <code>monday|08:00|16:00;;tuesday|09:00|18:00</code>.</li>
+              <li>JSON-Spalten nur verwenden, wenn wirklich strukturierte Detaildaten importiert werden sollen.</li>
+            </ul>
+            <p>
+              Falls Excel Datumswerte automatisch umformatiert, stellen Sie die
+              betroffenen Spalten auf Text oder verwenden Sie eine Hilfsspalte:
+            </p>
+            <pre><code>=TEXT(A2;"yyyy-mm-dd")</code></pre>
+            <p>Fuer Uhrzeiten kann eine Hilfsspalte helfen:</p>
+            <pre><code>=TEXT(A2;"hh:mm")</code></pre>
+
+            <h3>5.3 CSV aus Excel exportieren</h3>
+            <ol>
+              <li>Datei oeffnen.</li>
+              <li><code>Datei -&gt; Speichern unter</code> waehlen.</li>
+              <li>Als Dateityp <code>CSV UTF-8 (durch Trennzeichen getrennt) (*.csv)</code> auswaehlen.</li>
+              <li>Datei speichern.</li>
+              <li>Falls Excel warnt, dass nur das aktive Tabellenblatt gespeichert wird, bestaetigen.</li>
+            </ol>
+            <p>
+              Hinweis: Je nach Windows-/Excel-Region verwendet Excel Komma oder
+              Semikolon als Trennzeichen. Der Import ist fuer normale
+              CSV-Dateien gedacht; am sichersten ist <code>CSV UTF-8</code>.
+            </p>
+          </section>
+
+          <section id="csv-spalten" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 06</p>
+            <h2>Benoetigte CSV-Spalten je Datenbereich</h2>
+            <div class="schema-grid">
+              <section class="schema-card">
+                <h3>6.1 Module (<code>modules.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>id</code>, <code>name</code>, <code>sws</code>, <code>cp</code>, <code>type</code>, <code>category</code></p>
+                <p><strong>Optionale wichtige Spalten:</strong> <code>programIds</code>, <code>prerequisites</code>, <code>forbiddenSemesters</code>, <code>maxParticipants</code>, <code>personInCharge</code>, <code>duration</code>, <code>frequency</code>, <code>description</code>, <code>learningOutcomes</code>, <code>examType</code>, <code>teachingMethods</code>, <code>language</code>, <code>literature</code>, <code>equivalentTo</code>, <code>semesterRecommendation</code>, <code>beamer</code>, <code>lecturerPc</code>, <code>macRoom</code>, <code>pcLab</code></p>
+                <ul>
+                  <li><code>type</code>: <code>Pflicht</code>, <code>Wahlpflicht</code> oder <code>Pool</code></li>
+                  <li><code>programIds</code>: Studiengang-IDs mit <code>|</code> trennen</li>
+                  <li><code>prerequisites</code>: Modul-IDs mit <code>|</code> trennen</li>
+                  <li><code>forbiddenSemesters</code>: Zahlen mit <code>|</code> trennen</li>
+                  <li>Ausstattung: <code>true</code> oder <code>false</code></li>
+                </ul>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.2 Studiengaenge (<code>programs.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>id</code>, <code>name</code>, <code>moduleIds</code>, <code>defaultStudents</code>, <code>semesters</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>categoryOrder</code>, <code>department</code>, <code>sem1</code>, <code>sem2</code>, <code>sem3</code>, <code>sem4</code>, <code>sem5</code>, <code>sem6</code>, <code>sem7</code>, <code>sem8</code>, <code>sem9</code></p>
+                <ul>
+                  <li><code>moduleIds</code>: alle Modul-IDs des Studiengangs mit <code>|</code> trennen</li>
+                  <li><code>sem1</code> bis <code>sem9</code>: Module fuer den Template-Plan mit <code>|</code> trennen</li>
+                </ul>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.3 Gruppen (<code>cohorts.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>id</code>, <code>name</code>, <code>programId</code>, <code>startSemesterId</code>, <code>startSemesterName</code>, <code>startSemesterType</code>, <code>startSemesterYear</code>, <code>studentCount</code>, <code>semesters</code>, <code>shortName</code>, <code>type</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>userLockedModules</code>, <code>sem1</code>, <code>sem2</code>, <code>sem3</code>, <code>sem4</code>, <code>sem5</code>, <code>sem6</code>, <code>sem7</code>, <code>sem8</code>, <code>sem9</code></p>
+                <ul>
+                  <li><code>startSemesterType</code>: <code>SS</code> oder <code>WS</code></li>
+                  <li><code>type</code>: z. B. <code>klassisch</code> oder <code>dual</code></li>
+                  <li><code>sem1</code> bis <code>sem9</code>: Modul- oder Modulinstanz-IDs mit <code>|</code> trennen</li>
+                </ul>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.4 Kategorien (<code>categories.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>id</code>, <code>name</code></p>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.5 Kataloge (<code>catalogs.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>key</code>, <code>value</code></p>
+                <p><strong>Werte fuer <code>key</code>:</strong> <code>examTypes</code>, <code>teachingMethods</code>, <code>languages</code>, <code>personInCharge</code></p>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.6 Nutzer und Dozenten (<code>users.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>id</code>, <code>name</code>, <code>email</code>, <code>role</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>department</code>, <code>cohortId</code>, <code>universityId</code></p>
+                <p><strong>Werte fuer <code>role</code>:</strong> <code>superuser</code>, <code>admin</code>, <code>coordinator</code>, <code>professor</code>, <code>lecturer</code>, <code>student</code>, <code>guest</code></p>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.7 Raeume (<code>rooms.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>id</code>, <code>name</code>, <code>type</code>, <code>capacity</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>beamer</code>, <code>lecturerPc</code>, <code>macRoom</code>, <code>pcLab</code>, <code>darkenable</code>, <code>barrierFree</code>, <code>airConditioned</code>, <code>workspacesMac</code>, <code>workspacesPc</code>, <code>area</code>, <code>floor</code>, <code>building</code>, <code>weblink</code>, <code>blockedPeriods</code>, <code>notes</code></p>
+                <ul>
+                  <li><code>type</code>: <code>building</code>, <code>online</code> oder <code>hybrid</code></li>
+                  <li>Ausstattung: <code>true</code> oder <code>false</code></li>
+                  <li><code>blockedPeriods</code>: <code>start|end|reason</code>, mehrere Eintraege mit <code>;;</code> trennen</li>
+                </ul>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.8 Raumbelegung (<code>room-occupancy.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>id</code>, <code>roomId</code>, <code>date</code>, <code>startTime</code>, <code>endTime</code>, <code>title</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>person</code>, <code>purpose</code>, <code>moduleId</code>, <code>cohortId</code>, <code>color</code>, <code>lockKind</code></p>
+                <ul>
+                  <li><code>date</code>: <code>YYYY-MM-DD</code></li>
+                  <li><code>startTime</code> und <code>endTime</code>: <code>HH:mm</code></li>
+                  <li><code>lockKind</code>: <code>soft</code> oder <code>hard</code></li>
+                </ul>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.9 Systemeinstellungen (<code>system-settings.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>currentSemester</code>, <code>lecturesStart</code>, <code>lecturesEnd</code>, <code>defaultLocation</code>, <code>cpWorkloadFactor</code>, <code>swsDurationMinutes</code>, <code>defaultRoomBufferMinutes</code>, <code>startHour</code>, <code>endHour</code>, <code>standardPauseMinutes</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>examsStart</code>, <code>examsEnd</code>, <code>campusLocations</code>, <code>eventBreakDurationMinutes</code>, <code>eventBreakIntervalMinutes</code>, <code>plannedWeekdays</code>, <code>useLunchBreak</code>, <code>lunchBreakStart</code>, <code>lunchBreakEnd</code></p>
+                <ul>
+                  <li><code>campusLocations</code>: Standorte mit <code>|</code> trennen</li>
+                  <li><code>plannedWeekdays</code>: Wochentage mit <code>|</code> trennen, z. B. <code>monday|tuesday|wednesday|thursday|friday</code></li>
+                  <li><code>useLunchBreak</code>: <code>true</code> oder <code>false</code></li>
+                </ul>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.10 Akademischer Kalender (<code>academic-calendar.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>academicYearStartMonth</code>, <code>id</code>, <code>name</code>, <code>type</code>, <code>year</code>, <code>lecturesStart</code>, <code>lecturesEnd</code>, <code>examsStart</code>, <code>examsEnd</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>lectureBreakStart</code>, <code>lectureBreakEnd</code></p>
+                <ul>
+                  <li><code>type</code>: <code>SS</code> oder <code>WS</code></li>
+                  <li>Datumswerte: <code>YYYY-MM-DD</code></li>
+                </ul>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.11 Dozenten-Verfuegbarkeit (<code>lecturer-availability.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>userId</code>, <code>availableSlots</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>unavailableSlots</code>, <code>unavailableDateSlots</code>, <code>maxSwsPerDay</code>, <code>notes</code></p>
+                <ul>
+                  <li><code>availableSlots</code>: <code>day|start|end</code>, mehrere mit <code>;;</code> trennen</li>
+                  <li><code>unavailableSlots</code>: <code>day|start|end</code>, mehrere mit <code>;;</code> trennen</li>
+                  <li><code>unavailableDateSlots</code>: <code>id|date|start|end|reason</code>, mehrere mit <code>;;</code> trennen</li>
+                  <li>Wochentage: <code>monday</code>, <code>tuesday</code>, <code>wednesday</code>, <code>thursday</code>, <code>friday</code>, <code>saturday</code>, <code>sunday</code></li>
+                </ul>
+              </section>
+
+              <section class="schema-card">
+                <h3>6.12 Bestehenden Stundenplan importieren (<code>schedule.json</code>)</h3>
+                <p><strong>Pflichtspalten:</strong> <code>semesterId</code>, <code>status</code>, <code>semesterStartDate</code>, <code>semesterEndDate</code>, <code>weekStartDate</code>, <code>weekEndDate</code>, <code>entryId</code>, <code>moduleId</code>, <code>moduleName</code>, <code>roomId</code>, <code>roomName</code>, <code>day</code>, <code>date</code>, <code>startTime</code>, <code>endTime</code>, <code>sws</code>, <code>participants</code></p>
+                <p><strong>Optionale Spalten:</strong> <code>generatedAt</code>, <code>moduleInstanceIds</code>, <code>cohortIds</code>, <code>cohortNames</code>, <code>lecturerUserId</code>, <code>lecturerName</code>, <code>occurrenceDates</code>, <code>score</code>, <code>warnings</code>, <code>totalOfferings</code>, <code>plannedRoomAssignments</code>, <code>teachingWeeks</code></p>
+                <p>
+                  Dieser Import ist fuer bereits geplante Termine gedacht. Fuer
+                  die normale Stundenplanung ist es besser, Module, Gruppen,
+                  Raeume und Verfuegbarkeiten zu importieren und den Plan danach
+                  neu erzeugen zu lassen.
+                </p>
+              </section>
+            </div>
+          </section>
+
+          <section id="import-durchfuehren" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 07</p>
+            <h2>Import in CoursePilot durchfuehren</h2>
+            <ol>
+              <li><code>Einstellungen -&gt; Import</code> oeffnen.</li>
+              <li>Passende Import-Karte suchen.</li>
+              <li>CSV-Datei ueber den Upload-Button waehlen.</li>
+              <li>Erfolgsmeldung oder Fehlermeldung direkt in der Karte pruefen.</li>
+              <li>Bei Fehlern die CSV in Excel korrigieren und erneut als CSV UTF-8 speichern.</li>
+              <li>Import wiederholen.</li>
+            </ol>
+            <p>Typische Fehler:</p>
+            <ul>
+              <li>Pflichtspalte fehlt.</li>
+              <li>Spaltenname ist falsch geschrieben.</li>
+              <li>Ein Datum liegt nicht im Format <code>YYYY-MM-DD</code> vor.</li>
+              <li>Listen verwenden Komma statt <code>|</code>.</li>
+              <li>Ein Modulverantwortlicher ist nicht als Dozent/Nutzer vorhanden.</li>
+              <li>Ein Gruppenplan enthaelt Modul-IDs, die in <code>modules.json</code> fehlen.</li>
+            </ul>
+          </section>
+
+          <section id="stundenplan-erzeugen" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 08</p>
+            <h2>Stundenplan erzeugen</h2>
+            <ol>
+              <li>Oeffnen Sie <code>Stundenplan</code>.</li>
+              <li>Waehlen Sie oben das gewuenschte Semester.</li>
+              <li>Pruefen Sie die Planungsregeln in der rechten Einstellungsseite.</li>
+              <li>Klicken Sie auf <code>Semester planen</code>.</li>
+              <li>Falls Modulverantwortliche fehlen, erscheint eine Tabelle.</li>
+              <li>Waehlen Sie in der Tabelle fuer jedes betroffene Modul einen Modulverantwortlichen.</li>
+              <li>Klicken Sie erneut auf <code>Semester planen</code>.</li>
+            </ol>
+            <p>CoursePilot erzeugt danach:</p>
+            <ul>
+              <li>geplante Veranstaltungen,</li>
+              <li>Einzeltermine ueber den Semesterzeitraum,</li>
+              <li>Raumbelegungen,</li>
+              <li>offene Probleme, falls kein konfliktfreier Termin gefunden wurde.</li>
+            </ul>
+            <figure class="manual-figure">
+              <img src="assets/screenshots/crops/chapter-05-schedule-settings.png" alt="Stundenplanung mit Planungsregeln und Planstatus" loading="lazy">
+              <figcaption>Vor dem Klick auf Semester planen sollten Semester, Tagesfenster, Pausen und Planungstage stimmen.</figcaption>
+            </figure>
+          </section>
+
+          <section id="ergebnis-kontrollieren" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 09</p>
+            <h2>Ergebnis kontrollieren</h2>
+            <p>Nach der Planung sollten Sie kontrollieren:</p>
+            <ul>
+              <li>Anzahl der Veranstaltungen.</li>
+              <li>Anzahl offener Probleme.</li>
+              <li>Anzahl der Einzeltermine.</li>
+              <li>Vorlesungswochen.</li>
+              <li>Filteransichten nach Gesamt, Dozent, Gruppe oder Raum.</li>
+              <li>Stichproben in unterschiedlichen Wochen.</li>
+            </ul>
+            <p>
+              Nutzen Sie die Wochenpfeile oder das Datumsfeld, um durch das
+              Semester zu wechseln. Mit <code>Erste Woche</code> springen Sie
+              zur ersten Vorlesungswoche.
+            </p>
+          </section>
+
+          <section id="konflikte-loesen" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 10</p>
+            <h2>Konflikte und offene Probleme loesen</h2>
+            <p>Wenn CoursePilot keinen Slot findet, erscheint ein offenes Problem. Typische Ursachen:</p>
+            <ul>
+              <li>Kein geeigneter Raum vorhanden.</li>
+              <li>Raumkapazitaet reicht nicht aus.</li>
+              <li>Raum hat die benoetigte Ausstattung nicht.</li>
+              <li>Dozent ist nicht verfuegbar.</li>
+              <li>Mittagspause oder Tageszeiten blockieren den Termin.</li>
+              <li>Gruppe, Raum oder Dozent haette einen Konflikt.</li>
+            </ul>
+            <p>Vorgehen:</p>
+            <ol>
+              <li>Problem oeffnen.</li>
+              <li>Ursache lesen.</li>
+              <li>Datum, Raum, Start, Ende oder Dozent anpassen.</li>
+              <li>Verfuegbare Raeume im Dropdown pruefen.</li>
+              <li>Aktuelle Pruefung beachten.</li>
+              <li>Konfliktfrei planen oder bewusst manuell festlegen.</li>
+            </ol>
+            <p>
+              Wenn ein Termin gekuerzt wird, verschwindet die Unterrichtszeit
+              nicht automatisch. Pruefen Sie deshalb die angezeigten
+              Soll-/Ist-Werte fuer das ausgewaehlte Modul und passen Sie bei
+              Bedarf Anzahl, erstes Datum oder letztes Datum der Termine an.
+            </p>
+            <figure class="manual-figure narrow">
+              <img src="assets/screenshots/crops/chapter-06-conflicts.png" alt="Planstatus mit nicht geplantem Modul und Konfliktgrund" loading="lazy">
+              <figcaption>Der Planstatus zeigt, welches Modul offen ist und warum kein Slot gefunden wurde.</figcaption>
+            </figure>
+          </section>
+
+          <section id="termine-bearbeiten" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 11</p>
+            <h2>Termine manuell bearbeiten</h2>
+            <p>Ein geplanter Termin kann geoeffnet und bearbeitet werden. Dabei sind u. a. relevant:</p>
+            <ul>
+              <li>Datum</li>
+              <li>Raum</li>
+              <li>Startzeit</li>
+              <li>Endzeit</li>
+              <li>Dozent</li>
+              <li>manueller Lock</li>
+              <li>Titel</li>
+              <li>Notiz</li>
+              <li>Anzahl geplanter Termine</li>
+              <li>erster Termin</li>
+              <li>letzter Termin</li>
+              <li>Soll-/Ist-Unterrichtseinheiten fuer das ausgewaehlte Modul</li>
+            </ul>
+            <p>
+              Bei Serien sollten Sie besonders darauf achten, ob die Aenderung
+              nur einen Einzeltermin oder die Terminserie betrifft.
+            </p>
+          </section>
+
+          <section id="plan-sperren" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 12</p>
+            <h2>Plan sperren oder entsperren</h2>
+            <p>Wenn der Plan fertig kontrolliert ist:</p>
+            <ol>
+              <li>Klicken Sie auf <code>Plan sperren</code>.</li>
+              <li>Der Plan wird gegen automatische Veraenderungen geschuetzt.</li>
+            </ol>
+            <p>Wenn spaeter wieder automatisch angepasst werden soll:</p>
+            <ol>
+              <li>Klicken Sie auf <code>Entsperren</code>.</li>
+              <li>Bestaetigen Sie die Rueckfrage.</li>
+            </ol>
+          </section>
+
+          <section id="exportieren" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 13</p>
+            <h2>Stundenplan exportieren</h2>
+            <p>Im Bereich <code>Stundenplan</code> gibt es den Export:</p>
+            <ul>
+              <li><code>CSV</code> fuer Tabellenkalkulation oder Nachbearbeitung.</li>
+              <li><code>iCal (.ics)</code> fuer Kalenderprogramme.</li>
+              <li><code>JSON</code> fuer technische Weiterverarbeitung oder Sicherung.</li>
+              <li><code>Drucken / PDF</code> fuer Ausdruck oder PDF-Erzeugung.</li>
+            </ul>
+            <p>Empfehlung:</p>
+            <ul>
+              <li>Fuer Abstimmungen mit Verwaltung oder Dozenten: CSV.</li>
+              <li>Fuer persoenliche Kalender: iCal.</li>
+              <li>Fuer Sicherung oder technischen Austausch: JSON.</li>
+              <li>Fuer ein Handout: Drucken / PDF.</li>
+            </ul>
+          </section>
+
+          <section id="checkliste" class="manual-chapter">
+            <p class="chapter-kicker">Kapitel 14</p>
+            <h2>Checkliste vor der finalen Freigabe</h2>
+            <ul class="final-checklist">
+              <li>Alle Module im relevanten Semester haben Modulverantwortliche.</li>
+              <li>Alle Gruppen haben die korrekte Teilnehmendenzahl.</li>
+              <li>Alle Raeume haben Kapazitaet und Ausstattung.</li>
+              <li>Dozenten-Verfuegbarkeiten und negative Verfuegbarkeiten sind aktuell.</li>
+              <li>Vorlesungszeitraum und Vorlesungspausen stimmen.</li>
+              <li>Mittagspause und Tageszeiten sind korrekt eingestellt.</li>
+              <li>Offene Probleme sind geloest oder bewusst dokumentiert.</li>
+              <li>Soll-/Ist-Unterrichtseinheiten je Modul sind plausibel.</li>
+              <li>Plan ist gesperrt.</li>
+              <li>Export wurde erstellt.</li>
+            </ul>
+          </section>
+
+          <section id="vollansichten" class="manual-chapter">
+            <p class="chapter-kicker">Referenz</p>
+            <h2>Komplette Screenshots</h2>
+            <p>
+              Die Kapitel nutzen zugeschnittene Ausschnitte. Diese Vollansichten
+              zeigen die wichtigsten Arbeitsbereiche im Zusammenhang.
+            </p>
+            <div class="gallery">
+              <figure class="shot">
+                <img src="assets/screenshots/settings-import.png" alt="Importbereich mit CSV-Vorgaben fuer JSON-Dateien" loading="lazy">
+                <figcaption>Importbereich mit Pflichtspalten, optionalen Spalten und Wertformaten.</figcaption>
+              </figure>
+              <figure class="shot">
+                <img src="assets/screenshots/module-overview.png" alt="Moduluebersicht mit bearbeitbaren Modulstammdaten" loading="lazy">
+                <figcaption>Moduluebersicht fuer Stammdaten, SWS, CP und Teilnehmer.</figcaption>
+              </figure>
+              <figure class="shot">
+                <img src="assets/screenshots/semester-overview.png" alt="Semesteruebersicht mit Studiengaengen, Gruppen und SWS-Prognose" loading="lazy">
+                <figcaption>Semesteruebersicht mit Nachfrage, Gruppen und SWS-Prognose.</figcaption>
+              </figure>
+              <figure class="shot">
+                <img src="assets/screenshots/schedule-planner.png" alt="Stundenplanung mit Wochenkalender, Planungsregeln und Konfliktstatus" loading="lazy">
+                <figcaption>Stundenplanung mit Kalender, Regeln und offenen Konflikten.</figcaption>
+              </figure>
+            </div>
+          </section>
+        </article>
+      </div>
+    </main>
+
+    <footer>
+      <span>Copyright (c) 2026 Seb Hirsch.</span>
+      <span>CoursePilot Dokumentation.</span>
+    </footer>
+  </body>
+</html>

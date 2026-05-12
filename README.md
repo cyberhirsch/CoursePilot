@@ -129,6 +129,10 @@ docs/                    Project notes, research material, and module-descriptio
 screenshots/             README screenshots
 ```
 
+Key handbook pages:
+
+- [CoursePilot Docs Website](docs/index.html)
+
 ## Production
 
 Build the app:
