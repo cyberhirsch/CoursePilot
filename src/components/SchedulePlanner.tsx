@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { RELATIVE_SEMESTERS, getRelativeSemesterIndex } from '@/constants';
 import type {
   AbsoluteSemester,
   Cohort,
@@ -29,6 +30,7 @@ interface SchedulePlannerProps {
   onUpdateRoomAssignments: (assignments: RoomAssignment[], options?: { reconcileSchedule?: boolean }) => void;
   schedulePlan: SchedulePlan | null;
   onUpdateSchedulePlan: (plan: SchedulePlan | null) => void;
+  onUpdateModule: (moduleId: string, field: keyof Module, value: any) => void;
   systemSettings?: SystemSettings;
   onUpdateSystemSettings?: (settings: SystemSettings) => void;
 }
@@ -57,10 +59,12 @@ type ScheduleIssueItem = SchedulePlan['unscheduled'][number];
 type ScheduledEntry = SchedulePlan['entries'][number];
 type ScheduledOccurrenceOverride = NonNullable<ScheduledEntry['occurrenceOverrides']>[number];
 type ScheduleLockKind = 'soft' | 'hard';
-type ScheduleEditDraft = RoomAssignment & { lockKind: ScheduleLockKind };
+type ScheduleEditDraft = RoomAssignment & { lockKind: ScheduleLockKind; occurrenceCount?: number };
 
 type IssuePlanningDraft = {
   date: string;
+  lastDate: string;
+  occurrenceCount: number;
   startTime: string;
   endTime: string;
   roomId: string;
@@ -73,6 +77,12 @@ type ScheduleFilterType = 'all' | 'lecturer' | 'cohort' | 'room';
 type ScheduleExportFormat = 'csv' | 'ics' | 'json' | 'print';
 type PendingConfirmationAction = 'clear-plan' | 'unlock-plan';
 type DragNotice = { tone: 'success' | 'warning'; message: string };
+type ResponsibleModuleProblem = {
+  module: Module;
+  cohortNames: string[];
+  sourceModuleIds: string[];
+  reason: 'missing' | 'invalid';
+};
 
 const DEFAULT_PLANNED_WEEKDAYS: Weekday[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
 
@@ -89,6 +99,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
   onUpdateRoomAssignments,
   schedulePlan,
   onUpdateSchedulePlan,
+  onUpdateModule,
   systemSettings,
   onUpdateSystemSettings,
 }) => {
@@ -97,6 +108,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
   ));
   const [editingEntry, setEditingEntry] = useState<ScheduleDisplayEntry | null>(null);
   const [editDraft, setEditDraft] = useState<ScheduleEditDraft | null>(null);
+  const [editValidationProblems, setEditValidationProblems] = useState<string[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<ScheduleIssueItem | null>(null);
   const [issueDraft, setIssueDraft] = useState<IssuePlanningDraft | null>(null);
   const [filterType, setFilterType] = useState<ScheduleFilterType>('all');
@@ -106,6 +118,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
   const [draggedAssignmentId, setDraggedAssignmentId] = useState<string | null>(null);
   const [dragOverAssignmentId, setDragOverAssignmentId] = useState<string | null>(null);
   const [dragNotice, setDragNotice] = useState<DragNotice | null>(null);
+  const [showResponsibleCheck, setShowResponsibleCheck] = useState(false);
 
   useEffect(() => {
     if (!selectedSemester) return;
@@ -145,6 +158,64 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
       .filter(user => ['professor', 'lecturer', 'admin', 'coordinator'].includes(user.role))
       .sort((a, b) => a.name.localeCompare(b.name))
   ), [users]);
+  const teachingUserNames = useMemo(() => new Set(teachingUsers.map(user => user.name)), [teachingUsers]);
+
+  const getModuleByInstanceId = (id: string): Module | undefined => {
+    const directMatch = modules.find(module => module.id === id);
+    if (directMatch) return directMatch;
+
+    return modules.find(module => module.type === 'Pool' && id.startsWith(`${module.id}-`));
+  };
+
+  const getCanonicalModule = (module: Module): Module => {
+    if (!module.equivalentTo) return module;
+    return modules.find(item => item.id === module.equivalentTo) || module;
+  };
+
+  const responsibleModuleProblems = useMemo(() => {
+    if (!selectedSemester) return [];
+
+    const problems = new Map<string, ResponsibleModuleProblem>();
+
+    cohorts.forEach(cohort => {
+      const relativeIndex = getRelativeSemesterIndex(semesters, cohort.startSemester, selectedSemester);
+      if (relativeIndex < 0 || relativeIndex >= cohort.semesters) return;
+
+      const relativeSemester = RELATIVE_SEMESTERS[relativeIndex];
+      const instanceIds = cohort.plan.semesters[relativeSemester.id] || [];
+
+      instanceIds.forEach(instanceId => {
+        const moduleForInstance = getModuleByInstanceId(instanceId);
+        if (!moduleForInstance) return;
+
+        const canonicalModule = getCanonicalModule(moduleForInstance);
+        const responsibleName = (canonicalModule.personInCharge || moduleForInstance.personInCharge || '').trim();
+        const reason = !responsibleName
+          ? 'missing'
+          : teachingUserNames.has(responsibleName)
+            ? null
+            : 'invalid';
+
+        if (!reason) return;
+
+        const current = problems.get(canonicalModule.id);
+        if (current) {
+          current.cohortNames = Array.from(new Set([...current.cohortNames, cohort.shortName || cohort.name]));
+          current.sourceModuleIds = Array.from(new Set([...current.sourceModuleIds, moduleForInstance.id]));
+          return;
+        }
+
+        problems.set(canonicalModule.id, {
+          module: canonicalModule,
+          cohortNames: [cohort.shortName || cohort.name],
+          sourceModuleIds: [moduleForInstance.id],
+          reason,
+        });
+      });
+    });
+
+    return Array.from(problems.values()).sort((a, b) => a.module.id.localeCompare(b.module.id));
+  }, [cohorts, modules, selectedSemester, semesters, teachingUserNames]);
 
   const getGeneratedAssignmentId = (entry: { semesterId: string; id: string }, originalDate: string) => {
     return `schedule-${entry.semesterId}-${originalDate}-${entry.id}`;
@@ -286,6 +357,12 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
 
     setPendingConfirmation(null);
     setDragNotice(null);
+    setShowResponsibleCheck(false);
+
+    if (responsibleModuleProblems.length > 0) {
+      setShowResponsibleCheck(true);
+      return;
+    }
 
     const result = generateOptimalSchedule({
       modules,
@@ -313,6 +390,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
     setEditingEntry(null);
     setEditDraft(null);
     setDragNotice(null);
+    setShowResponsibleCheck(false);
   };
 
   const planStatus = activePlan?.status === 'locked' ? 'locked' : 'planning';
@@ -416,6 +494,50 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
     return `${hour}:${minute}`;
   };
 
+  const getSwsUnitMinutes = () => {
+    return Math.max(1, systemSettings?.calculationFactors?.swsDurationMinutes || 45);
+  };
+
+  const getTeachingMinutesInBlock = (startTime: string, endTime: string) => {
+    const blockMinutes = Math.max(0, timeToMinutes(endTime) - timeToMinutes(startTime));
+    const breakDuration = Math.max(0, planningSettings.eventBreakDurationMinutes || 0);
+    const breakInterval = Math.max(0, planningSettings.eventBreakIntervalMinutes || 0);
+
+    if (blockMinutes === 0 || breakDuration === 0 || breakInterval === 0) return blockMinutes;
+
+    let teachingMinutes = 0;
+    for (let candidate = 0; candidate <= blockMinutes; candidate += 1) {
+      const breakCount = Math.floor(Math.max(0, candidate - 1) / breakInterval);
+      if (candidate + breakCount * breakDuration <= blockMinutes) {
+        teachingMinutes = candidate;
+      }
+    }
+    return teachingMinutes;
+  };
+
+  const getTeachingUnitsInBlock = (startTime: string, endTime: string) => {
+    return getTeachingMinutesInBlock(startTime, endTime) / getSwsUnitMinutes();
+  };
+
+  const formatTeachingUnits = (value: number) => {
+    return value.toLocaleString('de-DE', {
+      maximumFractionDigits: Number.isInteger(value) ? 0 : 1,
+      minimumFractionDigits: 0,
+    });
+  };
+
+  const formatTeachingBalance = (value: number) => {
+    if (value > 0.01) return formatTeachingUnits(value);
+    if (value < -0.01) return `+${formatTeachingUnits(Math.abs(value))}`;
+    return '0';
+  };
+
+  const addDaysToDateInput = (date: string, days: number) => {
+    const next = new Date(`${date}T00:00:00`);
+    next.setDate(next.getDate() + days);
+    return toDateInputValue(next);
+  };
+
   const getModuleForIssue = (issue: ScheduleIssueItem | null) => {
     if (!issue) return undefined;
     return modules.find(module => module.id === issue.moduleId);
@@ -453,6 +575,75 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
   const getWeekdayForDate = (date: string) => {
     const jsDay = new Date(`${date}T00:00:00`).getDay();
     return WEEKDAYS.find(day => day.jsDay === jsDay)?.id;
+  };
+
+  const getIssueAvailableDatesFrom = (firstDate: string) => {
+    if (!firstDate) return [];
+
+    const day = getWeekdayForDate(firstDate);
+    if (!day) return [firstDate];
+
+    const semesterDates = semesterRange?.teachingDatesByDay[day] || [];
+    const availableDates = semesterDates.filter(date => date >= firstDate);
+    return availableDates.length ? availableDates : [firstDate];
+  };
+
+  const getIssueDatesForCount = (firstDate: string, occurrenceCount: number) => {
+    const count = Math.max(1, Math.floor(occurrenceCount || 1));
+    const availableDates = getIssueAvailableDatesFrom(firstDate);
+    const dates = availableDates.slice(0, count);
+
+    let cursor = dates.length ? dates[dates.length - 1] : firstDate;
+    while (cursor && dates.length < count) {
+      cursor = addDaysToDateInput(cursor, 7);
+      dates.push(cursor);
+    }
+
+    return dates.length ? dates : [firstDate];
+  };
+
+  const getIssueDatesForRange = (firstDate: string, lastDate: string) => {
+    if (!firstDate) return [];
+    if (!lastDate || lastDate < firstDate) return [firstDate];
+
+    const day = getWeekdayForDate(firstDate);
+    if (!day) return [firstDate];
+
+    const semesterDates = semesterRange?.teachingDatesByDay[day] || [];
+    const dates = semesterDates.filter(date => date >= firstDate && date <= lastDate);
+    if (dates.length) return dates;
+
+    const fallbackDates: string[] = [];
+    for (let cursor = firstDate; cursor <= lastDate; cursor = addDaysToDateInput(cursor, 7)) {
+      fallbackDates.push(cursor);
+    }
+
+    return fallbackDates.length ? fallbackDates : [firstDate];
+  };
+
+  const getIssueDefaultOccurrenceCount = (firstDate: string) => {
+    return Math.max(1, getIssueAvailableDatesFrom(firstDate).length);
+  };
+
+  const getIssueDurationForCount = (
+    issue: ScheduleIssueItem,
+    firstDate: string,
+    occurrenceCount: number
+  ) => {
+    const defaultCount = getIssueDefaultOccurrenceCount(firstDate);
+    const totalMinutes = getIssueDurationMinutes(issue) * defaultCount;
+    return Math.max(15, Math.ceil(totalMinutes / Math.max(1, occurrenceCount) / 5) * 5);
+  };
+
+  const getIssueEndTimeForCount = (
+    issue: ScheduleIssueItem,
+    firstDate: string,
+    startTime: string,
+    occurrenceCount: number
+  ) => {
+    const startMinutes = timeToMinutes(startTime);
+    const duration = getIssueDurationForCount(issue, firstDate, occurrenceCount);
+    return minutesToTime(Math.min(23 * 60 + 59, startMinutes + duration));
   };
 
   const rangesOverlapWithStandardPause = (startA: string, endA: string, startB: string, endB: string) => {
@@ -507,8 +698,12 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
       slot.day === day
       && rangesOverlap(assignment.startTime, assignment.endTime, slot.startTime, slot.endTime)
     );
+    const dateBlocked = (availability.unavailableDateSlots || []).some(slot =>
+      slot.date === assignment.date
+      && rangesOverlap(assignment.startTime, assignment.endTime, slot.startTime, slot.endTime)
+    );
 
-    return insideAvailability && !blocked;
+    return insideAvailability && !blocked && !dateBlocked;
   };
 
   const sameCohortConflict = (assignment: RoomAssignment, other: RoomAssignment) => {
@@ -536,15 +731,80 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
     return true;
   };
 
-  const getIssueOccurrenceDates = (issue: ScheduleIssueItem, draft: IssuePlanningDraft) => {
-    if (!selectedSemester) return [draft.date];
+  const getAssignmentParticipants = (assignment: RoomAssignment) => {
+    if (editingEntry && editingEntry.assignmentId === assignment.id) {
+      return editingEntry.participants || 0;
+    }
 
-    const day = getWeekdayForDate(draft.date);
-    if (!day) return [draft.date];
+    return (assignment.cohortId || '')
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean)
+      .reduce((sum, cohortId) => {
+        const cohort = cohorts.find(item => item.id === cohortId);
+        return sum + (cohort?.studentCount || 0);
+      }, 0);
+  };
 
-    const range = getSemesterScheduleRange(selectedSemester);
-    const occurrenceDates = range.teachingDatesByDay[day] || [];
-    return occurrenceDates.length ? occurrenceDates : [draft.date];
+  const roomFitsAssignment = (room: Room | undefined, assignment: RoomAssignment) => {
+    if (!room) return false;
+
+    const participants = getAssignmentParticipants(assignment);
+    if (participants > 0 && (room.capacity || 0) < participants) return false;
+
+    const moduleId = assignment.moduleId || editingEntry?.moduleId;
+    const module = modules.find(item => item.id === moduleId);
+    const requirements = module?.requirements;
+    if (!requirements) return true;
+
+    if (requirements.beamer && !room.equipment?.beamer) return false;
+    if (requirements.lecturerPc && !room.equipment?.lecturerPc) return false;
+    if (requirements.macRoom && !room.equipment?.macRoom) return false;
+    if (requirements.pcLab && !room.equipment?.pcLab) return false;
+
+    return true;
+  };
+
+  const roomAvailableForAssignment = (
+    room: Room,
+    assignment: RoomAssignment,
+    contextAssignments: RoomAssignment[] = roomAssignments
+  ) => {
+    if (!assignment.date || !assignment.startTime || !assignment.endTime) return false;
+    if (!roomFitsAssignment(room, assignment)) return false;
+    if (roomBlockedOn(room, assignment.date, assignment.startTime, assignment.endTime)) return false;
+
+    return !contextAssignments.some(item =>
+      item.id !== assignment.id
+      && item.date === assignment.date
+      && item.roomId === room.id
+      && rangesOverlapWithStandardPause(assignment.startTime, assignment.endTime, item.startTime, item.endTime)
+    );
+  };
+
+  const getAvailableRoomsForEdit = () => {
+    if (!editDraft) return [];
+    return rooms
+      .filter(room => roomAvailableForAssignment(room, editDraft))
+      .sort((a, b) => (a.capacity || 0) - (b.capacity || 0));
+  };
+
+  const getIssueOccurrenceDates = (draft: IssuePlanningDraft) => {
+    return getIssueDatesForRange(draft.date, draft.lastDate)
+      .slice(0, Math.max(1, Math.floor(draft.occurrenceCount || 1)));
+  };
+
+  const getIssueTeachingUnits = (issue: ScheduleIssueItem, draft: IssuePlanningDraft) => {
+    const module = getModuleForIssue(issue);
+    const target = (module?.sws || 1) * getIssueDefaultOccurrenceCount(draft.date);
+    const actual = getTeachingUnitsInBlock(draft.startTime, draft.endTime)
+      * Math.max(1, Math.floor(draft.occurrenceCount || 1));
+
+    return {
+      target,
+      actual,
+      open: target - actual,
+    };
   };
 
   const buildIssueAssignment = (
@@ -572,7 +832,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
   ) => {
     const problems: string[] = [];
 
-    if (!draft.roomId || !draft.date || !draft.startTime || !draft.endTime || !draft.title.trim()) {
+    if (!draft.roomId || !draft.date || !draft.lastDate || !draft.startTime || !draft.endTime || !draft.title.trim()) {
       problems.push('Raum, Datum, Uhrzeit und Titel muessen ausgefuellt sein.');
       return problems;
     }
@@ -582,14 +842,34 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
       return problems;
     }
 
+    if (draft.lastDate < draft.date) {
+      problems.push('Der letzte Termin muss am oder nach dem ersten Termin liegen.');
+      return problems;
+    }
+
+    if (Math.floor(draft.occurrenceCount || 0) < 1) {
+      problems.push('Es muss mindestens ein Termin geplant werden.');
+      return problems;
+    }
+
+    const requiredDuration = getIssueDurationForCount(issue, draft.date, draft.occurrenceCount);
+    if (timeToMinutes(draft.startTime) + requiredDuration > 23 * 60 + 59) {
+      problems.push('Die Anzahl der Termine ist zu niedrig, um die geplante Kontaktzeit an einem Tag abzubilden.');
+    }
+
     if (!strict) return problems;
+
+    const { target: targetUnits, actual: actualUnits } = getIssueTeachingUnits(issue, draft);
+    if (actualUnits + 0.01 < targetUnits) {
+      problems.push(`Die geplanten Termine decken nur ${formatTeachingUnits(actualUnits)} von ${formatTeachingUnits(targetUnits)} UE ab.`);
+    }
 
     const room = rooms.find(item => item.id === draft.roomId);
     if (!roomFitsIssue(room, issue)) {
       problems.push('Der Raum erfuellt Kapazitaet oder technische Anforderungen nicht.');
     }
 
-    const occurrenceDates = getIssueOccurrenceDates(issue, draft);
+    const occurrenceDates = getIssueOccurrenceDates(draft);
     occurrenceDates.forEach(date => {
       const assignment = buildIssueAssignment(issue, draft, date);
 
@@ -679,8 +959,8 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
 
   const validateAssignment = (assignment: RoomAssignment) => {
     const problems = getAssignmentValidationProblems(assignment);
+    setEditValidationProblems(problems);
     if (problems.length > 0) {
-      alert(problems[0]);
       return false;
     }
 
@@ -688,11 +968,16 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
   };
 
   const buildAssignmentForEntry = (entry: ScheduleDisplayEntry): ScheduleEditDraft => {
+    const occurrenceCount = Array.isArray(entry.occurrenceDates) && entry.occurrenceDates.length
+      ? entry.occurrenceDates.length
+      : 1;
+
     const existingAssignment = roomAssignments.find(assignment => assignment.id === entry.assignmentId);
     if (existingAssignment) {
       return {
         ...existingAssignment,
         lockKind: entry.displayLockKind,
+        occurrenceCount,
       };
     }
 
@@ -709,6 +994,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
       cohortId: entry.cohortIds.join(','),
       color: entry.displayColor || `hsl(${Math.abs(hashCode(entry.moduleId)) % 360}, 65%, 44%)`,
       lockKind: entry.displayLockKind,
+      occurrenceCount,
     };
   };
 
@@ -887,6 +1173,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
     setSelectedIssue(null);
     setIssueDraft(null);
     setPendingConfirmation(null);
+    setEditValidationProblems([]);
     setEditingEntry(entry);
     setEditDraft(buildAssignmentForEntry(entry));
   };
@@ -894,23 +1181,150 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
   const closeEdit = () => {
     setEditingEntry(null);
     setEditDraft(null);
+    setEditValidationProblems([]);
   };
 
   const updateEditDraft = (updates: Partial<ScheduleEditDraft>) => {
+    setEditValidationProblems([]);
     setEditDraft(current => current ? { ...current, ...updates } : current);
+  };
+
+  const getScheduledEntryForEdit = () => {
+    if (!editingEntry) return null;
+    return activePlan?.entries.find(entry => entry.id === editingEntry.id) || editingEntry;
+  };
+
+  const getSeriesDatesForEntry = (entry: ScheduledEntry, occurrenceCount: number) => {
+    const currentDates = Array.isArray(entry.occurrenceDates) && entry.occurrenceDates.length
+      ? entry.occurrenceDates
+      : [entry.date];
+    const firstDate = currentDates[0] || entry.date;
+    return getIssueDatesForCount(firstDate, Math.max(1, Math.floor(occurrenceCount || currentDates.length || 1)));
+  };
+
+  const getEditSeriesInfo = () => {
+    const scheduledEntry = getScheduledEntryForEdit();
+    if (!editingEntry || !editDraft || !scheduledEntry) {
+      return {
+        dates: [] as string[],
+        occurrenceCount: 0,
+        firstDate: '',
+        lastDate: '',
+        currentIndex: -1,
+        hasPrevious: false,
+        hasNext: false,
+      };
+    }
+
+    const savedDates = Array.isArray(scheduledEntry.occurrenceDates) && scheduledEntry.occurrenceDates.length
+      ? scheduledEntry.occurrenceDates
+      : [scheduledEntry.date];
+    const occurrenceCount = Math.max(1, Math.floor(editDraft.occurrenceCount || savedDates.length || 1));
+    const dates = getSeriesDatesForEntry(scheduledEntry, occurrenceCount);
+    const currentIndex = dates.indexOf(editingEntry.originalDate);
+
+    return {
+      dates,
+      occurrenceCount,
+      firstDate: dates[0] || '',
+      lastDate: dates[dates.length - 1] || '',
+      currentIndex,
+      hasPrevious: currentIndex > 0,
+      hasNext: currentIndex >= 0 && currentIndex < dates.length - 1,
+    };
+  };
+
+  const getEditTeachingUnits = () => {
+    const scheduledEntry = getScheduledEntryForEdit();
+    const seriesInfo = getEditSeriesInfo();
+    if (!editingEntry || !editDraft || !scheduledEntry) {
+      return { occurrenceCount: 0, target: 0, actual: 0 };
+    }
+
+    const actual = seriesInfo.dates.reduce((sum, originalDate) => {
+      const override = scheduledEntry.occurrenceOverrides?.find(item => item.originalDate === originalDate);
+      const startTime = originalDate === editingEntry.originalDate
+        ? editDraft.startTime
+        : override?.startTime || scheduledEntry.startTime;
+      const endTime = originalDate === editingEntry.originalDate
+        ? editDraft.endTime
+        : override?.endTime || scheduledEntry.endTime;
+
+      return sum + getTeachingUnitsInBlock(startTime, endTime);
+    }, 0);
+
+    return {
+      occurrenceCount: seriesInfo.occurrenceCount,
+      target: (scheduledEntry.sws || 0) * seriesInfo.occurrenceCount,
+      actual,
+    };
+  };
+
+  const updateEditOccurrenceCount = (value: number) => {
+    const occurrenceCount = Math.max(1, Math.floor(value || 1));
+    const scheduledEntry = getScheduledEntryForEdit();
+
+    if (editingEntry && scheduledEntry) {
+      const nextDates = getSeriesDatesForEntry(scheduledEntry, occurrenceCount);
+      if (!nextDates.includes(editingEntry.originalDate)) {
+        const nextOriginalDate = nextDates[nextDates.length - 1];
+        const nextEntry = allDisplayEntries.find(entry =>
+          entry.id === editingEntry.id && entry.originalDate === nextOriginalDate
+        );
+
+        if (nextEntry) {
+          setEditValidationProblems([]);
+          setEditingEntry(nextEntry);
+          setEditDraft({
+            ...buildAssignmentForEntry(nextEntry),
+            occurrenceCount,
+          });
+          setPreviewWeekStartDate(getScheduleWeekRange(selectedSemester, nextEntry.displayDate).weekStartDate);
+          return;
+        }
+      }
+    }
+
+    updateEditDraft({ occurrenceCount });
+  };
+
+  const jumpEditOccurrence = (direction: -1 | 1) => {
+    if (!editingEntry) return;
+    const seriesInfo = getEditSeriesInfo();
+    const nextDate = seriesInfo.dates[seriesInfo.currentIndex + direction];
+    if (!nextDate) return;
+
+    const nextEntry = allDisplayEntries.find(entry =>
+      entry.id === editingEntry.id && entry.originalDate === nextDate
+    );
+    if (!nextEntry) return;
+
+    setEditValidationProblems([]);
+    setEditingEntry(nextEntry);
+    setEditDraft({
+      ...buildAssignmentForEntry(nextEntry),
+      occurrenceCount: seriesInfo.occurrenceCount,
+    });
+    setPreviewWeekStartDate(getScheduleWeekRange(selectedSemester, nextEntry.displayDate).weekStartDate);
   };
 
   const openIssueResolver = (issue: ScheduleIssueItem) => {
     const startTime = planningSettings.startHour;
-    const endTime = minutesToTime(timeToMinutes(startTime) + getIssueDurationMinutes(issue));
     const preferredRoom = rooms.find(room => roomFitsIssue(room, issue)) || rooms[0];
     const preferredLecturer = teachingUsers.find(user => user.name === getModuleForIssue(issue)?.personInCharge)
       || teachingUsers[0];
+    const firstDate = weekRange.weekDates.monday || activePlan?.semesterStartDate || semesterRange?.semesterStartDate || toDateInputValue(new Date());
+    const occurrenceCount = getIssueDefaultOccurrenceCount(firstDate);
+    const occurrenceDates = getIssueDatesForCount(firstDate, occurrenceCount);
+    const lastDate = occurrenceDates[occurrenceDates.length - 1] || firstDate;
+    const endTime = getIssueEndTimeForCount(issue, firstDate, startTime, occurrenceCount);
 
     closeEdit();
     setSelectedIssue(issue);
     setIssueDraft({
-      date: weekRange.weekDates.monday || activePlan?.semesterStartDate || semesterRange?.semesterStartDate || toDateInputValue(new Date()),
+      date: firstDate,
+      lastDate,
+      occurrenceCount,
       startTime,
       endTime,
       roomId: preferredRoom?.id || '',
@@ -929,6 +1343,78 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
     setIssueDraft(current => current ? { ...current, ...updates } : current);
   };
 
+  const updateIssueFirstDate = (date: string) => {
+    if (!selectedIssue) {
+      updateIssueDraft({ date });
+      return;
+    }
+
+    setIssueDraft(current => {
+      if (!current) return current;
+      const occurrenceCount = Math.max(1, Math.floor(current.occurrenceCount || 1));
+      const occurrenceDates = getIssueDatesForCount(date, occurrenceCount);
+      return {
+        ...current,
+        date,
+        lastDate: occurrenceDates[occurrenceDates.length - 1] || date,
+        endTime: getIssueEndTimeForCount(selectedIssue, date, current.startTime, occurrenceCount),
+      };
+    });
+  };
+
+  const updateIssueLastDate = (lastDate: string) => {
+    if (!selectedIssue) {
+      updateIssueDraft({ lastDate });
+      return;
+    }
+
+    setIssueDraft(current => {
+      if (!current) return current;
+      const occurrenceCount = Math.max(1, getIssueDatesForRange(current.date, lastDate).length);
+      return {
+        ...current,
+        lastDate,
+        occurrenceCount,
+        endTime: getIssueEndTimeForCount(selectedIssue, current.date, current.startTime, occurrenceCount),
+      };
+    });
+  };
+
+  const updateIssueOccurrenceCount = (value: number) => {
+    if (!selectedIssue) {
+      updateIssueDraft({ occurrenceCount: Math.max(1, Math.floor(value || 1)) });
+      return;
+    }
+
+    setIssueDraft(current => {
+      if (!current) return current;
+      const occurrenceCount = Math.max(1, Math.floor(value || 1));
+      const occurrenceDates = getIssueDatesForCount(current.date, occurrenceCount);
+      return {
+        ...current,
+        occurrenceCount,
+        lastDate: occurrenceDates[occurrenceDates.length - 1] || current.date,
+        endTime: getIssueEndTimeForCount(selectedIssue, current.date, current.startTime, occurrenceCount),
+      };
+    });
+  };
+
+  const updateIssueStartTime = (startTime: string) => {
+    if (!selectedIssue) {
+      updateIssueDraft({ startTime });
+      return;
+    }
+
+    setIssueDraft(current => current
+      ? {
+          ...current,
+          startTime,
+          endTime: getIssueEndTimeForCount(selectedIssue, current.date, startTime, current.occurrenceCount),
+        }
+      : current
+    );
+  };
+
   const saveEdit = () => {
     if (!selectedSemester || !editDraft || !validateAssignment(editDraft)) return;
 
@@ -937,8 +1423,25 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
       const room = rooms.find(item => item.id === editDraft.roomId);
 
       if (scheduledEntry) {
+        const previousOccurrenceCount = Array.isArray(scheduledEntry.occurrenceDates) && scheduledEntry.occurrenceDates.length
+          ? scheduledEntry.occurrenceDates.length
+          : 1;
+        const nextOccurrenceDates = getSeriesDatesForEntry(
+          scheduledEntry,
+          editDraft.occurrenceCount || previousOccurrenceCount
+        );
+        const overrideOriginalDate = nextOccurrenceDates.includes(editingEntry.originalDate)
+          ? editingEntry.originalDate
+          : nextOccurrenceDates[nextOccurrenceDates.length - 1] || editingEntry.originalDate;
+        const normalizedEntry: ScheduledEntry = {
+          ...scheduledEntry,
+          date: nextOccurrenceDates[0] || scheduledEntry.date,
+          occurrenceDates: nextOccurrenceDates,
+          occurrenceOverrides: (scheduledEntry.occurrenceOverrides || [])
+            .filter(item => nextOccurrenceDates.includes(item.originalDate)),
+        };
         const override: ScheduledOccurrenceOverride = {
-          originalDate: editingEntry.originalDate,
+          originalDate: overrideOriginalDate,
           date: editDraft.date,
           roomId: editDraft.roomId,
           roomName: room?.name || editDraft.roomId,
@@ -950,10 +1453,11 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
           color: editDraft.color,
           lockKind: editDraft.lockKind,
         };
-        const updatedEntry = applyOccurrenceOverride(scheduledEntry, override);
+        const updatedEntry = applyOccurrenceOverride(normalizedEntry, override);
+        const updatedEntries = activePlan.entries.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry);
         const updatedPlan: SchedulePlan = {
           ...activePlan,
-          entries: activePlan.entries.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry),
+          entries: updatedEntries,
           adjustmentLog: [
             ...(activePlan.adjustmentLog || []),
             {
@@ -964,11 +1468,17 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
               fromDate: editingEntry.originalDate,
               toDate: editDraft.date,
               note: editDraft.lockKind === 'hard'
-                ? 'Einzeltermin manuell geaendert und hart gelockt.'
-                : 'Einzeltermin manuell geaendert; Hard Lock entfernt.',
+                ? `Einzeltermin manuell geaendert und hart gelockt; Terminanzahl ${previousOccurrenceCount} -> ${nextOccurrenceDates.length}.`
+                : `Einzeltermin manuell geaendert; Hard Lock entfernt; Terminanzahl ${previousOccurrenceCount} -> ${nextOccurrenceDates.length}.`,
               createdAt: new Date().toISOString(),
             },
           ],
+          summary: {
+            ...activePlan.summary,
+            plannedRoomAssignments: updatedEntries.reduce((sum, entry) => {
+              return sum + (Array.isArray(entry.occurrenceDates) ? entry.occurrenceDates.length : 1);
+            }, 0),
+          },
         };
         const nextAssignments = buildRoomAssignmentsFromSchedule(updatedPlan, roomAssignments);
 
@@ -1001,17 +1511,16 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
 
     const problems = getIssuePlacementProblems(selectedIssue, issueDraft, !bruteForce);
     if (problems.length > 0 && !bruteForce) {
-      alert(`Der Termin kann noch nicht konfliktfrei geplant werden:\n\n${problems.slice(0, 8).join('\n')}`);
       return;
     }
 
     const room = rooms.find(item => item.id === issueDraft.roomId);
     const lecturer = users.find(user => user.name === issueDraft.lecturerName);
     const module = getModuleForIssue(selectedIssue);
-    const occurrenceDates = getIssueOccurrenceDates(selectedIssue, issueDraft);
+    const occurrenceDates = getIssueOccurrenceDates(issueDraft);
     const day = getWeekdayForDate(issueDraft.date) || 'monday';
     const hardWarnings = bruteForce
-      ? getIssuePlacementProblems(selectedIssue, issueDraft, true).map(problem => `Brute Force: ${problem}`)
+      ? getIssuePlacementProblems(selectedIssue, issueDraft, true).map(problem => `Regel uebersteuert: ${problem}`)
       : [];
 
     const forcedEntry: SchedulePlan['entries'][number] = {
@@ -1035,7 +1544,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
       participants: getIssueParticipants(selectedIssue),
       score: bruteForce ? 999 : 50,
       warnings: bruteForce
-        ? ['Brute-Force-Platzierung: harte Planungsregeln wurden bewusst uebersteuert.', ...hardWarnings]
+        ? ['Regeln wurden bewusst uebersteuert: harte Planungsregeln wurden nicht blockierend angewendet.', ...hardWarnings]
         : ['Manuell aus Nicht geplant geloest.'],
       occurrenceOverrides: occurrenceDates.map(date => ({
         originalDate: date,
@@ -1069,7 +1578,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
           moduleId: selectedIssue.moduleId,
           toDate: issueDraft.date,
           note: bruteForce
-            ? 'Nicht geplantes Modul per Brute Force eingeplant.'
+            ? 'Nicht geplantes Modul durch bewusstes Uebersteuern der Regeln eingeplant.'
             : 'Nicht geplantes Modul manuell konfliktfrei eingeplant.',
           createdAt: new Date().toISOString(),
         },
@@ -1200,7 +1709,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
     }
 
     if (!activePlan || filteredDisplayEntries.length === 0) {
-      alert('Es gibt fuer die aktuelle Auswahl keine Termine zum Exportieren.');
+      setDragNotice({ tone: 'warning', message: 'Es gibt fuer die aktuelle Auswahl keine Termine zum Exportieren.' });
       return;
     }
 
@@ -1449,6 +1958,91 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
           </div>
         </div>
       </div>
+
+      {showResponsibleCheck && (
+        <div className={`rounded-lg border p-4 shadow-sm ${responsibleModuleProblems.length ? 'border-destructive/50 bg-destructive/10' : 'border-emerald-500/40 bg-emerald-500/10'}`}>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className={`h-5 w-5 mt-0.5 shrink-0 ${responsibleModuleProblems.length ? 'text-destructive' : 'text-emerald-600'}`} />
+                <div>
+                  <h3 className="font-bold text-sm">
+                    {responsibleModuleProblems.length
+                      ? 'Modulverantwortliche fehlen'
+                      : 'Modulverantwortliche vollstaendig'}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    {responsibleModuleProblems.length
+                      ? `Die Stundenplanung kann erst starten, wenn fuer alle zu planenden Module im Semester ${selectedSemester?.name || ''} ein gueltiger Modulverantwortlicher gesetzt ist.`
+                      : 'Alle zu planenden Module haben jetzt einen gueltigen Modulverantwortlichen.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={runOptimizer}
+                className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-bold shrink-0 ${responsibleModuleProblems.length ? 'bg-muted text-foreground hover:bg-muted/80' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
+              >
+                <Sparkles className="h-4 w-4" />
+                {responsibleModuleProblems.length ? 'Erneut pruefen' : 'Semester planen'}
+              </button>
+            </div>
+
+            {responsibleModuleProblems.length > 0 && (
+              <div className="overflow-auto rounded-md border border-border bg-card">
+                <table className="w-full min-w-[760px] text-sm">
+                  <thead className="bg-muted/40">
+                    <tr className="text-left border-b border-border">
+                      <th className="p-3 font-semibold">Modul</th>
+                      <th className="p-3 font-semibold">Betroffene Planung</th>
+                      <th className="p-3 font-semibold">Status</th>
+                      <th className="p-3 font-semibold">Modulverantwortliche(r)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {responsibleModuleProblems.map(problem => {
+                      const currentResponsible = (problem.module.personInCharge || '').trim();
+                      return (
+                        <tr key={problem.module.id}>
+                          <td className="p-3">
+                            <div className="font-bold">{problem.module.id} {problem.module.name}</div>
+                            {problem.sourceModuleIds.some(id => id !== problem.module.id) && (
+                              <div className="text-xs text-muted-foreground">
+                                zusammengefuehrt aus {problem.sourceModuleIds.join(', ')}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-3 text-muted-foreground">
+                            {problem.cohortNames.join(', ')}
+                          </td>
+                          <td className="p-3">
+                            <span className="inline-flex rounded-md bg-destructive/10 text-destructive px-2 py-1 text-xs font-bold">
+                              {problem.reason === 'missing'
+                                ? 'fehlt'
+                                : `ungueltig: ${currentResponsible}`}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <select
+                              value={currentResponsible}
+                              onChange={event => onUpdateModule(problem.module.id, 'personInCharge', event.target.value)}
+                              className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm"
+                            >
+                              <option value="">Waehlen...</option>
+                              {teachingUsers.map(user => (
+                                <option key={user.id} value={user.name}>{user.name}</option>
+                              ))}
+                            </select>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {pendingConfirmationCopy && (
         <div
@@ -1790,15 +2384,81 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
             </div>
 
             <div className="p-4 overflow-auto space-y-3">
-              <label className="space-y-1 block">
-                <span className="text-xs font-bold text-muted-foreground">Datum</span>
-                <input
-                  type="date"
-                  value={editDraft.date}
-                  onChange={event => updateEditDraft({ date: event.target.value })}
-                  className="w-full bg-muted border border-input rounded-md px-3 py-2 text-sm font-bold"
-                />
-              </label>
+              {(() => {
+                const teachingUnits = getEditTeachingUnits();
+                const missingUnits = teachingUnits.target - teachingUnits.actual;
+                const seriesInfo = getEditSeriesInfo();
+                return (
+                  <div className="rounded-md bg-muted/40 border border-border p-3 space-y-2">
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <div className="font-bold text-muted-foreground">Termine</div>
+                        <input
+                          type="number"
+                          min={1}
+                          step={1}
+                          value={teachingUnits.occurrenceCount || 1}
+                          onChange={event => updateEditOccurrenceCount(Number(event.target.value))}
+                          className="mt-1 w-full bg-background border border-input rounded-md px-2 py-1 text-base font-bold"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-bold text-muted-foreground">UE Soll</div>
+                        <div className="text-base font-bold">{formatTeachingUnits(teachingUnits.target)}</div>
+                      </div>
+                      <div className={missingUnits > 0.01 ? 'text-amber-600' : 'text-emerald-600'}>
+                        <div className="font-bold">UE Ist</div>
+                        <div className="text-base font-bold">{formatTeachingUnits(teachingUnits.actual)}</div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <div className="font-bold text-muted-foreground">Erster Termin</div>
+                        <div className="font-bold">{formatDate(seriesInfo.firstDate)}</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-muted-foreground">Letzter Termin</div>
+                        <div className="font-bold">{formatDate(seriesInfo.lastDate)}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {(() => {
+                const seriesInfo = getEditSeriesInfo();
+                return (
+                  <label className="space-y-1 block">
+                    <span className="text-xs font-bold text-muted-foreground">Datum</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => jumpEditOccurrence(-1)}
+                        disabled={!seriesInfo.hasPrevious}
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md border border-border bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 disabled:opacity-40 disabled:hover:text-muted-foreground"
+                        title="Vorheriger Termin"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      <input
+                        type="date"
+                        value={editDraft.date}
+                        onChange={event => updateEditDraft({ date: event.target.value })}
+                        className="min-w-0 flex-1 bg-muted border border-input rounded-md px-3 py-2 text-sm font-bold"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => jumpEditOccurrence(1)}
+                        disabled={!seriesInfo.hasNext}
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md border border-border bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 disabled:opacity-40 disabled:hover:text-muted-foreground"
+                        title="Naechster Termin"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </label>
+                );
+              })()}
 
               <label className="space-y-1 block">
                 <span className="text-xs font-bold text-muted-foreground">Raum</span>
@@ -1810,6 +2470,57 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
                   {rooms.map(room => <option key={room.id} value={room.id}>{room.id} - {room.name}</option>)}
                 </select>
               </label>
+
+              {editValidationProblems.length > 0 && (() => {
+                const roomProblem = editValidationProblems.some(problem =>
+                  problem.startsWith('Dieser Raum') || problem.startsWith('Der Raum')
+                );
+                const availableRooms = roomProblem ? getAvailableRoomsForEdit() : [];
+                return (
+                  <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 space-y-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-600" />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-bold text-amber-700">Speichern noch nicht moeglich</div>
+                        <div className="mt-1 space-y-1 text-xs text-amber-800">
+                          {editValidationProblems.map(problem => (
+                            <div key={problem}>{problem}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {roomProblem && (
+                      <label className="space-y-1 block">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800">
+                          <DoorOpen className="h-3.5 w-3.5" />
+                          Verfuegbare Raeume
+                        </span>
+                        {availableRooms.length > 0 ? (
+                          <select
+                            value=""
+                            onChange={event => {
+                              if (event.target.value) updateEditDraft({ roomId: event.target.value });
+                            }}
+                            className="w-full bg-background border border-amber-500/40 rounded-md px-3 py-2 text-sm font-bold"
+                          >
+                            <option value="">Freien Raum auswaehlen</option>
+                            {availableRooms.map(room => (
+                              <option key={room.id} value={room.id}>
+                                {room.id} - {room.name} ({room.capacity || 0} Plaetze)
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <div className="rounded-md border border-amber-500/30 bg-background/70 px-3 py-2 text-xs text-amber-800">
+                            Fuer dieses Datum und Zeitfenster wurde kein passender freier Raum gefunden.
+                          </div>
+                        )}
+                      </label>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="grid grid-cols-2 gap-2">
                 <label className="space-y-1 block">
@@ -2091,12 +2802,59 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
                 </div>
               </div>
 
+              {(() => {
+                const teachingUnits = getIssueTeachingUnits(selectedIssue, issueDraft);
+                return (
+                  <div className="rounded-md bg-muted/40 border border-border p-3 space-y-2">
+                    <p className="text-xs font-bold">Unterrichtseinheiten</p>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <div className="font-bold text-muted-foreground">UE Soll</div>
+                        <div className="text-base font-bold">{formatTeachingUnits(teachingUnits.target)}</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-muted-foreground">UE Ist</div>
+                        <div className="text-base font-bold">{formatTeachingUnits(teachingUnits.actual)}</div>
+                      </div>
+                      <div className={Math.abs(teachingUnits.open) < 0.01 ? 'text-emerald-600' : 'text-amber-600'}>
+                        <div className="font-bold">Differenz</div>
+                        <div className="text-base font-bold">{formatTeachingBalance(teachingUnits.open)}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="grid grid-cols-2 gap-2">
+                <label className="space-y-1 block">
+                  <span className="text-xs font-bold text-muted-foreground">Erster Termin</span>
+                  <input
+                    type="date"
+                    value={issueDraft.date}
+                    onChange={event => updateIssueFirstDate(event.target.value)}
+                    className="w-full bg-muted border border-input rounded-md px-3 py-2 text-sm font-bold"
+                  />
+                </label>
+                <label className="space-y-1 block">
+                  <span className="text-xs font-bold text-muted-foreground">Letzter Termin</span>
+                  <input
+                    type="date"
+                    value={issueDraft.lastDate}
+                    min={issueDraft.date}
+                    onChange={event => updateIssueLastDate(event.target.value)}
+                    className="w-full bg-muted border border-input rounded-md px-3 py-2 text-sm font-bold"
+                  />
+                </label>
+              </div>
+
               <label className="space-y-1 block">
-                <span className="text-xs font-bold text-muted-foreground">Datum / Wochentag</span>
+                <span className="text-xs font-bold text-muted-foreground">Anzahl Termine</span>
                 <input
-                  type="date"
-                  value={issueDraft.date}
-                  onChange={event => updateIssueDraft({ date: event.target.value })}
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={issueDraft.occurrenceCount}
+                  onChange={event => updateIssueOccurrenceCount(Number(event.target.value))}
                   className="w-full bg-muted border border-input rounded-md px-3 py-2 text-sm font-bold"
                 />
               </label>
@@ -2122,7 +2880,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
                   <input
                     type="time"
                     value={issueDraft.startTime}
-                    onChange={event => updateIssueDraft({ startTime: event.target.value })}
+                    onChange={event => updateIssueStartTime(event.target.value)}
                     className="w-full bg-muted border border-input rounded-md px-3 py-2 text-sm font-bold"
                   />
                 </label>
@@ -2183,7 +2941,7 @@ export const SchedulePlanner: React.FC<SchedulePlannerProps> = ({
                 className="w-full inline-flex items-center justify-center gap-2 bg-amber-500/15 text-amber-600 px-3 py-2 rounded-md text-sm font-bold hover:bg-amber-500/20"
               >
                 <Sparkles className="h-4 w-4" />
-                Brute Force planen
+                Regeln uebersteuern
               </button>
             </div>
           </aside>

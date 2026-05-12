@@ -3,6 +3,7 @@ import type {
   AbsoluteSemester,
   AvailabilitySlot,
   Cohort,
+  DateAvailabilitySlot,
   LecturerAvailability,
   Module,
   Room,
@@ -184,6 +185,20 @@ const slotOverlaps = (slot: AvailabilitySlot, day: Weekday, startTime: string, e
   return slot.day === day && rangesOverlap(slot.startTime, slot.endTime, startTime, endTime);
 };
 
+const dateSlotOverlaps = (slot: DateAvailabilitySlot, date: string, startTime: string, endTime: string): boolean => {
+  return slot.date === date && rangesOverlap(slot.startTime, slot.endTime, startTime, endTime);
+};
+
+const dateSlotsOverlapAnyOccurrence = (
+  slots: DateAvailabilitySlot[] | undefined,
+  occurrenceDates: string[],
+  startTime: string,
+  endTime: string
+): boolean => {
+  if (!slots?.length || occurrenceDates.length === 0) return false;
+  return slots.some(slot => occurrenceDates.some(date => dateSlotOverlaps(slot, date, startTime, endTime)));
+};
+
 export const isTeachingUser = (user: User): boolean => {
   return ['professor', 'lecturer', 'admin', 'coordinator'].includes(user.role);
 };
@@ -208,6 +223,7 @@ export const createDefaultAvailability = (
       endTime,
     })),
     unavailableSlots: [],
+    unavailableDateSlots: [],
   };
 };
 
@@ -413,6 +429,7 @@ const existingRoomAssignmentConflict = (
 const lecturerAvailable = (
   user: User | undefined,
   day: Weekday,
+  occurrenceDates: string[],
   startTime: string,
   endTime: string,
   availabilities: LecturerAvailability[],
@@ -422,7 +439,8 @@ const lecturerAvailable = (
 
   const availability = getAvailabilityForUser(user.id, availabilities, systemSettings);
   const insideAvailability = availability.availableSlots.some(slot => slotContains(slot, day, startTime, endTime));
-  const blocked = (availability.unavailableSlots || []).some(slot => slotOverlaps(slot, day, startTime, endTime));
+  const blocked = (availability.unavailableSlots || []).some(slot => slotOverlaps(slot, day, startTime, endTime))
+    || dateSlotsOverlapAnyOccurrence(availability.unavailableDateSlots, occurrenceDates, startTime, endTime);
 
   return insideAvailability && !blocked;
 };
@@ -558,7 +576,7 @@ const getBestCandidate = (
         if (roomUnavailable) continue;
 
         for (const lecturer of lecturerCandidates) {
-          if (!lecturerAvailable(lecturer, day.id, startTime, endTime, input.lecturerAvailabilities, input.systemSettings)) continue;
+          if (!lecturerAvailable(lecturer, day.id, occurrenceDates, startTime, endTime, input.lecturerAvailabilities, input.systemSettings)) continue;
 
           const availability = lecturer
             ? getAvailabilityForUser(lecturer.id, input.lecturerAvailabilities, input.systemSettings)

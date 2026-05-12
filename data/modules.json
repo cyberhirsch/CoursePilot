@@ -9,7 +9,8 @@
     "prerequisites": [],
     "forbiddenSemesters": [],
     "maxParticipants": 100,
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 04"
   },
   {
     "id": "G1",
@@ -22,7 +23,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 07"
   },
   {
     "id": "G2",
@@ -35,7 +37,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 07"
   },
   {
     "id": "G3",
@@ -48,7 +51,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 06"
   },
   {
     "id": "G4",
@@ -61,7 +65,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 04"
   },
   {
     "id": "G5",
@@ -74,7 +79,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 04"
   },
   {
     "id": "G6",
@@ -87,7 +93,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 06"
   },
   {
     "id": "WP1-8",
@@ -100,7 +107,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 11"
   },
   {
     "id": "F1",
@@ -112,7 +120,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 05"
   },
   {
     "id": "F2",
@@ -124,7 +133,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 04"
   },
   {
     "id": "F3",
@@ -136,7 +146,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 08"
   },
   {
     "id": "F4",
@@ -148,7 +159,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 08"
   },
   {
     "id": "F5",
@@ -160,7 +172,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 11"
   },
   {
     "id": "M1",
@@ -172,7 +185,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 09"
   },
   {
     "id": "M2",
@@ -184,7 +198,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 03"
   },
   {
     "id": "M3",
@@ -196,7 +211,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 09"
   },
   {
     "id": "M4",
@@ -208,7 +224,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 08"
   },
   {
     "id": "M5",
@@ -220,7 +237,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 07"
   },
   {
     "id": "M6",
@@ -232,7 +250,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 03"
   },
   {
     "id": "M7",
@@ -250,7 +269,7 @@
     "examType": "Project Work (with Presentation)",
     "teachingMethods": "Seminaristischer Unterricht",
     "language": "English",
-    "personInCharge": "Prof. Dr. Alex Generic",
+    "personInCharge": "Dozent Platzhalter 03",
     "workloadDetails": [
       {
         "description": "Contact Hours",
@@ -314,7 +333,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 05"
   },
   {
     "id": "B1",
@@ -327,7 +347,8 @@
       "ARAI"
     ],
     "equivalentTo": "F1",
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 05"
   },
   {
     "id": "B2",
@@ -340,7 +361,8 @@
       "ARAI"
     ],
     "equivalentTo": "F3",
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 08"
   },
   {
     "id": "A1",
@@ -358,7 +380,8 @@
       "pcLab": true,
       "beamer": false,
       "lecturerPc": false
-    }
+    },
+    "personInCharge": "Dozent Platzhalter 06"
   },
   {
     "id": "A2",
@@ -370,7 +393,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 10"
   },
   {
     "id": "A3",
@@ -383,7 +407,8 @@
       "ARAI"
     ],
     "equivalentTo": "M8",
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 05"
   },
   {
     "id": "C1",
@@ -396,7 +421,7 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Lecturer Computing"
+    "personInCharge": "Dozent Platzhalter 06"
   },
   {
     "id": "C2",
@@ -408,7 +433,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 09"
   },
   {
     "id": "C3",
@@ -420,7 +446,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 05"
   },
   {
     "id": "C4",
@@ -432,7 +459,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 09"
   },
   {
     "id": "S1",
@@ -444,7 +472,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 10"
   },
   {
     "id": "S2",
@@ -456,7 +485,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 04"
   },
   {
     "id": "S3",
@@ -468,7 +498,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 10"
   },
   {
     "id": "S4",
@@ -480,7 +511,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 10"
   },
   {
     "id": "S5",
@@ -492,7 +524,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 09"
   },
   {
     "id": "I1",
@@ -504,7 +537,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 07"
   },
   {
     "id": "I2",
@@ -516,7 +550,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 06"
   },
   {
     "id": "I3",
@@ -528,7 +563,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 07"
   },
   {
     "id": "I4",
@@ -540,7 +576,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 03"
   },
   {
     "id": "Lab",
@@ -552,7 +589,8 @@
     "programIds": [
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 11"
   },
   {
     "id": "Sp",
@@ -564,7 +602,8 @@
     "programIds": [
       "DSA"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 04"
   },
   {
     "id": "Rep",
@@ -577,7 +616,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 11"
   },
   {
     "id": "Prkt",
@@ -590,7 +630,8 @@
       "DSA",
       "ARAI"
     ],
-    "fachbereich": "Applied Engineering"
+    "fachbereich": "Applied Engineering",
+    "personInCharge": "Dozent Platzhalter 11"
   },
   {
     "id": "BA-A",
@@ -604,6 +645,6 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Prof. Dr. Alex Generic"
+    "personInCharge": "Dozent Platzhalter 03"
   }
 ]

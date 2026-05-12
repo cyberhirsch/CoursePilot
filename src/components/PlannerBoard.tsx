@@ -152,6 +152,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
       onUpdateRoomAssignments={onUpdateRoomAssignments}
       schedulePlan={schedulePlan}
       onUpdateSchedulePlan={onUpdateSchedulePlan}
+      onUpdateModule={onUpdateModule}
       systemSettings={systemSettings}
       onUpdateSystemSettings={onUpdateSystemSettings}
     />;

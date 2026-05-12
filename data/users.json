@@ -9,48 +9,48 @@
   },
   {
     "id": "usr_admin",
-    "name": "System Support",
-    "email": "support@example.edu",
+    "name": "Dozent Platzhalter 01",
+    "email": "dozent.platzhalter01@example.edu",
     "role": "admin",
     "department": null,
     "universityId": "999998"
   },
   {
     "id": "usr_coord_design",
-    "name": "Academic Coordinator",
-    "email": "coord@example.edu",
+    "name": "Dozent Platzhalter 02",
+    "email": "dozent.platzhalter02@example.edu",
     "role": "coordinator",
     "department": "Applied Engineering",
     "universityId": "100001"
   },
   {
     "id": "usr_prof_max",
-    "name": "Prof. Dr. Alex Generic",
-    "email": "alex.generic@example.edu",
+    "name": "Dozent Platzhalter 03",
+    "email": "dozent.platzhalter03@example.edu",
     "role": "professor",
     "department": "Applied Engineering",
     "universityId": "100002"
   },
   {
     "id": "usr_prof_erika",
-    "name": "Prof. Dr. Jordan Sample",
-    "email": "jordan.sample@example.edu",
+    "name": "Dozent Platzhalter 04",
+    "email": "dozent.platzhalter04@example.edu",
     "role": "professor",
     "department": "Management Systems",
     "universityId": "100003"
   },
   {
     "id": "usr_lecturer_film",
-    "name": "Lecturer Control Theory",
-    "email": "lecturer1@example.edu",
+    "name": "Dozent Platzhalter 05",
+    "email": "dozent.platzhalter05@example.edu",
     "role": "lecturer",
     "department": "Applied Engineering",
     "universityId": "200001"
   },
   {
     "id": "usr_lecturer_code",
-    "name": "Lecturer Computing",
-    "email": "lecturer2@example.edu",
+    "name": "Dozent Platzhalter 06",
+    "email": "dozent.platzhalter06@example.edu",
     "role": "lecturer",
     "department": "Applied Engineering",
     "universityId": "200002"
@@ -79,5 +79,45 @@
     "email": "guest@external.org",
     "role": "guest",
     "department": null
+  },
+  {
+    "id": "usr_011",
+    "name": "Dozent Platzhalter 07",
+    "email": "dozent.platzhalter07@example.edu",
+    "role": "lecturer",
+    "department": "Management Systems",
+    "universityId": "565472"
+  },
+  {
+    "id": "usr_placeholder_lecturer_01",
+    "name": "Dozent Platzhalter 08",
+    "email": "dozent.platzhalter08@example.edu",
+    "role": "lecturer",
+    "department": "Applied Engineering",
+    "universityId": "290001"
+  },
+  {
+    "id": "usr_placeholder_lecturer_02",
+    "name": "Dozent Platzhalter 09",
+    "email": "dozent.platzhalter09@example.edu",
+    "role": "lecturer",
+    "department": "Applied Engineering",
+    "universityId": "290002"
+  },
+  {
+    "id": "usr_placeholder_lecturer_03",
+    "name": "Dozent Platzhalter 10",
+    "email": "dozent.platzhalter10@example.edu",
+    "role": "lecturer",
+    "department": "Applied Engineering",
+    "universityId": "290003"
+  },
+  {
+    "id": "usr_placeholder_lecturer_04",
+    "name": "Dozent Platzhalter 11",
+    "email": "dozent.platzhalter11@example.edu",
+    "role": "lecturer",
+    "department": "Applied Engineering",
+    "universityId": "290004"
   }
 ]

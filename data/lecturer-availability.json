@@ -119,5 +119,78 @@
       }
     ],
     "unavailableSlots": []
+  },
+  {
+    "userId": "usr_011",
+    "maxSwsPerDay": 8,
+    "availableSlots": [
+      {
+        "day": "monday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "tuesday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "wednesday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "thursday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "friday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      }
+    ],
+    "unavailableSlots": []
+  },
+  {
+    "userId": "usr_placeholder_lecturer_02",
+    "maxSwsPerDay": 8,
+    "availableSlots": [
+      {
+        "day": "monday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "tuesday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "wednesday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "thursday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      },
+      {
+        "day": "friday",
+        "startTime": "09:00",
+        "endTime": "20:00"
+      }
+    ],
+    "unavailableSlots": [],
+    "unavailableDateSlots": [
+      {
+        "id": "blocked-1778488621399",
+        "date": "2026-05-11",
+        "startTime": "09:00",
+        "endTime": "20:00",
+        "reason": ""
+      }
+    ]
   }
 ]

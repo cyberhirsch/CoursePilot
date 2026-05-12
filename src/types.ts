@@ -225,10 +225,19 @@ export interface AvailabilitySlot {
   endTime: string;
 }
 
+export interface DateAvailabilitySlot {
+  id: string;
+  date: string; // YYYY-MM-DD
+  startTime: string;
+  endTime: string;
+  reason?: string;
+}
+
 export interface LecturerAvailability {
   userId: string;
   availableSlots: AvailabilitySlot[];
   unavailableSlots?: AvailabilitySlot[];
+  unavailableDateSlots?: DateAvailabilitySlot[];
   maxSwsPerDay?: number;
   notes?: string;
 }

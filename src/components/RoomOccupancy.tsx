@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import type { Room, Module, Cohort, RoomAssignment } from '@/types';
 import { TRANSLATIONS, DEFAULT_LANGUAGE } from '@/translations';
-import { Pencil, Save, Trash2, X } from 'lucide-react';
+import { AlertTriangle, DoorOpen, Pencil, Save, Trash2, X } from 'lucide-react';
 
 interface RoomOccupancyProps {
     rooms: Room[];
@@ -34,6 +34,7 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingAssignment, setEditingAssignment] = useState<RoomAssignment | null>(null);
     const [editDraft, setEditDraft] = useState<RoomAssignment | null>(null);
+    const [editValidationProblems, setEditValidationProblems] = useState<string[]>([]);
     const [newAssignment, setNewAssignment] = useState<Partial<RoomAssignment>>({
         startTime: '08:00',
         endTime: '12:00',
@@ -99,7 +100,59 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
         });
     };
 
+    const getAssignmentParticipants = (assignment: RoomAssignment) => {
+        return (assignment.cohortId || '')
+            .split(',')
+            .map(item => item.trim())
+            .filter(Boolean)
+            .reduce((sum, cohortId) => {
+                const cohort = cohorts.find(item => item.id === cohortId);
+                return sum + (cohort?.studentCount || 0);
+            }, 0);
+    };
+
+    const roomFitsAssignment = (room: Room, assignment: RoomAssignment) => {
+        const participants = getAssignmentParticipants(assignment);
+        if (participants > 0 && (room.capacity || 0) < participants) return false;
+
+        const module = modules.find(item => item.id === assignment.moduleId);
+        const requirements = module?.requirements;
+        if (!requirements) return true;
+
+        if (requirements.beamer && !room.equipment?.beamer) return false;
+        if (requirements.lecturerPc && !room.equipment?.lecturerPc) return false;
+        if (requirements.macRoom && !room.equipment?.macRoom) return false;
+        if (requirements.pcLab && !room.equipment?.pcLab) return false;
+
+        return true;
+    };
+
+    const roomAvailableForAssignment = (room: Room, assignment: RoomAssignment) => {
+        if (!assignment.date || !assignment.startTime || !assignment.endTime) return false;
+        if (!roomFitsAssignment(room, assignment)) return false;
+        if (roomBlockedOn(room, assignment.date, assignment.startTime, assignment.endTime)) return false;
+
+        return !roomAssignments.some(item =>
+            item.id !== assignment.id
+            && item.roomId === room.id
+            && item.date === assignment.date
+            && rangesOverlap(assignment.startTime, assignment.endTime, item.startTime, item.endTime)
+        );
+    };
+
+    const getAvailableRoomsForDraft = (assignment: RoomAssignment) => {
+        return rooms
+            .filter(room => roomAvailableForAssignment(room, assignment))
+            .sort((a, b) => (a.capacity || 0) - (b.capacity || 0));
+    };
+
+    const updateEditDraft = (updates: Partial<RoomAssignment>) => {
+        setEditValidationProblems([]);
+        setEditDraft(current => current ? { ...current, ...updates } : current);
+    };
+
     const openEdit = (assignment: RoomAssignment) => {
+        setEditValidationProblems([]);
         setEditingAssignment(assignment);
         setEditDraft({ ...assignment });
         setShowAddForm(false);
@@ -108,23 +161,25 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
     const closeEdit = () => {
         setEditingAssignment(null);
         setEditDraft(null);
+        setEditValidationProblems([]);
     };
 
-    const validateAssignment = (assignment: RoomAssignment) => {
+    const getAssignmentValidationProblems = (assignment: RoomAssignment) => {
+        const problems: string[] = [];
+
         if (!assignment.roomId || !assignment.date || !assignment.startTime || !assignment.endTime || !assignment.title.trim()) {
-            alert('Bitte Raum, Datum, Uhrzeit und Titel ausfuellen.');
-            return false;
+            problems.push('Bitte Raum, Datum, Uhrzeit und Titel ausfuellen.');
+            return problems;
         }
 
         if (timeToMinutes(assignment.startTime) >= timeToMinutes(assignment.endTime)) {
-            alert('Die Endzeit muss nach der Startzeit liegen.');
-            return false;
+            problems.push('Die Endzeit muss nach der Startzeit liegen.');
+            return problems;
         }
 
         const room = rooms.find(item => item.id === assignment.roomId);
         if (room && roomBlockedOn(room, assignment.date, assignment.startTime, assignment.endTime)) {
-            alert('Der Raum ist in diesem Zeitraum gesperrt.');
-            return false;
+            problems.push('Der Raum ist in diesem Zeitraum gesperrt.');
         }
 
         const roomConflict = roomAssignments.some(item =>
@@ -135,8 +190,7 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
         );
 
         if (roomConflict) {
-            alert('Dieser Raum ist in diesem Zeitraum bereits belegt.');
-            return false;
+            problems.push('Dieser Raum ist in diesem Zeitraum bereits belegt.');
         }
 
         const personConflict = assignment.person
@@ -149,7 +203,16 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
             : false;
 
         if (personConflict) {
-            alert('Die eingetragene Person hat in diesem Zeitraum bereits einen Termin.');
+            problems.push('Die eingetragene Person hat in diesem Zeitraum bereits einen Termin.');
+        }
+
+        return problems;
+    };
+
+    const validateAssignment = (assignment: RoomAssignment) => {
+        const problems = getAssignmentValidationProblems(assignment);
+        setEditValidationProblems(problems);
+        if (problems.length > 0) {
             return false;
         }
 
@@ -248,12 +311,12 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
                         <input
                             type="date"
                             value={editDraft.date}
-                            onChange={event => setEditDraft({ ...editDraft, date: event.target.value })}
+                            onChange={event => updateEditDraft({ date: event.target.value })}
                             className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
                         />
                         <select
                             value={editDraft.roomId}
-                            onChange={event => setEditDraft({ ...editDraft, roomId: event.target.value })}
+                            onChange={event => updateEditDraft({ roomId: event.target.value })}
                             className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
                         >
                             {rooms.map(room => <option key={room.id} value={room.id}>{room.id} - {room.name}</option>)}
@@ -261,23 +324,23 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
                         <input
                             type="time"
                             value={editDraft.startTime}
-                            onChange={event => setEditDraft({ ...editDraft, startTime: event.target.value })}
+                            onChange={event => updateEditDraft({ startTime: event.target.value })}
                             className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
                         />
                         <input
                             type="time"
                             value={editDraft.endTime}
-                            onChange={event => setEditDraft({ ...editDraft, endTime: event.target.value })}
+                            onChange={event => updateEditDraft({ endTime: event.target.value })}
                             className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
                         />
                         <input
                             value={editDraft.title}
-                            onChange={event => setEditDraft({ ...editDraft, title: event.target.value })}
+                            onChange={event => updateEditDraft({ title: event.target.value })}
                             className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
                         />
                         <input
                             value={editDraft.person || ''}
-                            onChange={event => setEditDraft({ ...editDraft, person: event.target.value })}
+                            onChange={event => updateEditDraft({ person: event.target.value })}
                             placeholder="Person"
                             className="bg-muted border-none rounded-lg px-3 py-2 text-xs font-bold"
                         />
@@ -298,9 +361,59 @@ export const RoomOccupancy: React.FC<RoomOccupancyProps> = ({
                             </button>
                         </div>
                     </div>
+                    {editValidationProblems.length > 0 && (() => {
+                        const roomProblem = editValidationProblems.some(problem =>
+                            problem.startsWith('Dieser Raum') || problem.startsWith('Der Raum')
+                        );
+                        const availableRooms = roomProblem ? getAvailableRoomsForDraft(editDraft) : [];
+                        return (
+                            <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 space-y-3">
+                                <div className="flex items-start gap-2">
+                                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-600" />
+                                    <div className="min-w-0 flex-1">
+                                        <div className="text-sm font-bold text-amber-700">Speichern noch nicht moeglich</div>
+                                        <div className="mt-1 space-y-1 text-xs text-amber-800">
+                                            {editValidationProblems.map(problem => (
+                                                <div key={problem}>{problem}</div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {roomProblem && (
+                                    <label className="space-y-1 block max-w-xl">
+                                        <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800">
+                                            <DoorOpen className="h-3.5 w-3.5" />
+                                            Verfuegbare Raeume
+                                        </span>
+                                        {availableRooms.length > 0 ? (
+                                            <select
+                                                value=""
+                                                onChange={event => {
+                                                    if (event.target.value) updateEditDraft({ roomId: event.target.value });
+                                                }}
+                                                className="w-full bg-background border border-amber-500/40 rounded-lg px-3 py-2 text-xs font-bold"
+                                            >
+                                                <option value="">Freien Raum auswaehlen</option>
+                                                {availableRooms.map(room => (
+                                                    <option key={room.id} value={room.id}>
+                                                        {room.id} - {room.name} ({room.capacity || 0} Plaetze)
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <div className="rounded-lg border border-amber-500/30 bg-background/70 px-3 py-2 text-xs text-amber-800">
+                                                Fuer dieses Datum und Zeitfenster wurde kein passender freier Raum gefunden.
+                                            </div>
+                                        )}
+                                    </label>
+                                )}
+                            </div>
+                        );
+                    })()}
                     <textarea
                         value={editDraft.purpose || ''}
-                        onChange={event => setEditDraft({ ...editDraft, purpose: event.target.value })}
+                        onChange={event => updateEditDraft({ purpose: event.target.value })}
                         placeholder="Zweck / Anmerkung"
                         className="mt-4 w-full bg-muted border-none rounded-lg px-3 py-2 text-xs font-medium min-h-20"
                     />

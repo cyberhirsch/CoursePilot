@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import type { AvailabilitySlot, LecturerAvailability as LecturerAvailabilityType, SchedulePlan, SystemSettings, User, Weekday } from '@/types';
+import type { AvailabilitySlot, DateAvailabilitySlot, LecturerAvailability as LecturerAvailabilityType, SchedulePlan, SystemSettings, User, Weekday } from '@/types';
 import { createDefaultAvailability, getTeachingUsers, WEEKDAYS } from '@/lib/schedule-optimizer';
 import { CalendarPlus, Trash2 } from 'lucide-react';
 
@@ -36,6 +36,16 @@ export const LecturerAvailability: React.FC<LecturerAvailabilityProps> = ({
   const plannedEntries = useMemo(() => {
     return schedulePlan?.entries.filter(entry => entry.lecturerUserId === selectedUserId) || [];
   }, [schedulePlan, selectedUserId]);
+
+  const dateBlocks = useMemo(() => {
+    return (availability?.unavailableDateSlots || [])
+      .map((slot, index) => ({ slot, index }))
+      .sort((a, b) => (
+        a.slot.date.localeCompare(b.slot.date)
+        || a.slot.startTime.localeCompare(b.slot.startTime)
+        || a.index - b.index
+      ));
+  }, [availability?.unavailableDateSlots]);
 
   const persistAvailability = (next: LecturerAvailabilityType) => {
     onUpdateLecturerAvailabilities([
@@ -75,9 +85,54 @@ export const LecturerAvailability: React.FC<LecturerAvailabilityProps> = ({
     });
   };
 
+  const updateDateBlock = (index: number, updates: Partial<DateAvailabilitySlot>) => {
+    if (!availability) return;
+    const currentBlocks = availability.unavailableDateSlots || [];
+    const nextBlocks = currentBlocks.map((slot, slotIndex) => (
+      slotIndex === index ? { ...slot, ...updates } : slot
+    ));
+    persistAvailability({ ...availability, unavailableDateSlots: nextBlocks });
+  };
+
+  const addDateBlock = () => {
+    if (!availability) return;
+    const today = new Date();
+    const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const startTime = systemSettings?.daySchedule?.startHour || '08:00';
+    const endTime = systemSettings?.daySchedule?.endHour || '18:00';
+
+    persistAvailability({
+      ...availability,
+      unavailableDateSlots: [
+        ...(availability.unavailableDateSlots || []),
+        {
+          id: `blocked-${Date.now()}`,
+          date,
+          startTime,
+          endTime,
+          reason: '',
+        },
+      ],
+    });
+  };
+
+  const removeDateBlock = (index: number) => {
+    if (!availability) return;
+    persistAvailability({
+      ...availability,
+      unavailableDateSlots: (availability.unavailableDateSlots || []).filter((_, slotIndex) => slotIndex !== index),
+    });
+  };
+
   const applyStandardWeek = () => {
     if (!availability) return;
-    persistAvailability(createDefaultAvailability(availability.userId, systemSettings));
+    const defaults = createDefaultAvailability(availability.userId, systemSettings);
+    persistAvailability({
+      ...availability,
+      availableSlots: defaults.availableSlots,
+      unavailableSlots: defaults.unavailableSlots,
+      maxSwsPerDay: defaults.maxSwsPerDay,
+    });
   };
 
   if (!selectedUser || !availability) {
@@ -151,6 +206,65 @@ export const LecturerAvailability: React.FC<LecturerAvailabilityProps> = ({
         </div>
 
         <div className="flex-grow overflow-auto p-4 space-y-4">
+          <div className="border border-border rounded-lg overflow-hidden">
+            <div className="p-3 bg-muted/30 flex items-center justify-between gap-3">
+              <div>
+                <h3 className="font-bold">Sperrtermine</h3>
+                <p className="text-xs text-muted-foreground">Datumsspezifische Verhinderungen</p>
+              </div>
+              <button
+                onClick={addDateBlock}
+                className="h-9 w-9 inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+                title="Sperrtermin hinzufuegen"
+              >
+                <CalendarPlus className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="p-3 space-y-2">
+              {dateBlocks.map(({ slot, index }) => (
+                <div key={slot.id || `${slot.date}-${index}`} className="grid grid-cols-1 md:grid-cols-[150px_110px_24px_110px_minmax(160px,1fr)_32px] gap-2 md:items-center">
+                  <input
+                    type="date"
+                    value={slot.date}
+                    onChange={event => updateDateBlock(index, { date: event.target.value })}
+                    className="bg-background border border-input rounded-md px-2 py-1 text-sm"
+                  />
+                  <input
+                    type="time"
+                    value={slot.startTime}
+                    onChange={event => updateDateBlock(index, { startTime: event.target.value })}
+                    className="bg-background border border-input rounded-md px-2 py-1 text-sm"
+                  />
+                  <span className="hidden md:block text-center text-muted-foreground text-sm">bis</span>
+                  <input
+                    type="time"
+                    value={slot.endTime}
+                    onChange={event => updateDateBlock(index, { endTime: event.target.value })}
+                    className="bg-background border border-input rounded-md px-2 py-1 text-sm"
+                  />
+                  <input
+                    value={slot.reason || ''}
+                    onChange={event => updateDateBlock(index, { reason: event.target.value })}
+                    className="bg-background border border-input rounded-md px-2 py-1 text-sm"
+                    placeholder="Grund"
+                  />
+                  <button
+                    onClick={() => removeDateBlock(index)}
+                    className="h-8 w-8 inline-flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    title="Sperrtermin entfernen"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+
+              {dateBlocks.length === 0 && (
+                <div className="text-sm text-muted-foreground italic">Keine Sperrtermine.</div>
+              )}
+            </div>
+          </div>
+
           {WEEKDAYS.map(day => {
             const slotsForDay = availability.availableSlots
               .map((slot, index) => ({ slot, index }))

@@ -136,6 +136,11 @@ export const LecturerOverview: React.FC<LecturerOverviewProps> = ({
                             </span>
                           );
                         })}
+                        {!!availability.unavailableDateSlots?.length && (
+                          <span className="px-2 py-1 rounded text-[10px] font-bold bg-destructive/10 text-destructive">
+                            {availability.unavailableDateSlots.length} Sperrtermin(e)
+                          </span>
+                        )}
                       </div>
                     </td>
                   </tr>
