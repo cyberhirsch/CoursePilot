@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { MainCategory, PlannerViewMode } from '@/types';
 import { Button } from './ui/button';
-import { LogOut } from 'lucide-react';
+import { ChevronDown, LogOut } from 'lucide-react';
 import { TRANSLATIONS, DEFAULT_LANGUAGE, type Language } from '@/translations';
 
 interface HeaderProps {
@@ -95,6 +95,7 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
     { key: 'settings-general', label: t.settings?.general || 'General' },
     { key: 'settings-calendar', label: t.settings?.calendar || 'Calendar' },
     { key: 'settings-variables', label: t.settings?.variables || 'Variables' },
+    { key: 'settings-import', label: t.settings?.import || 'Import' },
   ];
 
   const mainNavItems: ({ key: MainCategory; label: string; inactive?: boolean } | { type: 'divider' })[] = [
@@ -111,24 +112,26 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
 
   const mainCategoryItem = mainNavItems.find(item => 'key' in item && item.key === mainCategory);
   const currentMainCategoryLabel = mainCategoryItem && 'key' in mainCategoryItem ? mainCategoryItem.label : '';
-  const headerTitle = currentMainCategoryLabel;
 
   return (
     <header className="bg-background border-b border-border w-full z-30 sticky top-0">
       <div className="max-w-screen-2xl mx-auto px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <img
+            src="/logo.png"
+            alt="CoursePilot"
+            className="h-10 w-10 shrink-0 rounded-md object-contain"
+          />
           <div ref={dropdownRef} className="relative">
-            <button onClick={() => setIsDropdownOpen(prev => !prev)} className="flex items-center space-x-3 focus:outline-none">
-              <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
-                </svg>
-              </div>
-              <h1 className="text-xl font-bold text-foreground">
-                CoursePilot
-                {headerTitle && <span className="text-muted-foreground font-normal"> / {headerTitle}</span>}
-              </h1>
-              <svg className={`w-5 h-5 text-muted-foreground transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(prev => !prev)}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-lg font-bold text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
+              aria-haspopup="menu"
+              aria-expanded={isDropdownOpen}
+            >
+              <span>{currentMainCategoryLabel || 'Navigation'}</span>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             {isDropdownOpen && (
               <div className="origin-top-left absolute left-0 mt-2 w-56 rounded-lg shadow-xl bg-card ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical">

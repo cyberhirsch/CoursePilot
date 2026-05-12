@@ -243,7 +243,7 @@ export interface LecturerAvailability {
 }
 
 export type MainCategory = 'semester-plan' | 'schedule' | 'examinations' | 'user-management' | 'settings' | 'modules' | 'rooms' | 'lecturers';
-export type PlannerViewMode = 'semester' | 'group' | 'modules' | 'optimization' | 'schedule-planner' | 'module-details' | 'lecturer-overview' | 'availability' | 'room-overview' | 'room-occupancy' | 'room-availability' | 'user-profile' | 'user-groups' | 'settings-general' | 'settings-variables' | 'settings-calendar' | 'exam-transcript' | 'exam-grading' | 'exam-admin' | 'exam-schedule';
+export type PlannerViewMode = 'semester' | 'group' | 'modules' | 'optimization' | 'schedule-planner' | 'module-details' | 'lecturer-overview' | 'availability' | 'room-overview' | 'room-occupancy' | 'room-availability' | 'user-profile' | 'user-groups' | 'settings-general' | 'settings-variables' | 'settings-calendar' | 'settings-import' | 'exam-transcript' | 'exam-grading' | 'exam-admin' | 'exam-schedule';
 
 export interface RoomAssignment {
   id: string;
@@ -340,4 +340,19 @@ export interface SchedulePlan {
     plannedRoomAssignments: number;
     teachingWeeks: number;
   };
+}
+
+export interface CoursePilotData {
+  modules: Module[];
+  programs: Program[];
+  cohorts: Cohort[];
+  categories: Category[];
+  catalogs: Catalogs;
+  users: User[];
+  rooms: Room[];
+  roomAssignments: RoomAssignment[];
+  systemSettings: SystemSettings;
+  academicCalendar: AcademicCalendar;
+  lecturerAvailabilities: LecturerAvailability[];
+  schedulePlan: SchedulePlan | null;
 }

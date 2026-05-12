@@ -1,17 +1,17 @@
 {
   "currentSemester": "ss2025",
+  "academicCalendar": {
+    "lecturesStart": "2025-03-24",
+    "lecturesEnd": "2025-07-11",
+    "examsStart": "2025-07-14",
+    "examsEnd": "2025-07-25"
+  },
   "institutions": {
     "defaultLocation": "Traunstein",
     "campusLocations": [
       "Traunstein",
       "Ruhpolding"
     ]
-  },
-  "academicCalendar": {
-    "lecturesStart": "2025-03-24",
-    "lecturesEnd": "2025-07-11",
-    "examsStart": "2025-07-14",
-    "examsEnd": "2025-07-25"
   },
   "calculationFactors": {
     "cpWorkloadFactor": 30,

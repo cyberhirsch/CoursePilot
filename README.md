@@ -1,6 +1,6 @@
 # CoursePilot
 
-CoursePilot is a Next.js application for academic program planning, module administration, room planning, and AI-assisted teaching-load optimization. It is aimed at higher-education teams that need to coordinate cohorts, curricula, room capacity, and semester-by-semester resource demand.
+CoursePilot is a Next.js application for academic program planning, module administration, room planning, and teaching-load coordination. It is aimed at higher-education teams that need to coordinate cohorts, curricula, room capacity, and semester-by-semester resource demand.
 
 The app currently runs as a local-first planning tool backed by JSON files in `data/`, with optional PocketBase persistence for shared deployments.
 
@@ -14,7 +14,6 @@ The app currently runs as a local-first planning tool backed by JSON files in `d
 - Room inventory, room occupancy, and room availability views.
 - Lecturer overview with assigned modules, daily SWS limits, and availability windows.
 - Automated weekly schedule generation based on cohort plans, room capacity/equipment, room blocks, lecturer availability, and conflict checks.
-- AI-assisted module consolidation suggestions using Google Genkit and Google AI.
 - German and English UI labels.
 
 Several navigation areas are scaffolded for future work. Examinations, user profile, and user groups currently render placeholder screens.
@@ -35,14 +34,12 @@ Several navigation areas are scaffolded for future work. Examinations, user prof
 - React 18 and TypeScript 5
 - Tailwind CSS 3 and shadcn/ui-style components
 - Radix UI, lucide-react, Recharts, and @hello-pangea/dnd
-- Google Genkit 1.13 with the Google AI provider
 - PocketBase client support for optional remote persistence
 
 ## Prerequisites
 
 - Node.js 20 or newer
 - npm
-- Optional: a Google AI API key for the optimization panel
 - Optional: a PocketBase instance with a `CoursePilot` collection containing a JSON `data` field
 
 ## Getting Started
@@ -70,11 +67,10 @@ The app works without environment variables by reading and writing the local JSO
 Create `.env.local` only when you want optional integrations:
 
 ```env
-GOOGLE_GENAI_API_KEY=your_google_ai_key
 NEXT_PUBLIC_POCKETBASE_URL=https://your-pocketbase.example.com
 ```
 
-`GOOGLE_GENAI_API_KEY` enables the Genkit optimization flow. `NEXT_PUBLIC_POCKETBASE_URL` switches data loading and saving to PocketBase. If the initial PocketBase read fails, the app falls back to local JSON data for that request.
+`NEXT_PUBLIC_POCKETBASE_URL` switches data loading and saving to PocketBase. If the initial PocketBase read fails, the app falls back to local JSON data for that request.
 
 ## Data
 
@@ -94,22 +90,6 @@ Local application data lives in `data/`:
 - `schedule.json`: the latest generated weekly schedule.
 
 The API route at `src/app/api/data/route.ts` reads this data through `src/lib/data-service.ts` and saves UI changes back after edits.
-
-## AI Optimization
-
-Start the Genkit Developer UI when working on the consolidation flow:
-
-```bash
-npm run genkit:dev
-```
-
-For watch mode:
-
-```bash
-npm run genkit:watch
-```
-
-The optimization flow is defined in `src/ai/flows/consolidate-modules.ts`. It analyzes module placements across cohorts and suggests same-semester consolidations while excluding locked modules.
 
 ## PocketBase
 
@@ -133,8 +113,6 @@ npm run build         # Create a production build
 npm run start         # Start the production server
 npm run lint          # Run Next linting
 npm run typecheck     # Run TypeScript without emitting files
-npm run genkit:dev    # Start Genkit Developer UI
-npm run genkit:watch  # Start Genkit Developer UI in watch mode
 ```
 
 ## Project Structure
@@ -142,7 +120,6 @@ npm run genkit:watch  # Start Genkit Developer UI in watch mode
 ```text
 src/app/                 Next.js routes, layout, API routes, and CoursePilot client shell
 src/components/          Planner, module, room, settings, and UI components
-src/ai/                  Genkit configuration and AI flows
 src/lib/                 Data service, PocketBase client, and utilities
 src/hooks/               Shared React hooks
 src/types.ts             Shared application types
@@ -168,6 +145,12 @@ npm run start
 
 CoursePilot uses server-side API routes for data access, so deploy it to an environment that supports Node.js.
 
+## License
+
+Copyright (c) 2026 Seb Hirsch. All rights reserved.
+
+This software is provided as "source available". Use, reproduction, or distribution is prohibited without explicit written permission. See [LICENSE.md](LICENSE.md) for details or contact [seb@coursepilot.de](mailto:seb@coursepilot.de) for inquiries.
+
 ## Status
 
-CoursePilot is in active development. The core planning, module, room, settings, and AI optimization surfaces are present; several administrative areas are intentionally scaffolded as placeholders.
+CoursePilot is in active development. The core planning, module, room, and settings surfaces are present; several administrative areas are intentionally scaffolded as placeholders.

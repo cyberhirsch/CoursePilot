@@ -33,6 +33,7 @@ export const TRANSLATIONS = {
             general: 'Allgemein',
             calendar: 'Kalender',
             variables: 'Variablen',
+            import: 'Import',
         },
         moduleOverview: {
             title: 'Modulübersicht',
@@ -121,18 +122,6 @@ export const TRANSLATIONS = {
         },
         optimization: {
             title: 'Planungsoptimierung',
-            description: 'Dieser KI-Assistent analysiert alle Pläne und Modulanforderungen, um potenzielle Zusammenlegungen zu finden. Das Ziel ist, den gesamten Lehrbedarf (SWS) zu minimieren und gleichzeitig alle curricularen Regeln einzuhalten.',
-            start: 'Optimierung starten',
-            analyzing: 'Analysiere...',
-            results: 'Ergebnisse',
-            summary: 'Zusammenfassung',
-            swsBefore: 'SWS vorher',
-            swsSaved: 'SWS gespart',
-            swsAfter: 'SWS nachher',
-            suggestions: 'Vorschläge zur Zusammenlegung',
-            noOptimization: 'Keine weiteren Optimierungen gefunden.',
-            groups: 'Gruppen',
-            hints: 'Hinweise',
         },
         semesterOverview: {
             title: 'Semesterübersicht',
@@ -177,6 +166,7 @@ export const TRANSLATIONS = {
             general: 'General',
             calendar: 'Calendar',
             variables: 'Variables',
+            import: 'Import',
         },
         moduleOverview: {
             title: 'Module Overview',
@@ -265,18 +255,6 @@ export const TRANSLATIONS = {
         },
         optimization: {
             title: 'Planning Optimization',
-            description: 'This AI assistant analyzes all plans and module requirements to find potential consolidations. The goal is to minimize total teaching demand (SWS) while respecting all curricular rules.',
-            start: 'Start Optimization',
-            analyzing: 'Analyzing...',
-            results: 'Results',
-            summary: 'Summary',
-            swsBefore: 'SWS Before',
-            swsSaved: 'SWS Saved',
-            swsAfter: 'SWS After',
-            suggestions: 'Consolidation Suggestions',
-            noOptimization: 'No further optimizations found.',
-            groups: 'Groups',
-            hints: 'Hints',
         },
         semesterOverview: {
             title: 'Semester Overview',

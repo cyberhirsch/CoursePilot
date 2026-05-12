@@ -1,7 +1,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { Module, Program, Cohort, Category, ProgramPlan, RawPlan, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability, SchedulePlan } from '@/types';
+import type { Module, Program, Cohort, Category, ProgramPlan, RawPlan, Catalogs, User, Room, SystemSettings, AcademicCalendar, SemesterPeriod, RoomAssignment, LecturerAvailability, SchedulePlan } from '@/types';
 import pb from './pocketbase';
 
 interface AppData {
@@ -18,6 +18,122 @@ interface AppData {
     lecturerAvailabilities: LecturerAvailability[];
     schedulePlan: SchedulePlan | null;
 }
+
+const DEFAULT_CATALOGS: Catalogs = {
+    examTypes: [],
+    teachingMethods: [],
+    languages: [],
+    personInCharge: [],
+};
+
+const toDateInputValue = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const addDays = (date: Date, days: number) => {
+    const next = new Date(date);
+    next.setDate(next.getDate() + days);
+    return next;
+};
+
+const firstMondayOnOrAfter = (year: number, monthIndex: number, day: number) => {
+    const date = new Date(year, monthIndex, day);
+    while (date.getDay() !== 1) {
+        date.setDate(date.getDate() + 1);
+    }
+    return date;
+};
+
+const lastFridayOfMonth = (year: number, monthIndex: number) => {
+    const date = new Date(year, monthIndex + 1, 0);
+    while (date.getDay() !== 5) {
+        date.setDate(date.getDate() - 1);
+    }
+    return date;
+};
+
+const createUpcomingSemester = (now = new Date()): SemesterPeriod => {
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const createSummerSemester = currentMonth < 3 || currentMonth >= 9;
+    const year = createSummerSemester
+        ? currentMonth >= 9 ? currentYear + 1 : currentYear
+        : currentYear;
+
+    if (createSummerSemester) {
+        const lecturesStart = firstMondayOnOrAfter(year, 2, 15);
+        const lecturesEnd = addDays(lecturesStart, 15 * 7 + 4);
+        const examsStart = addDays(lecturesEnd, 3);
+        const examsEnd = addDays(examsStart, 11);
+
+        return {
+            id: `ss${year}`,
+            name: `SS ${year}`,
+            type: 'SS',
+            year,
+            lecturesStart: toDateInputValue(lecturesStart),
+            lecturesEnd: toDateInputValue(lecturesEnd),
+            examsStart: toDateInputValue(examsStart),
+            examsEnd: toDateInputValue(examsEnd),
+        };
+    }
+
+    const lecturesStart = new Date(year, 9, 1);
+    const lecturesEnd = lastFridayOfMonth(year + 1, 0);
+    const examsStart = addDays(lecturesEnd, 3);
+    const examsEnd = addDays(examsStart, 11);
+
+    return {
+        id: `ws${year}`,
+        name: `WS ${year}/${String(year + 1).slice(-2)}`,
+        type: 'WS',
+        year,
+        lecturesStart: toDateInputValue(lecturesStart),
+        lecturesEnd: toDateInputValue(lecturesEnd),
+        examsStart: toDateInputValue(examsStart),
+        examsEnd: toDateInputValue(examsEnd),
+        lectureBreakStart: `${year}-12-23`,
+        lectureBreakEnd: `${year + 1}-01-05`,
+    };
+};
+
+const createDefaultAcademicCalendar = (): AcademicCalendar => ({
+    academicYearStartMonth: 10,
+    semesters: [createUpcomingSemester()],
+});
+
+const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
+    currentSemester: createUpcomingSemester().id,
+    academicCalendar: {
+        lecturesStart: '',
+        lecturesEnd: '',
+        examsStart: '',
+        examsEnd: '',
+    },
+    institutions: {
+        defaultLocation: '',
+        campusLocations: [],
+    },
+    calculationFactors: {
+        cpWorkloadFactor: 30,
+        swsDurationMinutes: 45,
+        defaultRoomBufferMinutes: 15,
+    },
+    daySchedule: {
+        startHour: '08:00',
+        endHour: '18:00',
+        standardPauseMinutes: 15,
+        eventBreakDurationMinutes: 15,
+        eventBreakIntervalMinutes: 90,
+        plannedWeekdays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+        useLunchBreak: false,
+        lunchBreakStart: '12:00',
+        lunchBreakEnd: '13:00',
+    },
+};
 
 const dataDir = process.env.COURSEPILOT_DATA_DIR || path.join(process.cwd(), 'data');
 const cohortsFilePath = path.join(dataDir, 'cohorts.json');
@@ -47,6 +163,46 @@ async function readJsonFile<T>(filePath: string): Promise<T> {
         throw error;
     }
 }
+
+const normalizeCatalogs = (catalogs?: Partial<Catalogs> | null): Catalogs => ({
+    ...DEFAULT_CATALOGS,
+    ...(catalogs || {}),
+    examTypes: catalogs?.examTypes || [],
+    teachingMethods: catalogs?.teachingMethods || [],
+    languages: catalogs?.languages || [],
+    personInCharge: catalogs?.personInCharge || [],
+});
+
+const normalizeAcademicCalendar = (calendar?: Partial<AcademicCalendar> | null): AcademicCalendar => ({
+    ...createDefaultAcademicCalendar(),
+    ...(calendar || {}),
+    semesters: calendar?.semesters?.length ? calendar.semesters : [createUpcomingSemester()],
+});
+
+const normalizeSystemSettings = (settings?: Partial<SystemSettings> | null): SystemSettings => ({
+    ...DEFAULT_SYSTEM_SETTINGS,
+    ...(settings || {}),
+    academicCalendar: {
+        ...DEFAULT_SYSTEM_SETTINGS.academicCalendar,
+        ...(settings?.academicCalendar || {}),
+    },
+    institutions: {
+        ...DEFAULT_SYSTEM_SETTINGS.institutions,
+        ...(settings?.institutions || {}),
+        campusLocations: settings?.institutions?.campusLocations || [],
+    },
+    calculationFactors: {
+        ...DEFAULT_SYSTEM_SETTINGS.calculationFactors,
+        ...(settings?.calculationFactors || {}),
+    },
+    daySchedule: {
+        ...DEFAULT_SYSTEM_SETTINGS.daySchedule,
+        ...(settings?.daySchedule || {}),
+        plannedWeekdays: settings?.daySchedule?.plannedWeekdays?.length
+            ? settings.daySchedule.plannedWeekdays
+            : DEFAULT_SYSTEM_SETTINGS.daySchedule.plannedWeekdays,
+    },
+});
 
 // Transforms the new plan format (module: semester) into the old one (semesters: {sem1: [modules]})
 function transformPlan(plan: RawPlan | undefined, allModules: Module[]): ProgramPlan {
@@ -174,12 +330,12 @@ export async function getAllData(): Promise<AppData> {
                 programs: transformedPrograms,
                 cohorts,
                 categories: data.categories,
-                catalogs: data.catalogs || { examTypes: [], teachingMethods: [], languages: [], personInCharge: [] },
+                catalogs: normalizeCatalogs(data.catalogs),
                 users: data.users || [],
                 rooms: data.rooms || [],
                 roomAssignments: data.roomAssignments || [],
-                systemSettings: data.systemSettings || {} as any,
-                academicCalendar: data.academicCalendar || { academicYearStartMonth: 10, semesters: [] },
+                systemSettings: normalizeSystemSettings(data.systemSettings),
+                academicCalendar: normalizeAcademicCalendar(data.academicCalendar),
                 lecturerAvailabilities: data.lecturerAvailabilities || [],
                 schedulePlan: data.schedulePlan || null
             };
@@ -207,17 +363,12 @@ export async function getAllData(): Promise<AppData> {
         readJsonFile<Program[]>(programsFilePath),
         readJsonFile<any[]>(cohortsFilePath),
         readJsonFile<Category[]>(categoriesFilePath),
-        readJsonFile<Catalogs>(catalogsFilePath).catch(() => ({
-            examTypes: [],
-            teachingMethods: [],
-            languages: [],
-            personInCharge: []
-        } as Catalogs)),
+        readJsonFile<Catalogs>(catalogsFilePath).catch(() => DEFAULT_CATALOGS),
         readJsonFile<User[]>(usersFilePath).catch(() => []),
         readJsonFile<Room[]>(roomsFilePath).catch(() => []),
         readJsonFile<RoomAssignment[]>(roomOccupancyFilePath).catch(() => []),
-        readJsonFile<SystemSettings>(systemSettingsFilePath).catch(() => ({} as SystemSettings)),
-        readJsonFile<AcademicCalendar>(academicCalendarFilePath).catch(() => ({ academicYearStartMonth: 10, semesters: [] })),
+        readJsonFile<SystemSettings>(systemSettingsFilePath).catch(() => DEFAULT_SYSTEM_SETTINGS),
+        readJsonFile<AcademicCalendar>(academicCalendarFilePath).catch(() => createDefaultAcademicCalendar()),
         readJsonFile<LecturerAvailability[]>(lecturerAvailabilityFilePath).catch(() => []),
         readJsonFile<SchedulePlan | null>(scheduleFilePath).catch(() => null),
     ]);
@@ -248,12 +399,12 @@ export async function getAllData(): Promise<AppData> {
         programs: transformedPrograms,
         cohorts: cohortsData,
         categories,
-        catalogs,
+        catalogs: normalizeCatalogs(catalogs),
         users,
         rooms: (roomsData as any).rooms || roomsData,
         roomAssignments: (roomsData as any).roomAssignments || roomAssignments,
-        systemSettings: (roomsData as any).systemSettings || systemSettings,
-        academicCalendar: (roomsData as any).academicCalendar || academicCalendar,
+        systemSettings: normalizeSystemSettings((roomsData as any).systemSettings || systemSettings),
+        academicCalendar: normalizeAcademicCalendar((roomsData as any).academicCalendar || academicCalendar),
         lecturerAvailabilities,
         schedulePlan,
     };
@@ -311,6 +462,8 @@ export async function saveData(data: AppData): Promise<void> {
             }
             console.log("Data saved to PocketBase (single doc).");
         } else {
+            await fs.mkdir(dataDir, { recursive: true });
+
             await Promise.all([
                 fs.writeFile(modulesFilePath, JSON.stringify(modulesToSave, null, 2), 'utf-8'),
                 fs.writeFile(programsFilePath, JSON.stringify(programsToSave, null, 2), 'utf-8'),

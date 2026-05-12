@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import type { Module, Program, Cohort, AbsoluteSemester, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability as LecturerAvailabilityData, SchedulePlan } from '@/types';
+import type { Module, Program, Cohort, AbsoluteSemester, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability as LecturerAvailabilityData, SchedulePlan, CoursePilotData } from '@/types';
 import { TRANSLATIONS, DEFAULT_LANGUAGE } from '@/translations';
 import { ProgramPlannerGrid } from '@/components/ProgramPlannerGrid';
 import { SemesterOverview } from '@/components/SemesterOverview';
@@ -16,6 +16,7 @@ import { RoomAvailability } from '@/components/RoomAvailability';
 import { SettingsVariables } from '@/components/SettingsVariables';
 import { SettingsGeneral } from '@/components/SettingsGeneral';
 import { SettingsCalendar } from '@/components/SettingsCalendar';
+import { SettingsImport } from '@/components/SettingsImport';
 import { LecturerOverview } from '@/components/LecturerOverview';
 import { LecturerAvailability as LecturerAvailabilityView } from '@/components/LecturerAvailability';
 import { SchedulePlanner } from '@/components/SchedulePlanner';
@@ -75,6 +76,7 @@ interface PlannerBoardProps {
   onUpdateLecturerAvailabilities?: (availabilities: LecturerAvailabilityData[]) => void;
   schedulePlan?: SchedulePlan | null;
   onUpdateSchedulePlan?: (plan: SchedulePlan | null) => void;
+  onImportData?: (updates: Partial<CoursePilotData>) => void;
 }
 
 export const PlannerBoard: React.FC<PlannerBoardProps> = ({
@@ -130,6 +132,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
   onUpdateLecturerAvailabilities = () => { },
   schedulePlan = null,
   onUpdateSchedulePlan = () => { },
+  onImportData,
 }) => {
   const t = TRANSLATIONS[lang];
 
@@ -209,13 +212,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
   }
 
   if (viewMode === 'optimization') {
-    return <OptimizationPanel
-      cohorts={cohorts}
-      modules={modules}
-      programs={programs}
-      finalLockedModulesMap={finalLockedModulesMap}
-      lang={lang}
-    />
+    return <OptimizationPanel lang={lang} />
   }
 
   if (viewMode === 'exam-transcript') {
@@ -330,6 +327,27 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
       onAddCategory={onAddCategory}
       onUpdateCategory={onUpdateCategory}
       onDeleteCategory={onDeleteCategory}
+      lang={lang}
+    />;
+  }
+
+  if (viewMode === 'settings-import') {
+    return <SettingsImport
+      currentData={{
+        modules,
+        programs,
+        cohorts,
+        categories,
+        catalogs,
+        users,
+        rooms,
+        roomAssignments,
+        systemSettings,
+        academicCalendar,
+        lecturerAvailabilities,
+        schedulePlan,
+      }}
+      onImportData={onImportData}
       lang={lang}
     />;
   }

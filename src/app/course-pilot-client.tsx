@@ -5,7 +5,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { PlannerBoard } from '@/components/PlannerBoard';
 import { DEFAULT_LANGUAGE, type Language } from '@/translations';
-import type { Plan, Module, Program, Cohort, AbsoluteSemester, ProgramPlan, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability, SchedulePlan } from '@/types';
+import type { Plan, Module, Program, Cohort, AbsoluteSemester, ProgramPlan, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability, SchedulePlan, CoursePilotData } from '@/types';
 import { RELATIVE_SEMESTERS, getAbsoluteSemesterFor } from '@/constants';
 import { LoadingSpinner } from '@/components/icons/LoadingSpinner';
 import { reconcileScheduleAfterAssignmentChange } from '@/lib/schedule-optimizer';
@@ -92,9 +92,15 @@ export default function CoursePilotClient() {
   const [roomAssignments, setRoomAssignments] = useState<RoomAssignment[]>([]);
   const [lecturerAvailabilities, setLecturerAvailabilities] = useState<LecturerAvailability[]>([]);
   const [schedulePlan, setSchedulePlan] = useState<SchedulePlan | null>(null);
+  const [hasLoadedData, setHasLoadedData] = useState(false);
 
   useEffect(() => {
     fetchData().then(data => {
+      const loadedCalendar = data.academicCalendar as AcademicCalendar | undefined;
+      const defaultSemester = loadedCalendar
+        ? getDefaultFutureSemester(loadedCalendar.semesters) || loadedCalendar.semesters[0]
+        : undefined;
+
       setModules(data.modules);
       setPrograms(data.programs);
       setCohorts(data.cohorts);
@@ -103,10 +109,12 @@ export default function CoursePilotClient() {
       if (data.users) setUsers(data.users);
       if (data.rooms) setRooms(data.rooms);
       if (data.systemSettings) setSystemSettings(data.systemSettings);
-      if (data.academicCalendar) setAcademicCalendar(data.academicCalendar);
+      if (loadedCalendar) setAcademicCalendar(loadedCalendar);
+      if (defaultSemester) setSelectedSemester(defaultSemester);
       if (data.roomAssignments) setRoomAssignments(data.roomAssignments);
       if (data.lecturerAvailabilities) setLecturerAvailabilities(data.lecturerAvailabilities);
       if (typeof data.schedulePlan !== 'undefined') setSchedulePlan(data.schedulePlan);
+      setHasLoadedData(true);
       setIsMounted(true);
     }).catch(e => {
       console.error("Failed to load from backend", e);
@@ -117,18 +125,16 @@ export default function CoursePilotClient() {
   const fullData = useMemo(() => ({ modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar, lecturerAvailabilities, schedulePlan }), [modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar, lecturerAvailabilities, schedulePlan]);
 
   useEffect(() => {
-    if (isMounted) {
+    if (hasLoadedData) {
       const handler = setTimeout(() => {
-        if (fullData.modules.length > 0) {
-          postData(fullData);
-        }
+        postData(fullData);
       }, 1000);
 
       return () => {
         clearTimeout(handler);
       };
     }
-  }, [fullData, isMounted]);
+  }, [fullData, hasLoadedData]);
 
 
   const [activeCohortIds, setActiveCohortIds] = useState<string[]>([]);
@@ -564,6 +570,21 @@ export default function CoursePilotClient() {
     setRoomAssignments(nextAssignments);
   }, [roomAssignments, rooms, schedulePlan]);
 
+  const handleImportData = useCallback((updates: Partial<CoursePilotData>) => {
+    if (updates.modules) setModules(updates.modules);
+    if (updates.programs) setPrograms(updates.programs);
+    if (updates.cohorts) setCohorts(updates.cohorts);
+    if (updates.categories) setCategories(updates.categories);
+    if (updates.catalogs) setCatalogs(updates.catalogs);
+    if (updates.users) setUsers(updates.users);
+    if (updates.rooms) setRooms(updates.rooms);
+    if (updates.roomAssignments) setRoomAssignments(updates.roomAssignments);
+    if (updates.systemSettings) setSystemSettings(updates.systemSettings);
+    if (updates.academicCalendar) setAcademicCalendar(updates.academicCalendar);
+    if (updates.lecturerAvailabilities) setLecturerAvailabilities(updates.lecturerAvailabilities);
+    if ('schedulePlan' in updates) setSchedulePlan(updates.schedulePlan ?? null);
+  }, []);
+
   const handleAddCohort = useCallback((newCohort: Cohort, saveAsTemplate?: boolean) => {
     if (cohorts.some(sg => sg.id === newCohort.id)) {
       alert(`Eine Studiengruppe mit der ID "${newCohort.id}" existiert bereits.`);
@@ -597,6 +618,15 @@ export default function CoursePilotClient() {
     );
   }
 
+  const displaySelectedSemester = selectedSemester || academicCalendar?.semesters?.[0];
+  if (!displaySelectedSemester) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-sm text-muted-foreground italic">Lade Semesterdaten...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header
@@ -617,7 +647,7 @@ export default function CoursePilotClient() {
           onDragStart={handleDragStart}
           cohorts={cohorts}
           activeCohorts={activeCohorts}
-          selectedSemester={selectedSemester!}
+          selectedSemester={displaySelectedSemester!}
           setSelectedSemester={setSelectedSemester}
           semesters={academicCalendar?.semesters || []}
           onSelectGroup={handleSelectGroup}
@@ -661,8 +691,12 @@ export default function CoursePilotClient() {
           onUpdateLecturerAvailabilities={setLecturerAvailabilities}
           schedulePlan={schedulePlan}
           onUpdateSchedulePlan={setSchedulePlan}
+          onImportData={handleImportData}
         />
       </main>
+      <footer className="border-t border-border px-6 py-2 text-center text-[11px] font-medium text-muted-foreground">
+        Copyright (c) 2026 Seb Hirsch
+      </footer>
     </div>
   );
 };
