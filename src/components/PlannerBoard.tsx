@@ -5,10 +5,11 @@ import React from 'react';
 import type { Module, Program, Cohort, AbsoluteSemester, MainCategory, PlannerViewMode, Category, Catalogs, User, Room, SystemSettings, AcademicCalendar, RoomAssignment, LecturerAvailability as LecturerAvailabilityData, SchedulePlan, CoursePilotData } from '@/types';
 import { TRANSLATIONS, DEFAULT_LANGUAGE } from '@/translations';
 import { ProgramPlannerGrid } from '@/components/ProgramPlannerGrid';
+import { ProgramOverview } from '@/components/ProgramOverview';
+import { DepartmentManagement } from '@/components/DepartmentManagement';
 import { SemesterOverview } from '@/components/SemesterOverview';
 import { ModuleOverview } from '@/components/ModuleOverview';
 import { ModuleDetailView } from '@/components/ModuleDetailView';
-import { OptimizationPanel } from '@/components/OptimizationPanel';
 import { PlaceholderPage } from '@/components/PlaceholderPage';
 import { RoomOverview } from '@/components/RoomOverview';
 import { RoomOccupancy } from '@/components/RoomOccupancy';
@@ -54,7 +55,12 @@ interface PlannerBoardProps {
   onUpdateCategory: (categoryId: string, updates: Partial<Category>) => void;
   onDeleteCategory: (categoryId: string) => void;
   onAddCohort: (newCohort: Cohort, saveAsTemplate?: boolean) => boolean;
+  onAddProgram: (program: Program) => boolean;
   onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
+  departments: string[];
+  onAddDepartment: (name: string) => boolean;
+  onUpdateDepartment: (oldName: string, newName: string) => boolean;
+  onDeleteDepartment: (name: string) => boolean;
   lang?: keyof typeof TRANSLATIONS;
   catalogs?: Catalogs;
   onUpdateCatalogs?: (catalogs: Catalogs) => void;
@@ -110,7 +116,12 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
   onUpdateCategory,
   onDeleteCategory,
   onAddCohort,
+  onAddProgram,
   onUpdateProgram,
+  departments,
+  onAddDepartment,
+  onUpdateDepartment,
+  onDeleteDepartment,
   lang = DEFAULT_LANGUAGE,
   catalogs,
   onUpdateCatalogs,
@@ -136,7 +147,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
 }) => {
   const t = TRANSLATIONS[lang];
 
-  if (mainCategory !== 'semester-plan' && mainCategory !== 'schedule' && mainCategory !== 'modules' && mainCategory !== 'lecturers' && mainCategory !== 'rooms' && mainCategory !== 'user-management' && mainCategory !== 'settings' && mainCategory !== 'examinations') {
+  if (mainCategory !== 'semester-plan' && mainCategory !== 'departments' && mainCategory !== 'schedule' && mainCategory !== 'modules' && mainCategory !== 'lecturers' && mainCategory !== 'rooms' && mainCategory !== 'user-management' && mainCategory !== 'settings' && mainCategory !== 'examinations') {
     const fallbackKey = String(mainCategory).replace(/-./g, (match: string) => match[1].toUpperCase()) as keyof typeof t.navigation;
     return <PlaceholderPage title={t.navigation[fallbackKey] || String(mainCategory)} />;
   }
@@ -161,6 +172,19 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     />;
   }
 
+  if (viewMode === 'departments' || mainCategory === 'departments') {
+    return <DepartmentManagement
+      departments={departments}
+      modules={modules}
+      programs={programs}
+      users={users}
+      onAddDepartment={onAddDepartment}
+      onUpdateDepartment={onUpdateDepartment}
+      onDeleteDepartment={onDeleteDepartment}
+      lang={lang}
+    />;
+  }
+
   if (viewMode === 'modules') {
     return <ModuleOverview
       modules={modules}
@@ -181,6 +205,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
       onUpdateCategory={onUpdateCategory}
       onDeleteCategory={onDeleteCategory}
       catalogs={catalogs}
+      departments={departments}
       lang={lang}
     />;
   }
@@ -211,8 +236,16 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
     />
   }
 
-  if (viewMode === 'optimization') {
-    return <OptimizationPanel lang={lang} />
+  if (viewMode === 'programs') {
+    return <ProgramOverview
+      programs={programs}
+      modules={modules}
+      cohorts={cohorts}
+      onAddProgram={onAddProgram}
+      onUpdateProgram={onUpdateProgram}
+      departments={departments}
+      lang={lang}
+    />
   }
 
   if (viewMode === 'exam-transcript') {
@@ -288,6 +321,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
       onAddUser={onAddUser}
       onUpdateUser={onUpdateUser}
       onDeleteUser={onDeleteUser}
+      departments={departments}
       mode="profile"
     />;
   }
@@ -299,6 +333,7 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
       onAddUser={onAddUser}
       onUpdateUser={onUpdateUser}
       onDeleteUser={onDeleteUser}
+      departments={departments}
       mode="groups"
     />;
   }
@@ -397,7 +432,9 @@ export const PlannerBoard: React.FC<PlannerBoardProps> = ({
         activeBulkLocks={activeBulkLocks[activeGruppe.id]}
         finalLockedInstances={finalLockedModulesMap.get(activeGruppe.id) || new Set()}
         onAddCohort={onAddCohort}
+        onAddProgram={onAddProgram}
         onUpdateProgram={onUpdateProgram}
+        departments={departments}
         lang={lang}
         allSemesters={semesters}
       />

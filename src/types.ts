@@ -59,7 +59,7 @@ export interface Module {
   duration?: string; // e.g. "1 Semester"
   frequency?: string; // e.g. "jedes Semester"
   shortName?: string;
-  department?: 'Design' | 'Psychologie' | 'Wirtschaft';
+  department?: string;
   instanceCount?: number;
   description?: string;
   learningOutcomes?: string; // Markdown or text
@@ -89,7 +89,7 @@ export interface Program {
   semesters: number;
   categoryOrder?: string[];
   templatePlan?: ProgramPlan;
-  department?: 'Design' | 'Psychologie' | 'Wirtschaft';
+  department?: string;
 }
 
 export type SemesterType = 'WS' | 'SS';
@@ -99,6 +99,7 @@ export interface Catalogs {
   teachingMethods: string[];
   languages: string[];
   personInCharge?: string[];
+  departments?: string[];
 }
 
 export interface AbsoluteSemester {
@@ -242,8 +243,8 @@ export interface LecturerAvailability {
   notes?: string;
 }
 
-export type MainCategory = 'semester-plan' | 'schedule' | 'examinations' | 'user-management' | 'settings' | 'modules' | 'rooms' | 'lecturers';
-export type PlannerViewMode = 'semester' | 'group' | 'modules' | 'optimization' | 'schedule-planner' | 'module-details' | 'lecturer-overview' | 'availability' | 'room-overview' | 'room-occupancy' | 'room-availability' | 'user-profile' | 'user-groups' | 'settings-general' | 'settings-variables' | 'settings-calendar' | 'settings-import' | 'exam-transcript' | 'exam-grading' | 'exam-admin' | 'exam-schedule';
+export type MainCategory = 'semester-plan' | 'departments' | 'schedule' | 'examinations' | 'user-management' | 'settings' | 'modules' | 'rooms' | 'lecturers';
+export type PlannerViewMode = 'semester' | 'group' | 'programs' | 'departments' | 'modules' | 'schedule-planner' | 'module-details' | 'lecturer-overview' | 'availability' | 'room-overview' | 'room-occupancy' | 'room-availability' | 'user-profile' | 'user-groups' | 'settings-general' | 'settings-variables' | 'settings-calendar' | 'settings-import' | 'exam-transcript' | 'exam-grading' | 'exam-admin' | 'exam-schedule';
 
 export interface RoomAssignment {
   id: string;

@@ -24,6 +24,7 @@ const DEFAULT_CATALOGS: Catalogs = {
     teachingMethods: [],
     languages: [],
     personInCharge: [],
+    departments: [],
 };
 
 const toDateInputValue = (date: Date) => {
@@ -164,13 +165,23 @@ async function readJsonFile<T>(filePath: string): Promise<T> {
     }
 }
 
-const normalizeCatalogs = (catalogs?: Partial<Catalogs> | null): Catalogs => ({
+const uniqueSorted = (values: string[]) => {
+    return Array.from(new Set(values.map(value => value.trim()).filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b));
+};
+
+const collectDepartmentNames = (...collections: Array<Array<{ department?: string | null; fachbereich?: string | null }>>) => {
+    return uniqueSorted(collections.flatMap(collection => collection.map(item => item.department || item.fachbereich || '')));
+};
+
+const normalizeCatalogs = (catalogs?: Partial<Catalogs> | null, inferredDepartments: string[] = []): Catalogs => ({
     ...DEFAULT_CATALOGS,
     ...(catalogs || {}),
     examTypes: catalogs?.examTypes || [],
     teachingMethods: catalogs?.teachingMethods || [],
     languages: catalogs?.languages || [],
     personInCharge: catalogs?.personInCharge || [],
+    departments: uniqueSorted([...(catalogs?.departments || []), ...inferredDepartments]),
 });
 
 const normalizeAcademicCalendar = (calendar?: Partial<AcademicCalendar> | null): AcademicCalendar => ({
@@ -320,17 +331,18 @@ export async function getAllData(): Promise<AppData> {
 
             const enrichedModules = data.modules.map(m => ({
                 ...m,
-                department: m.department || 'Design',
+                department: m.department || (m as any).fachbereich || '',
                 workload: m.workload || (m.cp || 0) * 30,
                 shortName: m.shortName || m.name.substring(0, 5)
             }));
+            const inferredDepartments = collectDepartmentNames(enrichedModules, transformedPrograms, data.users || []);
 
             return {
                 modules: enrichedModules,
                 programs: transformedPrograms,
                 cohorts,
                 categories: data.categories,
-                catalogs: normalizeCatalogs(data.catalogs),
+                catalogs: normalizeCatalogs(data.catalogs, inferredDepartments),
                 users: data.users || [],
                 rooms: data.rooms || [],
                 roomAssignments: data.roomAssignments || [],
@@ -389,17 +401,18 @@ export async function getAllData(): Promise<AppData> {
 
     const enrichedModules = modules.map(m => ({
         ...m,
-        department: m.department || 'Design',
+        department: m.department || (m as any).fachbereich || '',
         workload: m.workload || (m.cp || 0) * 30,
         shortName: m.shortName || m.name.substring(0, 5)
     }));
+    const inferredDepartments = collectDepartmentNames(enrichedModules, transformedPrograms, users);
 
     return {
         modules: enrichedModules,
         programs: transformedPrograms,
         cohorts: cohortsData,
         categories,
-        catalogs: normalizeCatalogs(catalogs),
+        catalogs: normalizeCatalogs(catalogs, inferredDepartments),
         users,
         rooms: (roomsData as any).rooms || roomsData,
         roomAssignments: (roomsData as any).roomAssignments || roomAssignments,
@@ -418,7 +431,7 @@ export async function saveData(data: AppData): Promise<void> {
         const { modules, programs, cohorts } = data;
 
         // Strip UI-only fields from modules before saving
-        const modulesToSave = modules.map(({ department, workload, shortName, ...rest }) => rest);
+        const modulesToSave = modules.map(({ workload, shortName, ...rest }) => rest);
 
         const cohortsToSave = cohorts.map(sg => {
             const { plan, ...rest } = sg;

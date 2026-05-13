@@ -2,12 +2,12 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { Cohort, Module, AbsoluteSemester, Program } from '../types';
 import { getRelativeSemesterIndex, RELATIVE_SEMESTERS } from '../constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { TRANSLATIONS, DEFAULT_LANGUAGE } from '@/translations';
 
 interface ProgramSectionProps {
@@ -18,9 +18,10 @@ interface ProgramSectionProps {
     getModuleById: (id: string) => Module | undefined;
     onSelectGroup: (cohortId: string) => void;
     allSemesters: AbsoluteSemester[];
+    onRemove?: () => void;
 }
 
-const ProgramSection: React.FC<ProgramSectionProps & { lang?: keyof typeof TRANSLATIONS }> = ({ program, cohorts, modules, selectedSemester, getModuleById, onSelectGroup, allSemesters, lang = DEFAULT_LANGUAGE }) => {
+const ProgramSection: React.FC<ProgramSectionProps & { lang?: keyof typeof TRANSLATIONS }> = ({ program, cohorts, modules, selectedSemester, getModuleById, onSelectGroup, allSemesters, onRemove, lang = DEFAULT_LANGUAGE }) => {
     const t = TRANSLATIONS[lang];
 
     const relevantGroups = useMemo(() => cohorts
@@ -82,8 +83,21 @@ const ProgramSection: React.FC<ProgramSectionProps & { lang?: keyof typeof TRANS
 
     return (
         <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
-            <div className="p-4 border-b border-border">
+            <div className="p-4 border-b border-border flex items-start justify-between gap-3">
                 <h3 className="text-xl font-bold">{program.name}</h3>
+                {onRemove && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={onRemove}
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+                        aria-label={(t.semesterOverview?.removeProgram || 'Studiengang aus Übersicht entfernen').replace('{name}', program.name)}
+                        title={(t.semesterOverview?.removeProgram || 'Studiengang aus Übersicht entfernen').replace('{name}', program.name)}
+                    >
+                        <X className="h-4 w-4" />
+                    </Button>
+                )}
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -238,6 +252,59 @@ export const SemesterOverview: React.FC<{
             return groups;
         }, [cohorts]);
 
+        const availableProgramSections = useMemo(() => {
+            return Object.entries(groupedByProgram)
+                .map(([programId, programCohorts]) => {
+                    const program = programs.find(p => p.id === programId);
+                    if (!program) return null;
+
+                    const hasVisibleCohort = programCohorts.some(cohort => {
+                        const relativeIndex = getRelativeSemesterIndex(semesters, cohort.startSemester, selectedSemester);
+                        return relativeIndex >= 0 && relativeIndex < program.semesters;
+                    });
+                    if (!hasVisibleCohort) return null;
+
+                    return { program, cohorts: programCohorts };
+                })
+                .filter(Boolean)
+                .sort((a, b) => a!.program.name.localeCompare(b!.program.name)) as { program: Program; cohorts: Cohort[] }[];
+        }, [groupedByProgram, programs, selectedSemester, semesters]);
+
+        const availableProgramIds = useMemo(
+            () => availableProgramSections.map(section => section.program.id),
+            [availableProgramSections]
+        );
+        const [selectedProgramIds, setSelectedProgramIds] = useState<string[] | null>(null);
+
+        useEffect(() => {
+            setSelectedProgramIds(prev => {
+                if (prev === null) return prev;
+                const next = prev.filter(programId => availableProgramIds.includes(programId));
+                return next.length === prev.length && next.every((programId, index) => programId === prev[index])
+                    ? prev
+                    : next;
+            });
+        }, [availableProgramIds]);
+
+        const displayedProgramIds = selectedProgramIds ?? availableProgramIds;
+        const displayedProgramSections = availableProgramSections.filter(section => displayedProgramIds.includes(section.program.id));
+        const hiddenProgramSections = availableProgramSections.filter(section => !displayedProgramIds.includes(section.program.id));
+
+        const handleAddProgramToOverview = (programId: string) => {
+            setSelectedProgramIds(prev => {
+                const currentProgramIds = prev ?? displayedProgramIds;
+                if (currentProgramIds.includes(programId)) return currentProgramIds;
+                return [...currentProgramIds, programId];
+            });
+        };
+
+        const handleRemoveProgramFromOverview = (programId: string) => {
+            setSelectedProgramIds(prev => {
+                const currentProgramIds = prev ?? displayedProgramIds;
+                return currentProgramIds.filter(id => id !== programId);
+            });
+        };
+
         const poolMetrics = useMemo(() => {
             const participantGroups: Record<string, Set<string>> = {
                 'WP1-8': new Set<string>(),
@@ -298,8 +365,8 @@ export const SemesterOverview: React.FC<{
 
         return (
             <div className="h-full flex flex-col gap-4">
-                <div className="flex justify-between items-center gap-8">
-                    <div className="flex items-center gap-4">
+                <div className="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4">
                         <h2 className="text-xl font-bold text-foreground">{t.semesterOverview.title}:</h2>
                         <div className="flex items-center gap-1">
                             <Button variant="ghost" size="icon" onClick={() => handleSemesterChange('prev')}><ChevronLeft className="h-4 w-4" /></Button>
@@ -313,6 +380,26 @@ export const SemesterOverview: React.FC<{
                             </Select>
                             <Button variant="ghost" size="icon" onClick={() => handleSemesterChange('next')}><ChevronRight className="h-4 w-4" /></Button>
                         </div>
+                        <select
+                            value=""
+                            onChange={event => {
+                                if (event.target.value) {
+                                    handleAddProgramToOverview(event.target.value);
+                                }
+                            }}
+                            disabled={hiddenProgramSections.length === 0}
+                            className="h-10 min-w-[260px] rounded-md border border-input bg-background px-3 py-2 text-sm font-medium disabled:opacity-50"
+                            aria-label={t.semesterOverview?.addProgram || 'Studiengang zur Übersicht hinzufügen'}
+                        >
+                            <option value="">
+                                {hiddenProgramSections.length > 0
+                                    ? t.semesterOverview?.addProgram || 'Studiengang hinzufügen'
+                                    : t.semesterOverview?.allProgramsVisible || 'Alle Studiengänge sichtbar'}
+                            </option>
+                            {hiddenProgramSections.map(({ program }) => (
+                                <option key={program.id} value={program.id}>{program.name}</option>
+                            ))}
+                        </select>
                     </div>
                     <div className="bg-card border border-border rounded-lg p-3 flex items-stretch">
                         <div className="grid grid-cols-3 divide-x divide-border">
@@ -344,25 +431,30 @@ export const SemesterOverview: React.FC<{
                     </div>
                 </div>
 
-                <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-auto">
-                    {Object.entries(groupedByProgram).map(([programId, cohorts]) => {
-                        const program = programs.find(p => p.id === programId);
-                        if (!program) return null;
-
-                        return (
-                            <ProgramSection
-                                key={programId}
-                                program={program}
-                                cohorts={cohorts}
-                                modules={modules}
-                                selectedSemester={selectedSemester}
-                                getModuleById={getModuleById}
-                                onSelectGroup={onSelectGroup}
-                                allSemesters={semesters}
-                                lang={lang}
-                            />
-                        )
-                    })}
+                <div className="flex-grow min-h-0 min-w-0 overflow-x-auto overflow-y-auto pb-4">
+                    {displayedProgramSections.length > 0 ? (
+                        <div className="flex w-max gap-6 pr-4">
+                            {displayedProgramSections.map(({ program, cohorts }) => (
+                                <div key={program.id} className="w-[calc(50vw-2rem)] min-w-[720px] max-w-[980px] shrink-0">
+                                    <ProgramSection
+                                        program={program}
+                                        cohorts={cohorts}
+                                        modules={modules}
+                                        selectedSemester={selectedSemester}
+                                        getModuleById={getModuleById}
+                                        onSelectGroup={onSelectGroup}
+                                        allSemesters={semesters}
+                                        onRemove={() => handleRemoveProgramFromOverview(program.id)}
+                                        lang={lang}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="h-full min-h-[260px] flex items-center justify-center rounded-lg border border-dashed border-border bg-card/50 text-sm text-muted-foreground">
+                            {t.semesterOverview?.noVisiblePrograms || 'Keine Studiengänge ausgewählt.'}
+                        </div>
+                    )}
                 </div>
             </div>
         );

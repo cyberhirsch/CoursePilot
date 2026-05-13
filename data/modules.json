@@ -10,7 +10,8 @@
     "forbiddenSemesters": [],
     "maxParticipants": 100,
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 04"
+    "personInCharge": "Dozent Platzhalter 04",
+    "department": "Applied Engineering"
   },
   {
     "id": "G1",
@@ -24,7 +25,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 07"
+    "personInCharge": "Dozent Platzhalter 07",
+    "department": "Applied Engineering"
   },
   {
     "id": "G2",
@@ -38,7 +40,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 07"
+    "personInCharge": "Dozent Platzhalter 07",
+    "department": "Applied Engineering"
   },
   {
     "id": "G3",
@@ -52,7 +55,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 06"
+    "personInCharge": "Dozent Platzhalter 06",
+    "department": "Applied Engineering"
   },
   {
     "id": "G4",
@@ -66,7 +70,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 04"
+    "personInCharge": "Dozent Platzhalter 04",
+    "department": "Applied Engineering"
   },
   {
     "id": "G5",
@@ -80,7 +85,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 04"
+    "personInCharge": "Dozent Platzhalter 04",
+    "department": "Applied Engineering"
   },
   {
     "id": "G6",
@@ -94,7 +100,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 06"
+    "personInCharge": "Dozent Platzhalter 06",
+    "department": "Applied Engineering"
   },
   {
     "id": "WP1-8",
@@ -108,7 +115,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 11"
+    "personInCharge": "Dozent Platzhalter 11",
+    "department": "Applied Engineering"
   },
   {
     "id": "F1",
@@ -121,7 +129,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 05"
+    "personInCharge": "Dozent Platzhalter 05",
+    "department": "Applied Engineering"
   },
   {
     "id": "F2",
@@ -134,7 +143,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 04"
+    "personInCharge": "Dozent Platzhalter 04",
+    "department": "Applied Engineering"
   },
   {
     "id": "F3",
@@ -147,7 +157,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 08"
+    "personInCharge": "Dozent Platzhalter 08",
+    "department": "Applied Engineering"
   },
   {
     "id": "F4",
@@ -160,7 +171,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 08"
+    "personInCharge": "Dozent Platzhalter 08",
+    "department": "Applied Engineering"
   },
   {
     "id": "F5",
@@ -173,7 +185,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 11"
+    "personInCharge": "Dozent Platzhalter 11",
+    "department": "Applied Engineering"
   },
   {
     "id": "M1",
@@ -186,7 +199,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 09"
+    "personInCharge": "Dozent Platzhalter 09",
+    "department": "Applied Engineering"
   },
   {
     "id": "M2",
@@ -199,7 +213,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 03"
+    "personInCharge": "Dozent Platzhalter 03",
+    "department": "Applied Engineering"
   },
   {
     "id": "M3",
@@ -212,7 +227,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 09"
+    "personInCharge": "Dozent Platzhalter 09",
+    "department": "Applied Engineering"
   },
   {
     "id": "M4",
@@ -225,7 +241,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 08"
+    "personInCharge": "Dozent Platzhalter 08",
+    "department": "Applied Engineering"
   },
   {
     "id": "M5",
@@ -238,7 +255,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 07"
+    "personInCharge": "Dozent Platzhalter 07",
+    "department": "Applied Engineering"
   },
   {
     "id": "M6",
@@ -251,7 +269,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 03"
+    "personInCharge": "Dozent Platzhalter 03",
+    "department": "Applied Engineering"
   },
   {
     "id": "M7",
@@ -321,7 +340,8 @@
         "content": "Digital Control Implementation",
         "goals": ""
       }
-    ]
+    ],
+    "department": "Applied Engineering"
   },
   {
     "id": "M8",
@@ -334,7 +354,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 05"
+    "personInCharge": "Dozent Platzhalter 05",
+    "department": "Applied Engineering"
   },
   {
     "id": "B1",
@@ -348,7 +369,8 @@
     ],
     "equivalentTo": "F1",
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 05"
+    "personInCharge": "Dozent Platzhalter 05",
+    "department": "Applied Engineering"
   },
   {
     "id": "B2",
@@ -362,7 +384,8 @@
     ],
     "equivalentTo": "F3",
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 08"
+    "personInCharge": "Dozent Platzhalter 08",
+    "department": "Applied Engineering"
   },
   {
     "id": "A1",
@@ -381,7 +404,8 @@
       "beamer": false,
       "lecturerPc": false
     },
-    "personInCharge": "Dozent Platzhalter 06"
+    "personInCharge": "Dozent Platzhalter 06",
+    "department": "Applied Engineering"
   },
   {
     "id": "A2",
@@ -394,7 +418,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 10"
+    "personInCharge": "Dozent Platzhalter 10",
+    "department": "Applied Engineering"
   },
   {
     "id": "A3",
@@ -408,7 +433,8 @@
     ],
     "equivalentTo": "M8",
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 05"
+    "personInCharge": "Dozent Platzhalter 05",
+    "department": "Applied Engineering"
   },
   {
     "id": "C1",
@@ -421,7 +447,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 06"
+    "personInCharge": "Dozent Platzhalter 06",
+    "department": "Applied Engineering"
   },
   {
     "id": "C2",
@@ -434,7 +461,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 09"
+    "personInCharge": "Dozent Platzhalter 09",
+    "department": "Applied Engineering"
   },
   {
     "id": "C3",
@@ -447,7 +475,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 05"
+    "personInCharge": "Dozent Platzhalter 05",
+    "department": "Applied Engineering"
   },
   {
     "id": "C4",
@@ -460,7 +489,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 09"
+    "personInCharge": "Dozent Platzhalter 09",
+    "department": "Applied Engineering"
   },
   {
     "id": "S1",
@@ -473,7 +503,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 10"
+    "personInCharge": "Dozent Platzhalter 10",
+    "department": "Applied Engineering"
   },
   {
     "id": "S2",
@@ -486,7 +517,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 04"
+    "personInCharge": "Dozent Platzhalter 04",
+    "department": "Applied Engineering"
   },
   {
     "id": "S3",
@@ -499,7 +531,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 10"
+    "personInCharge": "Dozent Platzhalter 10",
+    "department": "Applied Engineering"
   },
   {
     "id": "S4",
@@ -512,7 +545,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 10"
+    "personInCharge": "Dozent Platzhalter 10",
+    "department": "Applied Engineering"
   },
   {
     "id": "S5",
@@ -525,7 +559,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 09"
+    "personInCharge": "Dozent Platzhalter 09",
+    "department": "Applied Engineering"
   },
   {
     "id": "I1",
@@ -538,7 +573,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 07"
+    "personInCharge": "Dozent Platzhalter 07",
+    "department": "Applied Engineering"
   },
   {
     "id": "I2",
@@ -551,7 +587,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 06"
+    "personInCharge": "Dozent Platzhalter 06",
+    "department": "Applied Engineering"
   },
   {
     "id": "I3",
@@ -564,7 +601,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 07"
+    "personInCharge": "Dozent Platzhalter 07",
+    "department": "Applied Engineering"
   },
   {
     "id": "I4",
@@ -577,7 +615,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 03"
+    "personInCharge": "Dozent Platzhalter 03",
+    "department": "Applied Engineering"
   },
   {
     "id": "Lab",
@@ -590,7 +629,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 11"
+    "personInCharge": "Dozent Platzhalter 11",
+    "department": "Applied Engineering"
   },
   {
     "id": "Sp",
@@ -603,7 +643,8 @@
       "DSA"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 04"
+    "personInCharge": "Dozent Platzhalter 04",
+    "department": "Applied Engineering"
   },
   {
     "id": "Rep",
@@ -617,7 +658,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 11"
+    "personInCharge": "Dozent Platzhalter 11",
+    "department": "Applied Engineering"
   },
   {
     "id": "Prkt",
@@ -631,7 +673,8 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 11"
+    "personInCharge": "Dozent Platzhalter 11",
+    "department": "Applied Engineering"
   },
   {
     "id": "BA-A",
@@ -645,6 +688,7 @@
       "ARAI"
     ],
     "fachbereich": "Applied Engineering",
-    "personInCharge": "Dozent Platzhalter 03"
+    "personInCharge": "Dozent Platzhalter 03",
+    "department": "Applied Engineering"
   }
 ]

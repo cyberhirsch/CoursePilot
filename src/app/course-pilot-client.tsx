@@ -75,6 +75,11 @@ const getDefaultFutureSemester = (
     || sortedSemesters[sortedSemesters.length - 1];
 };
 
+const uniqueSortedStrings = (values: string[]) => {
+  return Array.from(new Set(values.map(value => value.trim()).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b));
+};
+
 
 export default function CoursePilotClient() {
   const [isMounted, setIsMounted] = useState(false);
@@ -123,6 +128,12 @@ export default function CoursePilotClient() {
   }, []);
 
   const fullData = useMemo(() => ({ modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar, lecturerAvailabilities, schedulePlan }), [modules, programs, cohorts, categories, catalogs, users, rooms, roomAssignments, systemSettings, academicCalendar, lecturerAvailabilities, schedulePlan]);
+  const departments = useMemo(() => uniqueSortedStrings([
+    ...(catalogs.departments || []),
+    ...modules.map(module => module.department || ''),
+    ...programs.map(program => program.department || ''),
+    ...users.map(user => user.department || ''),
+  ]), [catalogs.departments, modules, programs, users]);
 
   useEffect(() => {
     if (hasLoadedData) {
@@ -419,6 +430,64 @@ export default function CoursePilotClient() {
     ));
   }, []);
 
+  const handleAddDepartment = useCallback((name: string) => {
+    const trimmedName = name.trim();
+    if (!trimmedName || departments.some(department => department.toLowerCase() === trimmedName.toLowerCase())) {
+      return false;
+    }
+
+    setCatalogs(prev => ({
+      ...prev,
+      departments: uniqueSortedStrings([...(prev.departments || []), trimmedName]),
+    }));
+    return true;
+  }, [departments]);
+
+  const handleUpdateDepartment = useCallback((oldName: string, newName: string) => {
+    const trimmedName = newName.trim();
+    if (!trimmedName || departments.some(department => department !== oldName && department.toLowerCase() === trimmedName.toLowerCase())) {
+      return false;
+    }
+
+    setCatalogs(prev => ({
+      ...prev,
+      departments: uniqueSortedStrings([...(prev.departments || []).filter(department => department !== oldName), trimmedName]),
+    }));
+    setPrograms(prev => prev.map(program => program.department === oldName ? { ...program, department: trimmedName } : program));
+    setModules(prev => prev.map(module => module.department === oldName ? { ...module, department: trimmedName } : module));
+    setUsers(prev => prev.map(user => user.department === oldName ? { ...user, department: trimmedName } : user));
+    return true;
+  }, [departments]);
+
+  const handleDeleteDepartment = useCallback((name: string) => {
+    const isUsed = programs.some(program => program.department === name)
+      || modules.some(module => module.department === name)
+      || users.some(user => user.department === name);
+    if (isUsed) return false;
+
+    setCatalogs(prev => ({
+      ...prev,
+      departments: (prev.departments || []).filter(department => department !== name),
+    }));
+    return true;
+  }, [modules, programs, users]);
+
+  const handleAddProgram = useCallback((newProgram: Program) => {
+    if (programs.some(program => program.id.toLowerCase() === newProgram.id.toLowerCase())) {
+      alert(`Ein Studiengang mit der ID "${newProgram.id}" existiert bereits.`);
+      return false;
+    }
+
+    setPrograms(prevPrograms => [...prevPrograms, {
+      ...newProgram,
+      moduleIds: newProgram.moduleIds || [],
+      defaultStudents: Math.max(0, Number(newProgram.defaultStudents) || 0),
+      semesters: Math.max(1, Number(newProgram.semesters) || 1),
+    }]);
+
+    return true;
+  }, [programs]);
+
   const getProgramById = useCallback((id: string): Program | undefined => {
     return programs.find(p => p.id === id);
   }, [programs]);
@@ -669,7 +738,12 @@ export default function CoursePilotClient() {
           onUpdateCategory={handleUpdateCategory}
           onDeleteCategory={handleDeleteCategory}
           onAddCohort={handleAddCohort}
+          onAddProgram={handleAddProgram}
           onUpdateProgram={handleUpdateProgram}
+          departments={departments}
+          onAddDepartment={handleAddDepartment}
+          onUpdateDepartment={handleUpdateDepartment}
+          onDeleteDepartment={handleDeleteDepartment}
           lang={lang}
           catalogs={catalogs}
           onUpdateCatalogs={setCatalogs}

@@ -58,9 +58,9 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
 
   const plannerNavItems: { key: PlannerViewMode; label: string }[] = [
     { key: 'semester', label: t.semesterOverview.title },
-    { key: 'group', label: t.navigation.semesterPlan },
+    { key: 'group', label: t.programs?.studyProgress || 'Studienverlauf' },
     { key: 'modules', label: t.moduleOverview?.overview || 'Module Overview' },
-    { key: 'optimization', label: t.optimization.title },
+    { key: 'programs', label: t.programs?.title || 'Studiengänge' },
   ];
 
   const examNavItems: { key: PlannerViewMode; label: string }[] = [
@@ -100,6 +100,7 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
 
   const mainNavItems: ({ key: MainCategory; label: string; inactive?: boolean } | { type: 'divider' })[] = [
     { key: 'semester-plan', label: t.navigation.semesterPlan },
+    { key: 'departments', label: t.navigation.departments || 'Fachbereiche' },
     { key: 'schedule', label: t.navigation.schedule },
     { key: 'examinations', label: t.navigation.examinations },
     { key: 'modules', label: t.navigation.modules },
@@ -153,6 +154,8 @@ export const Header: React.FC<HeaderProps> = ({ mainCategory, setMainCategory, v
                               setViewMode('module-details');
                             } else if (key === 'semester-plan') {
                               setViewMode('semester');
+                            } else if (key === 'departments') {
+                              setViewMode('departments');
                             } else if (key === 'schedule') {
                               setViewMode('schedule-planner');
                             } else if (key === 'examinations') {

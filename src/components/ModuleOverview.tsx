@@ -28,6 +28,7 @@ interface ModuleOverviewProps {
     onDeleteCategory: (categoryId: string) => void;
     lang?: keyof typeof TRANSLATIONS;
     catalogs?: Catalogs;
+    departments?: string[];
 }
 
 export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
@@ -42,7 +43,8 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
     onUpdateCategory,
     onDeleteCategory,
     lang = DEFAULT_LANGUAGE,
-    catalogs
+    catalogs,
+    departments = []
 }) => {
     const t = TRANSLATIONS[lang];
     const [fachbereichFilter, setFachbereichFilter] = useState<string>('all');
@@ -127,6 +129,12 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
     }, [modules, programs, fachbereichFilter, programFilter, categoryFilter, searchTerm]);
 
     const categoryOptions = useMemo(() => categories.map(c => c.name), [categories]);
+    const departmentOptions = useMemo(() => {
+        return Array.from(new Set([
+            ...departments,
+            ...modules.map(module => module.department || ''),
+        ].map(value => value.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+    }, [departments, modules]);
 
     return (
         <div className="flex flex-col h-full gap-6">
@@ -154,6 +162,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
                                 <label className="block"><span className="text-muted-foreground text-sm">ID*</span><EditableCell value={newModule.id} onChange={handleNewModuleChange} name="id" /></label>
                                 <label className="block"><span className="text-muted-foreground text-sm">Name*</span><EditableCell value={newModule.name} onChange={handleNewModuleChange} name="name" /></label>
                                 <label className="block"><span className="text-muted-foreground text-sm">Typ*</span><EditableCell value={newModule.type} onChange={handleNewModuleChange} name="type" type="select" options={['Pflicht', 'Wahlpflicht', 'Pool']} /></label>
+                                <label className="block"><span className="text-muted-foreground text-sm">{t.planner.department}</span><EditableCell value={newModule.department || ''} onChange={handleNewModuleChange} name="department" type="select" options={departmentOptions} placeholder="Wählen..." /></label>
                                 <div className="pt-2">
                                     <span className="text-muted-foreground text-sm">{t.moduleOverview?.assignedPrograms || 'Zugeordnete Studiengänge'}</span>
                                     <div className="p-2 bg-muted/50 rounded-md mt-1"><ProgramSelector programs={programs} selectedProgramIds={newModulePrograms} onChange={handleNewModuleProgramChange} /></div>
@@ -225,9 +234,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
                                         <label className="block text-sm font-medium text-muted-foreground mb-1">{t.planner.department}</label>
                                         <select value={fachbereichFilter} onChange={e => setFachbereichFilter(e.target.value)} className="bg-input p-2 rounded-md w-full text-sm">
                                             <option value="all">Alle</option>
-                                            <option value="Design">Design</option>
-                                            <option value="Psychologie">Psychologie</option>
-                                            <option value="Wirtschaft">Wirtschaft</option>
+                                            {departmentOptions.map(department => <option key={department} value={department}>{department}</option>)}
                                         </select>
                                     </div>
                                     <div>
@@ -259,6 +266,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
                                 <th className="p-2 border-b border-border w-24 font-code">{t.common.id}</th>
                                 <th className="p-2 border-b border-border min-w-[200px]">{t.common.name}</th>
                                 <th className="p-2 border-b border-border w-48">{t.planner.category}</th>
+                                <th className="p-2 border-b border-border w-48">{t.planner.department}</th>
                                 <th className="p-2 border-b border-border w-32">{t.common.type}</th>
                                 <th className="p-2 border-b border-border w-16 text-center">{t.common.sws}</th>
                                 <th className="p-2 border-b border-border w-16 text-center">{t.common.cp}</th>
@@ -287,6 +295,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
                                             <td className="p-2 border-t border-border font-code text-muted-foreground">{module.id}</td>
                                             <td className="p-1 border-t border-border"><EditableCell value={module.name} onChange={(e) => onUpdateModule(module.id, 'name', e.target.value)} name="name" /></td>
                                             <td className="p-1 border-t border-border"><EditableCell value={module.category} onChange={(e) => onUpdateModule(module.id, 'category', e.target.value)} name="category" type="select" options={categoryOptions} /></td>
+                                            <td className="p-1 border-t border-border"><EditableCell value={module.department || ''} onChange={(e) => onUpdateModule(module.id, 'department', e.target.value || undefined)} name="department" type="select" options={departmentOptions} placeholder="-" /></td>
                                             <td className="p-1 border-t border-border"><EditableCell value={module.type} onChange={(e) => onUpdateModule(module.id, 'type', e.target.value)} name="type" type="select" options={['Pflicht', 'Wahlpflicht', 'Pool']} /></td>
                                             <td className="p-1 border-t border-border text-center"><EditableCell value={module.sws} onChange={(e) => onUpdateModule(module.id, 'sws', parseInt(e.target.value) || 0)} name="sws" type="number" className="text-center" /></td>
                                             <td className="p-1 border-t border-border text-center"><EditableCell value={module.cp} onChange={(e) => onUpdateModule(module.id, 'cp', parseInt(e.target.value) || 0)} name="cp" type="number" className="text-center" /></td>
@@ -306,7 +315,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
                                         </tr>
                                         {expandedRow === module.id && (
                                             <tr className="bg-background/40">
-                                                <td colSpan={11} className="p-0">
+                                                <td colSpan={12} className="p-0">
                                                     <div className="p-4 space-y-4">
                                                         <div className="lg:col-span-4 bg-muted/50 p-4 rounded-md border border-border">
                                                             <label className="block text-muted-foreground text-sm font-semibold mb-2">{t.moduleOverview?.assignedPrograms || 'Zugeordnete Studiengänge'}</label>
@@ -342,7 +351,7 @@ export const ModuleOverview: React.FC<ModuleOverviewProps> = ({
                                 )
                             }) : (
                                 <tr>
-                                    <td colSpan={11} className="text-center p-8 text-muted-foreground">Keine Module für die aktuellen Filter gefunden.</td>
+                                    <td colSpan={12} className="text-center p-8 text-muted-foreground">Keine Module für die aktuellen Filter gefunden.</td>
                                 </tr>
                             )}
                         </tbody>

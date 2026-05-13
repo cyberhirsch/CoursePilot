@@ -38,7 +38,9 @@ interface ProgramPlannerGridProps {
     activeBulkLocks?: { past: boolean; categories: Set<string> };
     finalLockedInstances: Set<string>;
     onAddCohort: (newCohort: Cohort, saveAsTemplate?: boolean) => boolean;
+    onAddProgram: (program: Program) => boolean;
     onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
+    departments: string[];
     lang?: keyof typeof TRANSLATIONS;
     allSemesters: AbsoluteSemester[];
 }
@@ -69,7 +71,9 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
     activeBulkLocks,
     finalLockedInstances,
     onAddCohort,
+    onAddProgram,
     onUpdateProgram,
+    departments,
     lang = DEFAULT_LANGUAGE,
     allSemesters = []
 }) => {
@@ -371,7 +375,9 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
                 finalLockedInstances={finalLockedInstances}
                 allModules={allModules}
                 onAddCohort={onAddCohort}
+                onAddProgram={onAddProgram}
                 onUpdateProgram={onUpdateProgram}
+                departments={departments}
                 lang={lang}
                 allSemesters={allSemesters}
             />
@@ -531,8 +537,6 @@ export const ProgramPlannerGrid: React.FC<ProgramPlannerGridProps> = ({
         </div>
     );
 };
-
-
 
 
 

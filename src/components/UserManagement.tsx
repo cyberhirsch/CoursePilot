@@ -10,6 +10,7 @@ interface UserManagementProps {
   onAddUser: (user: User) => void;
   onUpdateUser: (userId: string, updates: Partial<User>) => void;
   onDeleteUser: (userId: string) => void;
+  departments?: string[];
   mode?: 'profile' | 'groups';
 }
 
@@ -40,6 +41,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   onAddUser,
   onUpdateUser,
   onDeleteUser,
+  departments = [],
   mode = 'profile',
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -172,7 +174,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                   {roles.map(role => <option key={role} value={role}>{role}</option>)}
                 </select>
               </label>
-              <UserField label="Fachbereich" value={draft.department || ''} onChange={value => setDraft(prev => ({ ...prev, department: value }))} />
+              <DepartmentSelect
+                label="Fachbereich"
+                value={draft.department || ''}
+                departments={departments}
+                onChange={value => setDraft(prev => ({ ...prev, department: value }))}
+              />
               <UserField label="Nummer" value={draft.universityId || ''} onChange={value => setDraft(prev => ({ ...prev, universityId: value }))} />
               <label className="block">
                 <span className="text-[10px] font-bold uppercase text-muted-foreground">Kohorte</span>
@@ -242,11 +249,14 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                     </select>
                   </td>
                   <td className="p-3">
-                    <input
+                    <select
                       value={user.department || ''}
                       onChange={event => onUpdateUser(user.id, { department: event.target.value || null })}
-                      className="w-44 bg-transparent border-none p-0 focus:ring-0"
-                    />
+                      className="w-44 bg-muted/40 rounded px-2 py-1 text-xs"
+                    >
+                      <option value="">Keine</option>
+                      {departments.map(department => <option key={department} value={department}>{department}</option>)}
+                    </select>
                   </td>
                   <td className="p-3">
                     <input
@@ -299,6 +309,20 @@ const UserField: React.FC<{ label: string; value: string; onChange: (value: stri
       onChange={event => onChange(event.target.value)}
       className="mt-1 w-full bg-background border border-input rounded-md px-2 py-2 text-sm"
     />
+  </label>
+);
+
+const DepartmentSelect: React.FC<{ label: string; value: string; departments: string[]; onChange: (value: string) => void }> = ({ label, value, departments, onChange }) => (
+  <label className="block">
+    <span className="text-[10px] font-bold uppercase text-muted-foreground">{label}</span>
+    <select
+      value={value}
+      onChange={event => onChange(event.target.value)}
+      className="mt-1 w-full bg-background border border-input rounded-md px-2 py-2 text-sm"
+    >
+      <option value="">Keine</option>
+      {departments.map(department => <option key={department} value={department}>{department}</option>)}
+    </select>
   </label>
 );
 

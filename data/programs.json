@@ -153,5 +153,16 @@
         "BA-A": 8
       }
     }
+  },
+  {
+    "id": "TES",
+    "name": "TESTStudiengang",
+    "moduleIds": [],
+    "defaultStudents": 25,
+    "semesters": 7,
+    "department": "Design",
+    "templatePlan": {
+      "modules": {}
+    }
   }
 ]

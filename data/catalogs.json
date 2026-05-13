@@ -25,5 +25,10 @@
     "Englisch",
     "Deutsch/Englisch"
   ],
-  "personInCharge": []
+  "personInCharge": [],
+  "departments": [
+    "Applied Engineering",
+    "Design",
+    "Management Systems"
+  ]
 }

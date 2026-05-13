@@ -17,6 +17,7 @@ import { RELATIVE_SEMESTERS } from '@/constants';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
 import { TRANSLATIONS, DEFAULT_LANGUAGE } from '@/translations';
+import { ProgramCreateDialog } from './ProgramCreateDialog';
 
 interface PlannerControlsProps {
     cohort: Cohort;
@@ -34,7 +35,9 @@ interface PlannerControlsProps {
     finalLockedInstances: Set<string>;
     allModules: Module[];
     onAddCohort: (newCohort: Cohort, saveAsTemplate: boolean) => boolean;
+    onAddProgram: (program: Program) => boolean;
     onUpdateProgram: (programId: string, updates: Partial<Program>) => void;
+    departments: string[];
     lang?: keyof typeof TRANSLATIONS;
     allSemesters: AbsoluteSemester[];
 }
@@ -44,7 +47,9 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
     isHeatmapVisible, onToggleHeatmap, selectedSemester,
     onTogglePastLock, onToggleCategoryLock, activeBulkLocks, allModules,
     onAddCohort,
+    onAddProgram,
     onUpdateProgram,
+    departments,
     lang = DEFAULT_LANGUAGE,
     allSemesters = []
 }) => {
@@ -360,6 +365,19 @@ export const PlannerControls: React.FC<PlannerControlsProps> = ({
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
+                <ProgramCreateDialog
+                    programs={allPrograms}
+                    onAddProgram={onAddProgram}
+                    departments={departments}
+                    lang={lang}
+                    trigger={(
+                        <Button variant="outline">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            {t.controls.newProgram || t.programs?.newProgram || 'Neuer Studiengang'}
+                        </Button>
+                    )}
+                />
 
                 <Dialog open={isDuplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
                     <DialogTrigger asChild>
